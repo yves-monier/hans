@@ -13,3 +13,30 @@ changeColor.onclick = function (element) {
             { code: 'document.body.style.backgroundColor = "' + color + '";' });
     });
 };
+
+$(function () {
+    $('#paste').click(function () {
+        pasteSelection();
+    });
+});
+function pasteSelection() {
+    /*
+    chrome.tabs.query({ active: true, windowId: chrome.windows.WINDOW_ID_CURRENT },
+        function (tab) {
+            chrome.tabs.sendMessage(tab[0].id, { method: "getSelection" },
+                function (response) {
+                    var text = document.getElementById('text');
+                    text.innerHTML = response.data;
+                });
+        });
+        */
+    chrome.tabs.executeScript({
+        code: "window.getSelection().toString();"
+    }, function (selection) {
+        // var query = encodeURIComponent(selection[0] || '汉典')
+        // document.querySelector('iframe').src =
+        //     'http://www.zdic.net/search/?c=3&q=' + query
+        var selectedText = selection[0];
+        console.log(selectedText);
+    });
+}
