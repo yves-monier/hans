@@ -38,5 +38,23 @@ function pasteSelection() {
         //     'http://www.zdic.net/search/?c=3&q=' + query
         var selectedText = selection[0];
         console.log(selectedText);
+
+        var jqxhr = $.get("http://bin.arnastofnun.is/leit/?id=434170", function (data) {
+            // success
+            var parser = new DOMParser();
+            var htmlDoc = parser.parseFromString(data, "text/html");
+            
+            var text = document.getElementById('text');
+            text.innerHTML = data;
+        })
+            .done(function () {
+                // console.log("second success");
+            })
+            .fail(function () {
+                console.log("error");
+            })
+            .always(function () {
+                // finished
+            });
     });
 }

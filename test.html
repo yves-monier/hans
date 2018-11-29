@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="jquery-2.2.4.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var jqxhr = $.get("http://bin.arnastofnun.is/leit/?id=434170", function (data) {
+                // success
+                var text = document.getElementById('text');
+                text.innerHTML = data;
+            })
+                .done(function () {
+                    // second success
+                })
+                .fail(function () {
+                    // error
+                })
+                .always(function () {
+                    // finished
+                });
+
+        });
+    </script>
+</head>
+
+<body>
+    <textarea id="text"> </textarea>
+
+</body>
+
+</html>

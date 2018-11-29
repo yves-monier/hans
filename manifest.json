@@ -5,7 +5,8 @@
   "permissions": [
     "activeTab",
     "declarativeContent",
-    "storage"
+    "storage",
+    "http://bin.arnastofnun.is"
   ],
   "background": {
     "page": "background.html",
