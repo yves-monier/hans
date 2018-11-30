@@ -5,10 +5,30 @@
     <script src="jquery-2.2.4.min.js"></script>
     <script>
         $(document).ready(function () {
-            var jqxhr = $.get("http://bin.arnastofnun.is/leit/?id=434170", function (data) {
+            // http://dev.phpbin.ja.is/ajax_leit.php?q=heiti
+            var jqxhr = $.get("http://localhost/heiti.html", function (data) {
                 // success
                 var text = document.getElementById('text');
                 text.innerHTML = data;
+
+                var parser = new DOMParser();
+                var htmlDoc = parser.parseFromString(data, "text/html");
+                $("ul li", htmlDoc).each(function (i) {
+                    var a = $("a", this);
+                    var lemma = a.text();
+                    var pos = $(this).contents().filter(function () {
+                        return this.nodeType == 3;
+                    })[0].nodeValue;
+                    pos = pos.trim();
+                    var onclick = a[0].getAttribute("onclick");
+                    var regex = /'(\d+)'/gm;
+                    var m = regex.exec(onclick);
+                    if (m !== null) {
+                        var id = m[1];
+                        var url2 = "http://bin.arnastofnun.is/leit/?id=" + id
+                        console.log("Analysis " + i + ": " + lemma + " (" + pos + ") " + url2);
+                    }
+                });
             })
                 .done(function () {
                     // second success
@@ -19,13 +39,12 @@
                 .always(function () {
                     // finished
                 });
-
         });
     </script>
 </head>
 
 <body>
-    <textarea id="text"> </textarea>
+    <textarea id="text" rows="40" cols="80"> </textarea>
 
 </body>
 
