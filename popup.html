@@ -2,21 +2,28 @@
 <html>
 
 <head>
+    <meta charset="UTF-8">
     <script src="jquery-2.2.4.min.js"></script>
     <style>
-        button {
-            height: 30px;
-            width: 30px;
-            outline: none;
+        #popup.result {
+            width: 400px;
+        }
+
+        #information {
+            display: none;
         }
     </style>
 </head>
 
 <body>
-    <textarea id="text"> </textarea>
-    <button id="paste">Paste Selection</button>
-    <button id="changeColor"></button>
-    <script src="popup.js"></script>
+    <div id="popup">
+        <button id="help">Hjálpa</button>
+        <div id="information">
+            <h1>Upplýsingar</h1>
+            <div id="information-body"></div>
+        </div>
+        <script src="popup.js"></script>
+    </div>
 </body>
 
 </html>

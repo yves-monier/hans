@@ -1,84 +1,140 @@
-let changeColor = document.getElementById('changeColor');
+// let changeColor = document.getElementById('changeColor');
 
-chrome.storage.sync.get('color', function (data) {
-    changeColor.style.backgroundColor = data.color;
-    changeColor.setAttribute('value', data.color);
-});
+// chrome.storage.sync.get('color', function (data) {
+//     changeColor.style.backgroundColor = data.color;
+//     changeColor.setAttribute('value', data.color);
+// });
 
-changeColor.onclick = function (element) {
-    let color = element.target.value;
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        chrome.tabs.executeScript(
-            tabs[0].id,
-            { code: 'document.body.style.backgroundColor = "' + color + '";' });
-    });
-};
+// changeColor.onclick = function (element) {
+//     let color = element.target.value;
+//     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+//         chrome.tabs.executeScript(
+//             tabs[0].id,
+//             { code: 'document.body.style.backgroundColor = "' + color + '";' });
+//     });
+// };
 
-function processURL(url, firstTry) {
-    var jqxhr = $.get(url, function (data) {
+function queryArnastofnun(form, firstQuery) {
+    let url = "http://dev.phpbin.ja.is/ajax_leit.php?q=" + encodeURIComponent(form);
+    if (!firstQuery) {
+        url = url + "&id=&ordmyndir=on";
+    }
+
+    let jqxhr = $.get(url, function (data) {
         // success
-        var parser = new DOMParser();
-        var htmlDoc = parser.parseFromString(data, "text/html");
-        var lis = $("ul li", htmlDoc);
+        let parser = new DOMParser();
+        let htmlDoc = parser.parseFromString(data, "text/html");
+        let lis = $("ul li", htmlDoc);
         lis.each(function (i) {
-            var a = $("a", this);
-            var lemma = a.text();
+            let a = $("a", this);
+            let lemma = a.text();
             lemma = lemma.trim();
-            var pos = $(this).contents().filter(function () {
+            let pos = $(this).contents().filter(function () {
                 return this.nodeType == 3;
             })[0].nodeValue;
             pos = pos.trim();
-            var onclick = a[0].getAttribute("onclick");
-            var regex = /'(\d+)'/gm;
-            var m = regex.exec(onclick);
+            let onclick = a[0].getAttribute("onclick");
+            let regex = /'(\d+)'/gm;
+            let m = regex.exec(onclick);
             if (m !== null) {
-                var id = m[1];
-                var url2 = "http://bin.arnastofnun.is/leit/?id=" + id
+                let id = m[1];
+                let url2 = "http://bin.arnastofnun.is/leit/?id=" + id
                 console.log("Analysis " + i + ": " + lemma + " (" + pos + ") " + url2);
             }
+
+            queryDictionary(lemma);
         });
 
         if (lis.length == 0) {
-            var h2s = $(".page-header h2", htmlDoc);
+            let h2s = $(".page-header h2", htmlDoc);
             if (h2s.length > 0) {
-                var h2 = h2s[0];
-                var lemma = $(h2).contents().filter(function () {
+                let h2 = h2s[0];
+                let lemma = $(h2).contents().filter(function () {
                     return this.nodeType == 3;
                 })[0].nodeValue;
                 lemma = lemma.trim();
-                var small = $("small", h2);
-                var pos = small.text();
+                let small = $("small", h2);
+                let pos = small.text();
                 pos = pos.trim();
                 console.log("Analysis: " + lemma + " (" + pos + ")");
-            } else if (firstTry) {
-                var nextUrl = url + "&id=&ordmyndir=on";
-                processURL(nextUrl, false);    
+
+                queryDictionary(lemma);
+            } else if (firstQuery) {
+                queryArnastofnun(form, false);
             } else {
                 // found nothing...
             }
         }
+    }).done(function () {
+        // console.log("second success");
+    }).fail(function () {
+        console.log("error");
+    }).always(function () {
+        // finished
+    });
+}
 
-        var text = document.getElementById('text');
-        text.innerHTML = data;
-    })
-        .done(function () {
-            // console.log("second success");
-        })
-        .fail(function () {
-            console.log("error");
-        })
-        .always(function () {
-            // finished
-        });
+function queryDictionary(lemma) {
+    // the url needs escape-encoding, not encodeURIComponent-encoding (tested with ákveða)
+    let url = "http://digicoll.library.wisc.edu/cgi-bin/IcelOnline/IcelOnline.TEId-idx?type=simple&size=First+100&rgn=lemma&q1=" + escape(lemma) + "&submit=Search";
 
+    let jqxhr = $.get(url, function (data) {
+        // success
+        let parser = new DOMParser();
+        let htmlDoc = parser.parseFromString(data, "text/html");
+        let entries = $(".entry", htmlDoc);
+        processDictionaryEntries(entries);
+    }).done(function () {
+        // console.log("second success");
+    }).fail(function () {
+        console.log("error");
+    }).always(function () {
+        // finished
+    });
+}
+
+function queryDictionaryRef(refUrl) {
+    let jqxhr = $.get(refUrl, function (data) {
+        // success
+        let parser = new DOMParser();
+        let htmlDoc = parser.parseFromString(data, "text/html");
+        let entries = $(".entry", htmlDoc);
+        processDictionaryEntries(entries);
+    }).done(function () {
+        // console.log("second success");
+    }).fail(function () {
+        console.log("error");
+    }).always(function () {
+        // finished
+    });
+}
+
+function processDictionaryEntries(entries) {
+    entries.each(function () {
+        console.log("Dictionary entry:\n" + $(this).html());
+        let hrefs = $(".ref a[href^='/cgi-bin/IcelOnline']", this); // e.g. for veitingastaður
+        if (hrefs.length == 0) {
+            $('#popup').addClass("result");
+            $('#information-body').append($(this));
+        } else {
+            hrefs.each(function () {
+                let refUrl = "http://digicoll.library.wisc.edu" + $(this).attr("href");
+                queryDictionaryRef(refUrl);
+            });
+        }
+    });
+    if (entries.length == 0) {
+        // no dictionary entries found
+    }
 }
 
 $(function () {
-    $('#paste').click(function () {
-        pasteSelection();
+    $('#help').click(function () {
+        provideHelp();
     });
 });
-function pasteSelection() {
+
+function provideHelp() {
     /*
     chrome.tabs.query({ active: true, windowId: chrome.windows.WINDOW_ID_CURRENT },
         function (tab) {
@@ -89,19 +145,22 @@ function pasteSelection() {
                 });
         });
         */
+
+    $('#information-body').empty();
+    $('#information').show();
+
     chrome.tabs.executeScript({
         code: "window.getSelection().toString();"
     }, function (selection) {
         // var query = encodeURIComponent(selection[0] || '汉典')
         // document.querySelector('iframe').src =
         //     'http://www.zdic.net/search/?c=3&q=' + query
-        var selectedText = selection[0];
+        let selectedText = selection[0];
         console.log(selectedText);
 
         // http://bin.arnastofnun.is/leit/?q=heiti
         // http://dev.phpbin.ja.is/ajax_leit.php?q=heiti
         // http://bin.arnastofnun.is/leit/?id=434170
-        var url1 = "http://dev.phpbin.ja.is/ajax_leit.php?q=" + encodeURIComponent(selectedText);
-        processURL(url1, true);
+        queryArnastofnun(selectedText, true);
     });
 }
