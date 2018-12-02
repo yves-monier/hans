@@ -162,5 +162,11 @@ function provideHelp() {
         // http://dev.phpbin.ja.is/ajax_leit.php?q=heiti
         // http://bin.arnastofnun.is/leit/?id=434170
         queryArnastofnun(selectedText, true);
+
+        // TODO
+        /*
+        1. Get lemma(s) [bin.arnastofnun.is]
+        2. For each lemma, get dictonary entries [digicoll.library.wisc.edu]
+        */
     });
 }
