@@ -83,7 +83,24 @@ function queryDictionary(lemma) {
         let parser = new DOMParser();
         let htmlDoc = parser.parseFromString(data, "text/html");
         let entries = $(".entry", htmlDoc);
-        processDictionaryEntries(entries);
+        if (entries.length > 0) {
+            processDictionaryEntries(entries);
+        } else {
+            // no dictionary entries found but maybe different part-of-speech proposals (e.g. searching "loka")
+            let nestlevels = $(".results .nestlevel", htmlDoc);
+            nestlevels.each(function() {
+                let aElem = $(".lemma a", this);
+                let lemma = aElem.text();
+                let href = "http://digicoll.library.wisc.edu" + aElem.attr("href");
+                let posElem = $(".pos a", this);
+                let pos = posElem.text();
+                // TODO match this POS with the provided one
+                queryDictionaryRef(href);
+            });
+            if (nestlevels.length == 0) {
+                // finally, no dictionary entries found
+            }
+        }
     }).done(function () {
         // console.log("second success");
     }).fail(function () {
@@ -109,7 +126,7 @@ function queryDictionaryRef(refUrl) {
     });
 }
 
-function processDictionaryEntries(entries) {
+function processDictionaryEntries(entries) { // TODO accept POS
     entries.each(function () {
         console.log("Dictionary entry:\n" + $(this).html());
         let hrefs = $(".ref a[href^='/cgi-bin/IcelOnline']", this); // e.g. for veitingastaður
@@ -123,10 +140,8 @@ function processDictionaryEntries(entries) {
             });
         }
     });
-    if (entries.length == 0) {
-        // no dictionary entries found
-    }
 }
+
 
 $(function () {
     $('#help').click(function () {
