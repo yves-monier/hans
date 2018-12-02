@@ -164,7 +164,6 @@ function provideHelp() {
         queryArnastofnun(selectedText, true);
 
         // TODO
-        
         /*
         1. Get lemma(s) [bin.arnastofnun.is]
         2. For each lemma, get dictonary entries [digicoll.library.wisc.edu]
