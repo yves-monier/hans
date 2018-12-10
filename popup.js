@@ -46,7 +46,7 @@ async function getLemmas(form, firstQuery) {
                 if (m !== null) {
                     let id = m[1];
                     let url2 = "http://bin.arnastofnun.is/leit/?id=" + id
-                    console.log("Analysis " + i + ": " + lemma + " (" + pos + ") " + url2);
+                    // console.log("Analysis " + i + ": " + lemma + " (" + pos + ") " + url2);
                 }
                 lemmas.push(lemma);
             });
@@ -62,7 +62,7 @@ async function getLemmas(form, firstQuery) {
                     let small = $("small", h2);
                     let pos = small.text();
                     pos = pos.trim();
-                    console.log("Analysis: " + lemma + " (" + pos + ")");
+                    // console.log("Analysis: " + lemma + " (" + pos + ")");
                     lemmas.push(lemma);
                 } else {
                     // found nothing...
@@ -77,28 +77,26 @@ async function getLemmas(form, firstQuery) {
 }
 
 // query http://digicoll.library.wisc.edu/IcelOnline for dictionary entries
-function displayDictionaryEntries(lemma) {
+async function displayLemmaDictionaryEntries(lemma) {
     // the url needs escape-encoding, not encodeURIComponent-encoding (tested with ákveða)
     let url = "http://digicoll.library.wisc.edu/cgi-bin/IcelOnline/IcelOnline.TEId-idx?type=simple&size=First+100&rgn=lemma&q1=" + escape(lemma) + "&submit=Search";
 
-    let jqxhr = $.get(url, function (data) {
-        // success
-        let parser = new DOMParser();
-        let htmlDoc = parser.parseFromString(data, "text/html");
-        let entryElements = $(".entry", htmlDoc);
-        processDictionaryEntries(entryElements);
-    }).done(function () {
-        // console.log("second success");
-    }).fail(function () {
-        console.log("error");
-    }).always(function () {
-        // finished
-    });
+    try {
+        let jqxhr = await $.get(url, function (data) {
+            // success
+            let parser = new DOMParser();
+            let htmlDoc = parser.parseFromString(data, "text/html");
+            let entryElements = $(".entry", htmlDoc);
+            displayDictionaryEntries(entryElements);
+        });
+    } catch (error) {
+        console.error(error);
+    }
 }
 
-function processDictionaryEntries(entryElements) {
+function displayDictionaryEntries(entryElements) {
     entryElements.each(function () {
-        console.log("Dictionary entry:\n" + $(this).html());
+        // console.log("Dictionary entry:\n" + $(this).html());
         let hrefs = $(".ref a[href^='/cgi-bin/IcelOnline']", this); // e.g. for veitingastaður
         if (hrefs.length == 0) {
             $('#popup').addClass("result");
@@ -115,20 +113,18 @@ function processDictionaryEntries(entryElements) {
     }
 }
 
-function getDictionaryEntriesRef(refUrl) {
-    let jqxhr = $.get(refUrl, function (data) {
-        // success
-        let parser = new DOMParser();
-        let htmlDoc = parser.parseFromString(data, "text/html");
-        let entries = $(".entry", htmlDoc);
-        processDictionaryEntries(entries);
-    }).done(function () {
-        // console.log("second success");
-    }).fail(function () {
-        console.log("error");
-    }).always(function () {
-        // finished
-    });
+async function getDictionaryEntriesRef(refUrl) {
+    try {
+        let jqxhr = await $.get(refUrl, function (data) {
+            // success
+            let parser = new DOMParser();
+            let htmlDoc = parser.parseFromString(data, "text/html");
+            let entries = $(".entry", htmlDoc);
+            displayLemmaDictionaryEntries(entries);
+        });
+    } catch (error) {
+        console.error(error);
+    }        
 }
 
 $(function () {
@@ -160,7 +156,7 @@ function provideHelp() {
         //     'http://www.zdic.net/search/?c=3&q=' + query
 
         let selectedText = selection[0];
-        console.log(selectedText);
+        // console.log(selectedText);
 
         let lemmas = await getLemmas(selectedText, true);
         if (lemmas.length == 0) {
@@ -168,7 +164,8 @@ function provideHelp() {
         }
 
         for (lemma of lemmas) {
-            // displayDictionaryEntries(lemma);
+            // console.log("lemma: " + lemma);
+            displayLemmaDictionaryEntries(lemma);
         }
     });
 }
