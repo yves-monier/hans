@@ -87,14 +87,26 @@ async function displayLemmaDictionaryEntries(lemma) {
             let parser = new DOMParser();
             let htmlDoc = parser.parseFromString(data, "text/html");
             let entryElements = $(".entry", htmlDoc);
-            displayDictionaryEntries(entryElements);
+            if (entryElements.length > 0) {
+                displayDictionaryEntries(lemma, entryElements);
+            } else {
+                let hrefs = $(".nestlevel .lemma a[href^='/cgi-bin/IcelOnline']", htmlDoc); // e.g. for vegna
+                if (hrefs.length > 0) {
+                    hrefs.each(function () {
+                        let refUrl = "http://digicoll.library.wisc.edu" + $(this).attr("href");
+                        getDictionaryEntriesRef(lemma, refUrl);
+                    });
+                } else {
+                    $('#information-body').append("<p></p>").text("No dictionary entry found for " + lemma);
+                }
+            }
         });
     } catch (error) {
         console.error(error);
     }
 }
 
-function displayDictionaryEntries(entryElements) {
+function displayDictionaryEntries(lemma, entryElements) {
     entryElements.each(function () {
         // console.log("Dictionary entry:\n" + $(this).html());
         let hrefs = $(".ref a[href^='/cgi-bin/IcelOnline']", this); // e.g. for veitingastaður
@@ -104,23 +116,23 @@ function displayDictionaryEntries(entryElements) {
         } else {
             hrefs.each(function () {
                 let refUrl = "http://digicoll.library.wisc.edu" + $(this).attr("href");
-                getDictionaryEntriesRef(refUrl);
+                getDictionaryEntriesRef(lemma, refUrl);
             });
         }
     });
     if (entryElements.length == 0) {
-        // no dictionary entries found => display something like "no result"
+        $('#information-body').append("<p></p>").text("No dictionary entry found for " + lemma);
     }
 }
 
-async function getDictionaryEntriesRef(refUrl) {
+async function getDictionaryEntriesRef(lemma, refUrl) {
     try {
         let jqxhr = await $.get(refUrl, function (data) {
             // success
             let parser = new DOMParser();
             let htmlDoc = parser.parseFromString(data, "text/html");
-            let entries = $(".entry", htmlDoc);
-            displayLemmaDictionaryEntries(entries);
+            let entryElements = $(".entry", htmlDoc);
+            displayDictionaryEntries(lemma, entryElements);
         });
     } catch (error) {
         console.error(error);
