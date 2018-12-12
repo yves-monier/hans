@@ -14,6 +14,11 @@
 //     });
 // };
 
+let popup;
+let information;
+let informationBody;
+let busy;
+
 // query http://bin.arnastofnun.is/leit/ to get lemma(s)
 // http://bin.arnastofnun.is/leit/?q=heiti
 // http://dev.phpbin.ja.is/ajax_leit.php?q=heiti
@@ -77,7 +82,13 @@ async function getLemmas(form, firstQuery) {
 }
 
 // query http://digicoll.library.wisc.edu/IcelOnline for dictionary entries
-async function displayLemmaDictionaryEntries(lemma) {
+async function displayLemmaDictionaryEntries(lemma, lemmaNum) {
+    let lemmaDiv = $("<div class='lemma-div' id='lemma-'+ lemmaNum></div>");
+    let lookingFor = $("<div class='looking-for-lemma'></div>");
+    lookingFor.text("Looking for " + lemma + "...");
+    lemmaDiv.append(lookingFor);
+    lemmaDiv.appendTo(informationBody);
+
     // the url needs escape-encoding, not encodeURIComponent-encoding (tested with ákveða)
     let url = "http://digicoll.library.wisc.edu/cgi-bin/IcelOnline/IcelOnline.TEId-idx?type=simple&size=First+100&rgn=lemma&q1=" + escape(lemma) + "&submit=Search";
 
@@ -88,16 +99,16 @@ async function displayLemmaDictionaryEntries(lemma) {
             let htmlDoc = parser.parseFromString(data, "text/html");
             let entryElements = $(".entry", htmlDoc);
             if (entryElements.length > 0) {
-                displayDictionaryEntries(lemma, entryElements);
+                displayDictionaryEntries(lemmaDiv, lemma, entryElements);
             } else {
                 let hrefs = $(".nestlevel .lemma a[href^='/cgi-bin/IcelOnline']", htmlDoc); // e.g. for vegna
                 if (hrefs.length > 0) {
                     hrefs.each(function () {
                         let refUrl = "http://digicoll.library.wisc.edu" + $(this).attr("href");
-                        getDictionaryEntriesRef(lemma, refUrl);
+                        getDictionaryEntriesRef(lemmaDiv, lemma, refUrl);
                     });
                 } else {
-                    $('#information-body').append("<p></p>").text("No dictionary entry found for " + lemma);
+                    displayNoResultForLemma(lemmaDiv, lemma);
                 }
             }
         });
@@ -106,37 +117,51 @@ async function displayLemmaDictionaryEntries(lemma) {
     }
 }
 
-function displayDictionaryEntries(lemma, entryElements) {
+function displayDictionaryEntries(lemmaDiv, lemma, entryElements) {
     entryElements.each(function () {
         // console.log("Dictionary entry:\n" + $(this).html());
         let hrefs = $(".ref a[href^='/cgi-bin/IcelOnline']", this); // e.g. for veitingastaður
         if (hrefs.length == 0) {
-            $('#popup').addClass("result");
-            $('#information-body').append($(this));
+            popup.addClass("result");
+            displayResultForLemma(lemmaDiv, lemma, $(this));
         } else {
             hrefs.each(function () {
                 let refUrl = "http://digicoll.library.wisc.edu" + $(this).attr("href");
-                getDictionaryEntriesRef(lemma, refUrl);
+                getDictionaryEntriesRef(lemmaDiv, lemma, refUrl);
             });
         }
     });
     if (entryElements.length == 0) {
-        $('#information-body').append("<p></p>").text("No dictionary entry found for " + lemma);
+        displayNoResultForLemma(lemmaDiv, lemma);
     }
 }
 
-async function getDictionaryEntriesRef(lemma, refUrl) {
+async function getDictionaryEntriesRef(lemmaDiv, lemma, refUrl) {
     try {
         let jqxhr = await $.get(refUrl, function (data) {
             // success
             let parser = new DOMParser();
             let htmlDoc = parser.parseFromString(data, "text/html");
             let entryElements = $(".entry", htmlDoc);
-            displayDictionaryEntries(lemma, entryElements);
+            displayDictionaryEntries(lemmaDiv, lemma, entryElements);
         });
     } catch (error) {
         console.error(error);
     }        
+}
+
+function displayResultForLemma(lemmaDiv, lemma, htmlObj) {
+    $('.looking-for-lemma', lemmaDiv).hide();
+    let resultDiv = $("<div class='lemma-result'></div>");
+    resultDiv.append(htmlObj);
+    lemmaDiv.append(resultDiv);
+}
+
+function displayNoResultForLemma(lemmaDiv, lemma) {
+    $('.looking-for-lemma', lemmaDiv).hide();
+    let noResultDiv = $("<div class='no-lemma-result'></div>");
+    noResultDiv.text("No dictionary entry found for " + lemma);
+    lemmaDiv.append(noResultDiv);
 }
 
 $(function () {
@@ -157,8 +182,13 @@ function provideHelp() {
         });
         */
 
-    $('#information-body').empty();
-    $('#information').show();
+    popup = $('#popup');
+    information = $('#information');
+    informationBody = $('#information-body');
+    busy = $('#busy');
+
+    informationBody.empty();
+    information.show();
 
     chrome.tabs.executeScript({
         code: "window.getSelection().toString();"
@@ -170,14 +200,19 @@ function provideHelp() {
         let selectedText = selection[0];
         // console.log(selectedText);
 
+        busy.show();
+
         let lemmas = await getLemmas(selectedText, true);
         if (lemmas.length == 0) {
             lemmas = await getLemmas(selectedText, false);
         }
 
-        for (lemma of lemmas) {
+        for (let i=0; i<lemmas.length; i++) {
+            let lemma = lemmas[i];
             // console.log("lemma: " + lemma);
-            displayLemmaDictionaryEntries(lemma);
+            displayLemmaDictionaryEntries(lemma, i);
         }
+
+        busy.hide();
     });
 }
