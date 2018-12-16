@@ -5,8 +5,7 @@
   "permissions": [
     "activeTab",
     "declarativeContent",
-    "storage",
-    "http://bin.arnastofnun.is"
+    "storage"
   ],
   "background": {
     "page": "background.html",
@@ -43,6 +42,9 @@
       "run_at": "document_end",
       "all_frames": true
     }
+  ],
+  "web_accessible_resources": [
+    "popup.html"
   ],
   "manifest_version": 2
 }

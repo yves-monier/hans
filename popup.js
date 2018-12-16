@@ -167,6 +167,11 @@ function displayNoResultForLemma(lemmaDiv, lemma) {
 $(function () {
     $('#help').click(function () {
         provideHelp();
+
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+            tabId = tabs[0].id;
+            chrome.tabs.sendMessage(tabId, "toggle" /*{"whatToDo": "on"}*/);
+        });
     });
 });
 
