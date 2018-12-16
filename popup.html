@@ -5,6 +5,10 @@
     <meta charset="UTF-8">
     <script src="jquery-2.2.4.min.js"></script>
     <style>
+        #popup {
+            width: 200px;
+        }
+
         #popup.result {
             width: 400px;
         }
@@ -25,6 +29,10 @@
             height: 10px;
             background-color: blue;
         }
+
+        #credits {
+            font-size: 80%;
+        }
     </style>
 </head>
 
@@ -32,9 +40,14 @@
     <div id="popup">
         <button id="help">Hjálpa</button>
         <div id="information">
-            <h1>Upplýsingar</h1>
+            <h3>Upplýsingar</h3>
             <div id="information-body"></div>
             <div id="busy"></div>
+        </div>
+        <div id="credits">
+            <p>Linguistic services gracefully powered by <a href="http://bin.arnastofnun.is">Stofnun Árna Magnússonar í
+                    íslenskum fræðum</a> and <a href="https://uwdc.library.wisc.edu/collections/IcelOnline">University
+                    of Wisconsin Digital Collections, Icelandic Online Dictionary and Readings</a></p>
         </div>
         <script src="popup.js"></script>
     </div>
