@@ -30,14 +30,21 @@ document.addEventListener('mousemove', function (e) {
 }, false);
 */
 
-chrome.runtime.onMessage.addListener(function (msg, sender) {
-    if (msg == "toggle") {
-        toggle();
+if (! chrome.runtime.onMessage.hasListener(assistantMessageListener)) {
+    console.log("Add assistant message listener");
+    chrome.runtime.onMessage.addListener(assistantMessageListener);
+} else {
+    console.log("Assistant message listener is already added");
+}
+
+function assistantMessageListener(msg, sender) {
+    if (msg == "toggle-sidebar") {
+        toggleSidebar();
     }
-})
+}
 
 var iframe = document.createElement('iframe');
-iframe.style.background = "green";
+iframe.style.background = "#eee";
 iframe.style.height = "100%";
 iframe.style.width = "0px";
 iframe.style.position = "fixed";
@@ -45,15 +52,40 @@ iframe.style.top = "0px";
 iframe.style.right = "0px";
 iframe.style.zIndex = "9000000000000000000";
 iframe.frameBorder = "none";
-iframe.src = chrome.extension.getURL("popup.html")
+iframe.src = chrome.extension.getURL("assistant.html")
 
 document.body.appendChild(iframe);
 
-function toggle() {
-    if (iframe.style.width == "0px") {
+// https://stackoverflow.com/questions/10100540/chrome-extension-inject-sidebar-into-page
+
+function toggleSidebar() {
+    // chrome.storage.sync.get(['sidebar'], function (result) {
+    //     let sidebarStatus = result.sidebar;
+    //     if ("on" === sidebarStatus) {
+    //         showSidebar(false);
+    //     } else {
+    //         showSidebar(true);
+    //     }
+    // });
+    let sidebarStatus = localStorage.getItem('sidebar');
+    if ("on" === sidebarStatus) {
+        showSidebar(false);
+    } else {
+        showSidebar(true);
+    }
+}
+
+function showSidebar(visible) {
+    let sidebarStatus;
+    if (visible) {
         iframe.style.width = "400px";
-    }
-    else {
+        sidebarStatus = 'on';
+    } else {
         iframe.style.width = "0px";
+        sidebarStatus = 'off';
     }
+    // chrome.storage.sync.set({ "sidebar": sidebarStatus }, function () {
+    //     // done
+    // });
+    localStorage.setItem('sidebar', sidebarStatus);
 }

@@ -14,7 +14,7 @@
 //     });
 // };
 
-let popup;
+let assistant;
 let information;
 let informationBody;
 let busy;
@@ -122,7 +122,6 @@ function displayDictionaryEntries(lemmaDiv, lemma, entryElements) {
         // console.log("Dictionary entry:\n" + $(this).html());
         let hrefs = $(".ref a[href^='/cgi-bin/IcelOnline']", this); // e.g. for veitingastaður
         if (hrefs.length == 0) {
-            popup.addClass("result");
             displayResultForLemma(lemmaDiv, lemma, $(this));
         } else {
             hrefs.each(function () {
@@ -147,7 +146,7 @@ async function getDictionaryEntriesRef(lemmaDiv, lemma, refUrl) {
         });
     } catch (error) {
         console.error(error);
-    }        
+    }
 }
 
 function displayResultForLemma(lemmaDiv, lemma, htmlObj) {
@@ -160,7 +159,7 @@ function displayResultForLemma(lemmaDiv, lemma, htmlObj) {
 function displayNoResultForLemma(lemmaDiv, lemma) {
     $('.looking-for-lemma', lemmaDiv).hide();
     let noResultDiv = $("<div class='no-lemma-result'></div>");
-    noResultDiv.text("No dictionary entry found for " + lemma);
+    noResultDiv.text("Found no dictionary entry for " + lemma);
     lemmaDiv.append(noResultDiv);
 }
 
@@ -175,54 +174,37 @@ $(function () {
         provideHelp();
     });
 
-    setSidebarButtonTitle(true);
+    // setSidebarButtonTitle(true);
 
-    $('#toggle-sidebar').click(function () {
-        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-            setSidebarButtonTitle(false);
+    // $('#toggle-sidebar').click(function () {
+    //     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+    //         setSidebarButtonTitle(false);
 
-            tabId = tabs[0].id;
-            chrome.tabs.sendMessage(tabId, "toggle-sidebar" /*{"whatToDo": "on"}*/);
-
-            //window.close();
-        });
-    });
+    //         tabId = tabs[0].id;
+    //         chrome.tabs.sendMessage(tabId, "toggle-sidebar" /*{"whatToDo": "on"}*/);
+    //     });
+    // });
 });
 
-function setSidebarButtonTitle(opposite) {
-    // chrome.storage.sync.get(['sidebar'], function (result) {
-    //     let button = document.getElementById("toggle-sidebar");
-    //     let sidebarStatus = result.sidebar;
-    //     if (opposite) {
-    //         if ("on" === sidebarStatus) {
-    //             button.innerHTML= "Fela skenkur";
-    //         } else {
-    //             button.innerHTML= "Sýna skenkur";
-    //         }
-    //     } else {
-    //         if ("on" === sidebarStatus) {
-    //             button.innerHTML= "Sýna skenkur";
-    //         } else {
-    //             button.innerHTML= "Fela skenkur";
-    //         }
-    //     }
-    // });
-    let button = document.getElementById("toggle-sidebar");
-    let sidebarStatus = localStorage.getItem('sidebar');
-    if (opposite) {
-        if ("on" === sidebarStatus) {
-            button.innerHTML= "Fela skenkur";
-        } else {
-            button.innerHTML= "Sýna skenkur";
-        }
-    } else {
-        if ("on" === sidebarStatus) {
-            button.innerHTML= "Sýna skenkur";
-        } else {
-            button.innerHTML= "Fela skenkur";
-        }
-    }
-}
+// function setSidebarButtonTitle(opposite) {
+//     chrome.storage.sync.get(['sidebar'], function (result) {
+//         let button = document.getElementById("toggle-sidebar");
+//         let sidebarStatus = result.sidebar;
+//         if (opposite) {
+//             if ("on" === sidebarStatus) {
+//                 button.innerHTML= "Fela skenkur";
+//             } else {
+//                 button.innerHTML= "Sýna skenkur";
+//             }
+//         } else {
+//             if ("on" === sidebarStatus) {
+//                 button.innerHTML= "Sýna skenkur";
+//             } else {
+//                 button.innerHTML= "Fela skenkur";
+//             }
+//         }
+//     });
+// }
 
 function provideHelp() {
     /*
@@ -236,7 +218,8 @@ function provideHelp() {
         });
         */
 
-    popup = $('#popup');
+    assistant = $('#assistant');
+    searching = $('#searching');
     information = $('#information');
     informationBody = $('#information-body');
     busy = $('#busy');
@@ -254,9 +237,7 @@ function provideHelp() {
         let selectedText = selection[0];
         // console.log(selectedText);
 
-        let heading = $("<h4></h4>");
-        heading.text("Searching " + selectedText + " ...");
-        heading.appendTo(informationBody);
+        searching.text("Searching " + selectedText + " ...");
 
         busy.show();
 
@@ -268,7 +249,7 @@ function provideHelp() {
             }
         }
 
-        for (let i=0; i<lemmas.length; i++) {
+        for (let i = 0; i < lemmas.length; i++) {
             let lemma = lemmas[i];
             // console.log("lemma: " + lemma);
             displayLemmaDictionaryEntries(lemma, i);

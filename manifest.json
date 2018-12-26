@@ -34,17 +34,17 @@
         "https://*/*"
       ],
       "css": [
-        "core.css"
+        "content.css"
       ],
       "js": [
-        "core.js"
+        "content.js"
       ],
       "run_at": "document_end",
-      "all_frames": true
+      "all_frames": false
     }
   ],
   "web_accessible_resources": [
-    "popup.html"
+    "popup.html", "assistant.html"
   ],
   "manifest_version": 2
 }

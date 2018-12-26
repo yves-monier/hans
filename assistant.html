@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <script src="jquery-2.2.4.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        #assistant {
+            padding: 10px;
+            width: 400px;
+        }
+
+        #information {
+            display: none;
+        }
+
+        .lemma-div {
+            margin: 0.5rem;
+            padding: 0.5rem;
+            background-color: #eee;
+        }
+
+        #searching {
+            display: none;
+        }
+
+        #busy {
+            display: none;
+            width: 400px;
+            height: 10px;
+            background-color: midnightblue;
+        }
+
+        #credits {
+            font-size: 80%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="assistant">
+        <div id="controls">
+            <button id="help" title="Help">Hjálpa</button>
+        </div>
+        <div id="information">
+            <div id="searching"></div>
+            <div id="information-body"></div>
+        </div>
+        <div id="busy"></div>
+        <script src="assistant.js"></script>
+    </div>
+</body>
+
+</html>
