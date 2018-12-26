@@ -171,6 +171,9 @@ function provideHelp() {
         // document.querySelector('iframe').src =
         //     'http://www.zdic.net/search/?c=3&q=' + query
         let selectedText = selection[0];
+        selectedText = selectedText.replace(/\u00AD/g,''); // &shy; (plenty of them on https://www.mbl.is/frettir/)
+        selectedText = selectedText.trim();
+        
         console.log(selectedText);
 
         // http://bin.arnastofnun.is/leit/?q=heiti
