@@ -235,9 +235,22 @@ function provideHelp() {
         //     'http://www.zdic.net/search/?c=3&q=' + query
 
         let selectedText = selection[0];
-        selectedText = selectedText.replace(/\u00AD/g,''); // &shy; (plenty of them on https://www.mbl.is/frettir/)
+        selectedText = selectedText.replace(/\u00AD/g, ''); // &shy; (plenty of them on https://www.mbl.is/frettir/)
         selectedText = selectedText.trim();
         // console.log(selectedText);
+
+        // issuing http $.get from https (icelandiconline.com...) triggers a mixed-content error
+        // tried to add permissions in manifest.json, with no success:
+        // "http://dev.phpbin.ja.is/ajax_leit.php*", "http://digicoll.library.wisc.edu*"
+        //
+        // instead the actual processing may take place in background.js + using messages from content-to-background then
+        // from background-to-js ???
+        //
+        // => https://developer.chrome.com/extensions/messaging
+        
+        chrome.runtime.sendMessage({ surfaceForm: selectedText }, function (response) {
+            console.log(response.data);
+        });
 
         searching.text("Searching " + selectedText + " ...");
 
