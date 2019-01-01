@@ -248,28 +248,32 @@ function provideHelp() {
         //
         // => https://developer.chrome.com/extensions/messaging
         
-        chrome.runtime.sendMessage({ surfaceForm: selectedText }, function (response) {
-            console.log(response.data);
+        chrome.runtime.sendMessage({ surfaceForm: selectedText }, function (lemmas) {
+            console.log("lemmas received!");
+
+            chrome.runtime.sendMessage({ lemmas: lemmas }, function (dictionaryLookupResult) {
+                console.log("dictionary lookup received!");
+            });
         });
 
-        searching.text("Searching " + selectedText + " ...");
+        // searching.text("Searching " + selectedText + " ...");
 
-        busy.show();
+        // busy.show();
 
-        let lemmas = await getLemmas(selectedText, true);
-        if (lemmas.length == 0) {
-            lemmas = await getLemmas(selectedText, false);
-            if (lemmas.length == 0) {
-                displayNoResult(selectedText);
-            }
-        }
+        // let lemmas = await getLemmas(selectedText, true);
+        // if (lemmas.length == 0) {
+        //     lemmas = await getLemmas(selectedText, false);
+        //     if (lemmas.length == 0) {
+        //         displayNoResult(selectedText);
+        //     }
+        // }
 
-        for (let i = 0; i < lemmas.length; i++) {
-            let lemma = lemmas[i];
-            // console.log("lemma: " + lemma);
-            displayLemmaDictionaryEntries(lemma, i);
-        }
+        // for (let i = 0; i < lemmas.length; i++) {
+        //     let lemma = lemmas[i];
+        //     // console.log("lemma: " + lemma);
+        //     displayLemmaDictionaryEntries(lemma, i);
+        // }
 
-        busy.hide();
+        // busy.hide();
     });
 }
