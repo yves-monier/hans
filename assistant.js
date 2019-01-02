@@ -25,79 +25,101 @@ $(function () {
 });
 
 function help() {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        tabId = tabs[0].id;
+        chrome.tabs.executeScript(tabId, {
+            code: "window.getSelection().toString();"
+        }, function (selection) {
+            if (selection && selection.length > 0) {
+                let selectedText = selection[0];
+                getHelp(selectedText);
+            } else {
+                showMessage("Failed to retrieve selected text!");
+            }
+        });
+    });
+    // chrome.tabs.executeScript(null, {
+    //     code: "window.getSelection().toString();"
+    // }, function (selection) {
+    //     let selectedText = selection[0];
+    //     getHelp(selectedText);
+    // });
+
+    // TODO issue on sýna (http://www.ruv.is/frett/katrin-jakobsdottir-oflug-i-spretthlaupi)
+}
+
+function showMessage(msg) {
+    let result = $('#result');
+    let msgDiv = $("<div class='message'></div>");
+    msgDiv.text(msg);
+    msgDiv.appendTo(result);
+}
+
+function getHelp(text) {
     let assistant = $('#assistant');
     let result = $('#result');
     let busy = $('#busy');
 
-    chrome.tabs.executeScript({
-        code: "window.getSelection().toString();"
-    }, async function (selection) {
-        // var query = encodeURIComponent(selection[0] || '汉典')
-        // document.querySelector('iframe').src =
-        //     'http://www.zdic.net/search/?c=3&q=' + query
+    text = text.replace(/\u00AD/g, ''); // &shy; (plenty of them on https://www.mbl.is/frettir/)
+    text = text.trim();
+    // console.log(text);
 
-        let selectedText = selection[0];
-        selectedText = selectedText.replace(/\u00AD/g, ''); // &shy; (plenty of them on https://www.mbl.is/frettir/)
-        selectedText = selectedText.trim();
-        // console.log(selectedText);
+    // issuing http $.get from https (icelandiconline.com...) triggers a mixed-content error
+    // tried to add permissions in manifest.json, with no success:
+    // "http://dev.phpbin.ja.is/ajax_leit.php*", "http://digicoll.library.wisc.edu*"
+    //
+    // instead the actual processing may take place in background.js + using messages from content-to-background then
+    // from background-to-js ???
+    //
+    // => https://developer.chrome.com/extensions/messaging
 
-        // issuing http $.get from https (icelandiconline.com...) triggers a mixed-content error
-        // tried to add permissions in manifest.json, with no success:
-        // "http://dev.phpbin.ja.is/ajax_leit.php*", "http://digicoll.library.wisc.edu*"
-        //
-        // instead the actual processing may take place in background.js + using messages from content-to-background then
-        // from background-to-js ???
-        //
-        // => https://developer.chrome.com/extensions/messaging
+    let searchItemDiv = $("<div class='search-item'></div>");
+    searchItemDiv.text("Searching for " + text + "...");
+    searchItemDiv.appendTo(result);
 
-        let searchItemDiv = $("<div class='search-item'></div>");
-        searchItemDiv.text("Searching for " + selectedText + "...");
-        searchItemDiv.appendTo(result);
+    chrome.runtime.sendMessage({ surfaceForm: text }, function (lemmas) {
+        console.log("lemmas received!");
 
-        chrome.runtime.sendMessage({ surfaceForm: selectedText }, function (lemmas) {
-            console.log("lemmas received!");
+        searchItemDiv.empty();
 
-            searchItemDiv.empty();
+        let lemmaDivs = [];
 
-            let lemmaDivs = [];
-
-            if (lemmas.length > 0) {
-                for (let i = 0; i < lemmas.length; i++) {
-                    let lemmaDiv = $("<div class='lemma'></div>");
-                    lemmaDiv.text("Searching for " + lemmas[i] + "...");
-                    lemmaDiv.appendTo(searchItemDiv);
-                    lemmaDivs.push(lemmaDiv);
-                }
-    
-                chrome.runtime.sendMessage({ lemmas: lemmas }, function (dictionaryLookupResult) {
-                    console.log("dictionary lookup received!");
-    
-                    for (let i = 0; i < dictionaryLookupResult.length; i++) {
-                        let lemma = lemmas[i];
-                        let lemmaDiv = lemmaDivs[i];
-                        let entries = dictionaryLookupResult[i].entries;
-                        lemmaDiv.empty();
-                        if (entries.length > 0) {
-                            for (let j = 0; j < entries.length; j++) {
-                                let entryDiv = $("<div class='entry'></div>");
-                                entryDiv.html(entries[j]);
-                                entryDiv.appendTo(lemmaDiv);
-                            }
-                        } else {
-                            let noResultDiv = $("<div class='no-lemma-result'></div>");
-                            noResultDiv.text("Found no dictionary entry for " + lemma);
-                            lemmaDiv.append(noResultDiv);
-                        }
-                    }
-                });
-            } else {
-                let noResultDiv = $("<div class='no-result'></div>");
-                noResultDiv.text("No analysis found for " + selectedText);
-                noResultDiv.appendTo(searchItemDiv);
+        if (lemmas.length > 0) {
+            for (let i = 0; i < lemmas.length; i++) {
+                let lemmaDiv = $("<div class='lemma'></div>");
+                lemmaDiv.text("Searching for " + lemmas[i] + "...");
+                lemmaDiv.appendTo(searchItemDiv);
+                lemmaDivs.push(lemmaDiv);
             }
 
-            var height = assistant.scrollHeight;
-            assistant.scrollTop(height);
-        });
+            chrome.runtime.sendMessage({ lemmas: lemmas }, function (dictionaryLookupResult) {
+                console.log("dictionary lookup received!");
+
+                for (let i = 0; i < dictionaryLookupResult.length; i++) {
+                    let lemma = lemmas[i];
+                    let lemmaDiv = lemmaDivs[i];
+                    let entries = dictionaryLookupResult[i].entries;
+                    lemmaDiv.empty();
+                    if (entries.length > 0) {
+                        for (let j = 0; j < entries.length; j++) {
+                            let entryDiv = $("<div class='entry'></div>");
+                            entryDiv.html(entries[j]);
+                            entryDiv.appendTo(lemmaDiv);
+                        }
+                    } else {
+                        let noResultDiv = $("<div class='no-lemma-result'></div>");
+                        noResultDiv.text("Found no dictionary entry for " + lemma);
+                        lemmaDiv.append(noResultDiv);
+                    }
+                }
+            });
+        } else {
+            let noResultDiv = $("<div class='no-result'></div>");
+            noResultDiv.text("No analysis found for " + text);
+            noResultDiv.appendTo(searchItemDiv);
+        }
+
+        var height = assistant.scrollHeight;
+        assistant.scrollTop(height);
     });
 }

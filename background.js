@@ -241,6 +241,13 @@ chrome.runtime.onInstalled.addListener(function () {
       } if (request.lemmas) {
         doDictionaryLookup(request.lemmas, sendResponse);
         return true;
+      } if (request.method == "getSidebarStatus") {
+        let sidebarStatus = localStorage['sidebarStatus'];
+        sendResponse({ sidebarStatus: sidebarStatus });
+      } if (request.method == "setSidebarStatus") {
+        let sidebarStatus = request.param;
+        localStorage['sidebarStatus'] = sidebarStatus;
+        sendResponse({});
       } else {
         // console.log(sender.tab ?
         //   "from a content script:" + sender.tab.url :
