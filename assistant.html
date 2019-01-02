@@ -20,14 +20,14 @@
             display: none;
         }
 
-        .lemma-div {
+        .lemma {
             margin: 0.5rem;
             padding: 0.5rem;
             background-color: #eee;
         }
 
-        #searching {
-            display: none;
+        .search-item {
+            margin-top: 0.5rem;
         }
 
         #busy {
@@ -47,10 +47,9 @@
     <div id="assistant">
         <div id="controls">
             <button id="help" title="Help">Hjálpa</button>
+            <button id="clear" title="Clear">Hreinsa</button>
         </div>
-        <div id="information">
-            <div id="searching"></div>
-            <div id="information-body"></div>
+        <div id="result">
         </div>
         <div id="busy"></div>
         <script src="assistant.js"></script>
