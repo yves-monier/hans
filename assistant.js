@@ -84,42 +84,41 @@ function getHelp(text) {
 
         let lemmaDivs = [];
 
-        if (lemmas.length > 0) {
-            for (let i = 0; i < lemmas.length; i++) {
-                let lemmaDiv = $("<div class='lemma'></div>");
-                lemmaDiv.text("Searching for " + lemmas[i] + "...");
-                lemmaDiv.appendTo(searchItemDiv);
-                lemmaDivs.push(lemmaDiv);
-            }
-
-            chrome.runtime.sendMessage({ lemmas: lemmas }, function (dictionaryLookupResult) {
-                console.log("dictionary lookup received!");
-
-                for (let i = 0; i < dictionaryLookupResult.length; i++) {
-                    let lemma = lemmas[i];
-                    let lemmaDiv = lemmaDivs[i];
-                    let entries = dictionaryLookupResult[i].entries;
-                    lemmaDiv.empty();
-                    if (entries.length > 0) {
-                        for (let j = 0; j < entries.length; j++) {
-                            let entryDiv = $("<div class='entry'></div>");
-                            entryDiv.html(entries[j]);
-                            entryDiv.appendTo(lemmaDiv);
-                        }
-                    } else {
-                        let noResultDiv = $("<div class='no-lemma-result'></div>");
-                        noResultDiv.text("Found no dictionary entry for " + lemma);
-                        lemmaDiv.append(noResultDiv);
-                    }
-                }
-            });
-        } else {
-            let noResultDiv = $("<div class='no-result'></div>");
-            noResultDiv.text("No analysis found for " + text);
-            noResultDiv.appendTo(searchItemDiv);
+        if (lemmas.length == 0) {
+            // if no lemma(s) found, use the given surface form by default, in case of...
+            lemmas.push(text);
         }
 
-        var height = assistant.scrollHeight;
+        for (let i = 0; i < lemmas.length; i++) {
+            let lemmaDiv = $("<div class='lemma'></div>");
+            lemmaDiv.text("Searching for " + lemmas[i] + "...");
+            lemmaDiv.appendTo(searchItemDiv);
+            lemmaDivs.push(lemmaDiv);
+        }
+
+        chrome.runtime.sendMessage({ lemmas: lemmas }, function (dictionaryLookupResult) {
+            console.log("dictionary lookup received!");
+
+            for (let i = 0; i < dictionaryLookupResult.length; i++) {
+                let lemma = lemmas[i];
+                let lemmaDiv = lemmaDivs[i];
+                let entries = dictionaryLookupResult[i].entries;
+                lemmaDiv.empty();
+                if (entries.length > 0) {
+                    for (let j = 0; j < entries.length; j++) {
+                        let entryDiv = $("<div class='entry'></div>");
+                        entryDiv.html(entries[j]);
+                        entryDiv.appendTo(lemmaDiv);
+                    }
+                } else {
+                    let noResultDiv = $("<div class='no-lemma-result'></div>");
+                    noResultDiv.text("Found no dictionary entry for " + lemma);
+                    lemmaDiv.append(noResultDiv);
+                }
+            }
+        });
+
+        let height = assistant.scrollHeight;
         assistant.scrollTop(height);
     });
 }
