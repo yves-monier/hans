@@ -30,7 +30,8 @@
   // http://dev.phpbin.ja.is/ajax_leit.php?q=heiti
   // http://bin.arnastofnun.is/leit/?id=434170
   async function getLemmas(form, firstQuery) {
-    let lemmas = [];
+    // let lemmas = [];
+    let lemmas = new Set();
 
     let url = "http://dev.phpbin.ja.is/ajax_leit.php?q=" + encodeURIComponent(form);
     if (!firstQuery) {
@@ -59,7 +60,8 @@
             let url2 = "http://bin.arnastofnun.is/leit/?id=" + id
             // console.log("Analysis " + i + ": " + lemma + " (" + pos + ") " + url2);
           }
-          lemmas.push(lemma);
+          // lemmas.push(lemma);
+          lemmas.add(lemma);
         });
 
         if (lis.length == 0) {
@@ -74,7 +76,8 @@
             let pos = small.text();
             pos = pos.trim();
             // console.log("Analysis: " + lemma + " (" + pos + ")");
-            lemmas.push(lemma);
+            // lemmas.push(lemma);
+            lemmas.add(lemma);
           } else {
             // found nothing...
           }
@@ -84,7 +87,8 @@
       console.error(error);
     }
 
-    return lemmas;
+    let lemmasArray = Array.from(lemmas);
+    return lemmasArray;
   }
 
   // query http://digicoll.library.wisc.edu/IcelOnline for dictionary entries
