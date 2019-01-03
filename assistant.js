@@ -22,7 +22,30 @@ $(function () {
     $('#clear').click(function () {
         $('#result').empty();
     });
+
+    $('#slider').click(function () {
+        toggleSidebar();
+    });
 });
+
+function toggleSidebar() {
+    chrome.runtime.sendMessage({ method: "getSidebarStatus" }, function (response) {
+        // response.sidebarStatus: on / off or undefined
+        console.log(response.sidebarStatus);
+        let newStatus;
+        if ("on" === response.sidebarStatus) {
+            newStatus = "off";
+        } else {
+            newStatus = "on";
+        }
+        chrome.runtime.sendMessage({ method: "setSidebarStatus", param: newStatus }, function (response) {
+            chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                tabId = tabs[0].id;
+                chrome.tabs.sendMessage(tabId, { method: "showSidebar", param: newStatus });
+            });
+        });
+    });
+}
 
 function help() {
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
@@ -104,10 +127,10 @@ function getHelp(text) {
                 let lemmaDiv = lemmaDivs[i];
                 let entries = dictionaryLookupResult[i].entries;
                 lemmaDiv.empty();
+                let heading = $("<h1 class='lemma-heading'></h1>");
+                heading.html(lemma);
+                heading.appendTo(lemmaDiv);
                 if (entries.length > 0) {
-                    let heading = $("<h1 class='lemma-heading'></h1>");
-                    heading.html(lemma);
-                    heading.appendTo(lemmaDiv);
                     for (let j = 0; j < entries.length; j++) {
                         let entryDiv = $("<div class='entry'></div>");
                         entryDiv.html(entries[j]);

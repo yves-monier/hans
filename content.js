@@ -51,15 +51,15 @@ let iframe;
 let extensionOrigin = 'chrome-extension://' + chrome.runtime.id;
 if (!location.ancestorOrigins.contains(extensionOrigin)) {
     iframe = document.createElement('iframe');
-    iframe.style.background = "#eee";
+    iframe.style.background = "transparent";
     iframe.style.height = "100%";
-    iframe.style.width = "0px";
+    iframe.style.width = "24px";
     iframe.style.position = "fixed";
     iframe.style.top = "0px";
     iframe.style.right = "0px";
     iframe.style.zIndex = "9000000000000000000";
     iframe.style.boxSizing = "border-box";
-    iframe.style.boxShadow = "inset 1px 0 0 steelblue";
+    // iframe.style.boxShadow = "inset 1px 0 0 steelblue";
     iframe.frameBorder = "none";
     iframe.src = chrome.extension.getURL("assistant.html")
     document.body.appendChild(iframe);
@@ -73,10 +73,15 @@ if (!location.ancestorOrigins.contains(extensionOrigin)) {
 
 function showSidebar(onOrOff) {
     if (iframe) {
+        let newWidth;
         if ("on" == onOrOff) {
-            iframe.style.width = "300px";
+            newWidth = "300px";
         } else {
-            iframe.style.width = "0px";
+            newWidth = "24px";
         }
+        // iframe.style.width = newWidth;
+        $(iframe).animate({
+            width: newWidth
+        }, 500);
     }
 }

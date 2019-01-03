@@ -41,7 +41,7 @@
         "content.css"
       ],
       "js": [
-        "content.js"
+        "jquery-2.2.4.min.js", "content.js"
       ],
       "run_at": "document_end",
       "all_frames": false

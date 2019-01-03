@@ -18,12 +18,30 @@
         }
 
         #assistant {
-            padding: 10px;
-            padding-right: 0;
             width: 300px;
             height: 100%;
             display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+
+        #slider {
+            flex: 0 0 24px;
+            height: 40px;
+            background-color: #eee;
+            border-top-left-radius: 16px;
+            border-bottom-left-radius: 16px;
+        }
+
+        #assistant-in {
+            padding: 10px;
+            padding-right: 0;
+            /*width: 300px;*/
+            flex: 1;
+            height: 100%;
+            display: flex;
             flex-direction: column;
+            background-color: #eee;
         }
 
         #controls {
@@ -35,6 +53,7 @@
 
         #controls #clear {
             margin-left: auto;
+            margin-right: 10px;
         }
 
         #controls button {
@@ -55,7 +74,11 @@
             margin-left: 0;
             background-color: #eee;
             padding-bottom: 0.25rem;
-            border-bottom: 1px dotted slateblue;
+            border-bottom: 1px dotted steelblue;
+        }
+
+        #result>.search-item>.lemma:last-child {
+            border-bottom: 2px solid steelblue;
         }
 
         #result>.search-item>.lemma>h1.lemma-heading {
@@ -74,13 +97,16 @@
 
 <body>
     <div id="assistant">
-        <div id="controls">
-            <button id="help" title="Help">Hjálpa</button>
-            <button id="clear" title="Clear">Hreinsa</button>
+        <div id="slider"></div>
+        <div id="assistant-in">
+            <div id="controls">
+                <button id="help" title="Help">Hjálpa</button>
+                <button id="clear" title="Clear">Hreinsa</button>
+            </div>
+            <div id="result">
+            </div>
+            <div id="busy"></div>
         </div>
-        <div id="result">
-        </div>
-        <div id="busy"></div>
         <script src="assistant.js"></script>
     </div>
 </body>
