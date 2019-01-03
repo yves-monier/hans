@@ -58,6 +58,8 @@ if (!location.ancestorOrigins.contains(extensionOrigin)) {
     iframe.style.top = "0px";
     iframe.style.right = "0px";
     iframe.style.zIndex = "9000000000000000000";
+    iframe.style.boxSizing = "border-box";
+    iframe.style.boxShadow = "inset 1px 0 0 steelblue";
     iframe.frameBorder = "none";
     iframe.src = chrome.extension.getURL("assistant.html")
     document.body.appendChild(iframe);
