@@ -105,6 +105,9 @@ function getHelp(text) {
                 let entries = dictionaryLookupResult[i].entries;
                 lemmaDiv.empty();
                 if (entries.length > 0) {
+                    let heading = $("<h1 class='lemma-heading'></h1>");
+                    heading.html(lemma);
+                    heading.appendTo(lemmaDiv);
                     for (let j = 0; j < entries.length; j++) {
                         let entryDiv = $("<div class='entry'></div>");
                         entryDiv.html(entries[j]);
