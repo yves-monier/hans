@@ -11,14 +11,26 @@
             box-sizing: border-box;
         }
 
+        html,
+        body {
+            height: 100%;
+            overflow-y: hidden;
+        }
+
         #assistant {
             padding: 10px;
+            padding-right: 0;
             width: 300px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
 
         #controls {
             display: flex;
             align-items: flex-start;
+            padding-bottom: 10px;
+            flex: 0 0 auto;
         }
 
         #controls #clear {
@@ -29,11 +41,16 @@
             padding: 0.125rem 0.25rem;
         }
 
-        #result > .search-item {
+        #result {
+            flex: 0 1 auto;
+            overflow-y: auto;
+        }
+
+        #result>.search-item {
             margin-top: 0.5rem;
         }
 
-        #result > .search-item > .lemma {
+        #result>.search-item>.lemma {
             margin: 0.5rem;
             margin-left: 0;
             background-color: #eee;
@@ -41,15 +58,16 @@
             border-bottom: 1px dotted slateblue;
         }
 
-        #result > .search-item > .lemma > h1.lemma-heading {
+        #result>.search-item>.lemma>h1.lemma-heading {
             font-size: 1rem;
         }
 
         #busy {
             display: none;
             width: 400px;
-            height: 10px;
+            height: 5px;
             background-color: midnightblue;
+            flex: 0 0 auto;
         }
     </style>
 </head>

@@ -119,9 +119,10 @@ function getHelp(text) {
                     lemmaDiv.append(noResultDiv);
                 }
             }
-        });
 
-        let height = assistant.scrollHeight;
-        assistant.scrollTop(height);
+            // scroll result div to bottom
+            let scrollHeight = result.prop("scrollHeight");
+            result.scrollTop(scrollHeight);
+        });
     });
 }
