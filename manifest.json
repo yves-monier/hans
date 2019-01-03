@@ -33,8 +33,9 @@
   "content_scripts": [
     {
       "matches": [
-        "http://*/*",
-        "https://*/*"
+        "http://*.is/*",
+        "https://*.is/*",
+        "https://icelandiconline.com/*"
       ],
       "css": [
         "content.css"
