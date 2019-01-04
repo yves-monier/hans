@@ -25,8 +25,10 @@ $(function () {
     //     help();
     // });
 
-    $('#clear').click(function () {
+    $('#clear').click(function (e) {
         $('#result').empty();
+        e.preventDefault();
+        return false;
     });
 
     $('#slider').click(function () {
