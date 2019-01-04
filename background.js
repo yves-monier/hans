@@ -92,12 +92,19 @@ async function getLemmas(form, firstQuery) {
 }
 
 // query http://digicoll.library.wisc.edu/IcelOnline for dictionary entries
-async function getDictionaryEntries(dictionaryLookup) {
+async function getDictionaryEntries(dictionaryLookup, givenUrl) {
   let lemmaAnalysis = dictionaryLookup.lemma;
   let lemma = lemmaAnalysis.lemma;
 
+  let newUrls = [];
+
   // the url needs escape-encoding, not encodeURIComponent-encoding (tested with ákveða)
-  let url = "http://digicoll.library.wisc.edu/cgi-bin/IcelOnline/IcelOnline.TEId-idx?type=simple&size=First+100&rgn=lemma&q1=" + escape(lemma) + "&submit=Search";
+  let url;
+  if (givenUrl) {
+    url = givenUrl;
+  } else {
+    url = "http://digicoll.library.wisc.edu/cgi-bin/IcelOnline/IcelOnline.TEId-idx?type=simple&size=First+100&rgn=lemma&q1=" + escape(lemma) + "&submit=Search";
+  }
 
   try {
     let jqxhr = await $.get(url, function (data) {
@@ -106,13 +113,14 @@ async function getDictionaryEntries(dictionaryLookup) {
       let htmlDoc = parser.parseFromString(data, "text/html");
       let entryElements = $(".entry", htmlDoc);
       if (entryElements.length > 0) {
-        processDictionaryEntryElements(dictionaryLookup, entryElements, url);
+        processDictionaryEntryElements(dictionaryLookup, entryElements, url, newUrls);
       } else {
         let hrefs = $(".nestlevel .lemma a[href^='/cgi-bin/IcelOnline']", htmlDoc); // e.g. for vegna
         if (hrefs.length > 0) {
           hrefs.each(function () {
             let refUrl = "http://digicoll.library.wisc.edu" + $(this).attr("href");
-            getDictionaryEntriesRef(dictionaryLookup, refUrl);
+            // getDictionaryEntriesRef(dictionaryLookup, refUrl);
+            newUrls.push(refUrl);
           });
         } else {
           noResultForLemma(dictionaryLookup);
@@ -122,9 +130,11 @@ async function getDictionaryEntries(dictionaryLookup) {
   } catch (error) {
     console.error(error);
   }
+
+  return newUrls;
 }
 
-function processDictionaryEntryElements(dictionaryLookup, entryElements, fromUrl) {
+function processDictionaryEntryElements(dictionaryLookup, entryElements, fromUrl, newUrls) {
   let lemmaAnalysis = dictionaryLookup.lemma;
   let lemma = lemmaAnalysis.lemma;
 
@@ -136,7 +146,8 @@ function processDictionaryEntryElements(dictionaryLookup, entryElements, fromUrl
     } else {
       hrefs.each(function () {
         let refUrl = "http://digicoll.library.wisc.edu" + $(this).attr("href");
-        getDictionaryEntriesRef(dictionaryLookup, refUrl);
+        // getDictionaryEntriesRef(dictionaryLookup, refUrl);
+        newUrls.push(refUrl);
       });
     }
   });
@@ -145,22 +156,23 @@ function processDictionaryEntryElements(dictionaryLookup, entryElements, fromUrl
   }
 }
 
-async function getDictionaryEntriesRef(dictionaryLookup, refUrl) {
-  let lemmaAnalysis = dictionaryLookup.lemma;
-  let lemma = lemmaAnalysis.lemma;
+// async function getDictionaryEntriesRef(dictionaryLookup, refUrl) {
+//   let lemmaAnalysis = dictionaryLookup.lemma;
+//   let lemma = lemmaAnalysis.lemma;
 
-  try {
-    let jqxhr = await $.get(refUrl, function (data) {
-      // success
-      let parser = new DOMParser();
-      let htmlDoc = parser.parseFromString(data, "text/html");
-      let entryElements = $(".entry", htmlDoc);
-      processDictionaryEntryElements(dictionaryLookup, entryElements, refUrl);
-    });
-  } catch (error) {
-    console.error(error);
-  }
-}
+//   try {
+//     let jqxhr = await $.get(refUrl, function (data) {
+//       // success
+//       let parser = new DOMParser();
+//       let htmlDoc = parser.parseFromString(data, "text/html");
+//       let entryElements = $(".entry", htmlDoc);
+//       processDictionaryEntryElements(dictionaryLookup, entryElements, refUrl);
+//     });
+//   } catch (error) {
+//     console.error(error);
+//   }
+//   return true;
+// }
 
 function oneResultForLemma(dictionaryLookup, htmlObj, url) {
   let lemmaAnalysis = dictionaryLookup.lemma;
@@ -205,7 +217,13 @@ async function dictionaryLookup(lemmas) {
 
     dictionaryLookupResult.push(dictionaryLookup);
 
-    await getDictionaryEntries(dictionaryLookup);
+    let newUrls = await getDictionaryEntries(dictionaryLookup);
+    if (newUrls.length > 0) {
+      for (let j = 0; j < newUrls.length; j++) {
+        let newUrl = newUrls[j];
+        await getDictionaryEntries(dictionaryLookup, newUrl);
+      }
+    }
   }
 
   return dictionaryLookupResult;
