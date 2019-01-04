@@ -106,7 +106,7 @@ async function getDictionaryEntries(dictionaryLookup) {
       let htmlDoc = parser.parseFromString(data, "text/html");
       let entryElements = $(".entry", htmlDoc);
       if (entryElements.length > 0) {
-        processDictionaryEntryElements(dictionaryLookup, entryElements);
+        processDictionaryEntryElements(dictionaryLookup, entryElements, url);
       } else {
         let hrefs = $(".nestlevel .lemma a[href^='/cgi-bin/IcelOnline']", htmlDoc); // e.g. for vegna
         if (hrefs.length > 0) {
@@ -124,7 +124,7 @@ async function getDictionaryEntries(dictionaryLookup) {
   }
 }
 
-function processDictionaryEntryElements(dictionaryLookup, entryElements) {
+function processDictionaryEntryElements(dictionaryLookup, entryElements, fromUrl) {
   let lemmaAnalysis = dictionaryLookup.lemma;
   let lemma = lemmaAnalysis.lemma;
 
@@ -132,7 +132,7 @@ function processDictionaryEntryElements(dictionaryLookup, entryElements) {
     // console.log("Dictionary entry:\n" + $(this).html());
     let hrefs = $(".ref a[href^='/cgi-bin/IcelOnline']", this); // e.g. for veitingastaður
     if (hrefs.length == 0) {
-      oneResultForLemma(dictionaryLookup, $(this));
+      oneResultForLemma(dictionaryLookup, $(this), fromUrl);
     } else {
       hrefs.each(function () {
         let refUrl = "http://digicoll.library.wisc.edu" + $(this).attr("href");
@@ -155,18 +155,19 @@ async function getDictionaryEntriesRef(dictionaryLookup, refUrl) {
       let parser = new DOMParser();
       let htmlDoc = parser.parseFromString(data, "text/html");
       let entryElements = $(".entry", htmlDoc);
-      processDictionaryEntryElements(dictionaryLookup, entryElements);
+      processDictionaryEntryElements(dictionaryLookup, entryElements, refUrl);
     });
   } catch (error) {
     console.error(error);
   }
 }
 
-function oneResultForLemma(dictionaryLookup, htmlObj) {
+function oneResultForLemma(dictionaryLookup, htmlObj, url) {
   let lemmaAnalysis = dictionaryLookup.lemma;
   let lemma = lemmaAnalysis.lemma;
 
-  dictionaryLookup.entries.push(htmlObj.html());
+  let entry = { html: htmlObj.html(), url: url };
+  dictionaryLookup.entries.push(entry);
 }
 
 function noResultForLemma(dictionaryLookup) {

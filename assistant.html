@@ -94,11 +94,11 @@
         }
 
         #result>.search-item>.lemma>h1.lemma-heading {
-            font-size: 0.5rem;
+            font-size: 1rem;
         }
 
         #result>.search-item>.lemma>h1.lemma-heading .lemma-url {
-            margin-left: 1rem;
+            margin-right: 0.5rem;
             display: inline-block;
             width: 16px;
             height: 16px;
@@ -116,6 +116,20 @@
             display: inline;
             content: ')';
         }*/
+
+        #result>.search-item>.lemma>.entry {
+            display: flex;
+        }
+
+        #result>.search-item>.lemma>.entry>.entry-url {
+            margin-right: 0.5rem;
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-image: url("images/uwdc.png");
+            background-position: left top;
+            background-repeat: no-repeat;
+        }
 
         #busy {
             display: none;

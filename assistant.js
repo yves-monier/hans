@@ -132,13 +132,18 @@ function getHelp(text) {
                 heading.html(lemma);
                 if (lemmas[i].url) {
                     let link = $("<a class='lemma-url' target='ia-arnastofnun' href='" + lemmas[i].url + "'></a>");
-                    link.appendTo(heading);
+                    heading.prepend(link);
                 }
                 heading.appendTo(lemmaDiv);
                 if (entries.length > 0) {
                     for (let j = 0; j < entries.length; j++) {
+                        let entry = entries[j];
                         let entryDiv = $("<div class='entry'></div>");
-                        entryDiv.html(entries[j]);
+                        let link = $("<a class='entry-url' target='ia-uwdc' href='" + entry.url + "'></a>");
+                        link.appendTo(entryDiv);
+                        let uwdcDiv = $("<div class='entry-uwdc'></div>");
+                        uwdcDiv.html(entry.html);
+                        uwdcDiv.appendTo(entryDiv);
                         entryDiv.appendTo(lemmaDiv);
                     }
                 } else {
