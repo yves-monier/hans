@@ -15,9 +15,15 @@
 // };
 
 $(function () {
-    $('#help').click(function () {
+    $("#controls").submit(function (e) {
+        e.preventDefault();
         help();
+        return false;
     });
+
+    // $('#help').click(function () {
+    //     help();
+    // });
 
     $('#clear').click(function () {
         $('#result').empty();
@@ -68,13 +74,18 @@ function help() {
             }, function (selection) {
                 if (selection && selection.length > 0) {
                     let selectedText = selection[0];
-                    getHelp(selectedText);
+                    selectedText = selectedText.trim();
+                    if (selectedText.length > 0) {
+                        getHelp(selectedText);
+                    } else {
+                        showMessage("Please select or enter a word first...");
+                    }
                 } else {
                     showMessage("Failed to retrieve selected text!");
                 }
             });
         });
-        }
+    }
     // chrome.tabs.executeScript(null, {
     //     code: "window.getSelection().toString();"
     // }, function (selection) {
@@ -88,13 +99,22 @@ function help() {
 }
 
 function showMessage(msg) {
-    let result = $('#result');
+    clearMessage();
+
+    let message = $('#message');
     let msgDiv = $("<div class='message'></div>");
     msgDiv.text(msg);
-    msgDiv.appendTo(result);
+    msgDiv.appendTo(message);
+}
+
+function clearMessage() {
+    let message = $('#message');
+    message.empty();
 }
 
 function getHelp(text) {
+    clearMessage();
+    
     let assistant = $('#assistant');
     let result = $('#result');
     let busy = $('#busy');
