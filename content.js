@@ -64,10 +64,12 @@ if (!location.ancestorOrigins.contains(extensionOrigin)) {
     iframe.src = chrome.extension.getURL("assistant.html")
     document.body.appendChild(iframe);
 
-    chrome.runtime.sendMessage({ method: "getSidebarStatus" }, function (response) {
-        // response.sidebarStatus: on / off or undefined
-        console.log(response.sidebarStatus);
-        showSidebar(response.sidebarStatus);
+    $(iframe).load(function () {
+        chrome.runtime.sendMessage({ method: "getSidebarStatus" }, function (response) {
+            // response.sidebarStatus: on / off or undefined
+            console.log(response.sidebarStatus);
+            showSidebar(response.sidebarStatus);
+        });
     });
 }
 
@@ -82,6 +84,8 @@ function showSidebar(onOrOff) {
         // iframe.style.width = newWidth;
         $(iframe).animate({
             width: newWidth
-        }, 500);
+        }, 500, function () {
+            // Animation complete
+        });
     }
 }

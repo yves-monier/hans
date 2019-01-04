@@ -42,9 +42,18 @@ function toggleSidebar() {
             chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
                 tabId = tabs[0].id;
                 chrome.tabs.sendMessage(tabId, { method: "showSidebar", param: newStatus });
+                updateSlider(newStatus);
             });
         });
     });
+}
+
+function updateSlider(sidebarStatus) {
+    if ("on" === sidebarStatus) {
+        $("#assistant").addClass("on");
+    } else {
+        $("#assistant").removeClass("on");
+    }
 }
 
 function help() {
@@ -68,7 +77,9 @@ function help() {
     //     getHelp(selectedText);
     // });
 
-    // TODO issue on sýna (http://www.ruv.is/frett/katrin-jakobsdottir-oflug-i-spretthlaupi)
+    // TODO issues with:
+    // sýna http://www.ruv.is/frett/katrin-jakobsdottir-oflug-i-spretthlaupi
+    // veðurs https://icelandiconline.com/course/Icelandic%20Online%203/121(1)
 }
 
 function showMessage(msg) {
@@ -131,7 +142,7 @@ function getHelp(text) {
                 let heading = $("<h1 class='lemma-heading'></h1>");
                 heading.html(lemma);
                 if (lemmas[i].url) {
-                    let link = $("<a class='lemma-url' target='ia-arnastofnun' href='" + lemmas[i].url + "'></a>");
+                    let link = $("<a class='lemma-url' title='Show on http://bin.arnastofnun.is' target='ia-arnastofnun' href='" + lemmas[i].url + "'></a>");
                     heading.prepend(link);
                 }
                 heading.appendTo(lemmaDiv);
@@ -139,7 +150,7 @@ function getHelp(text) {
                     for (let j = 0; j < entries.length; j++) {
                         let entry = entries[j];
                         let entryDiv = $("<div class='entry'></div>");
-                        let link = $("<a class='entry-url' target='ia-uwdc' href='" + entry.url + "'></a>");
+                        let link = $("<a class='entry-url' title='Show on UWDC Icelandic Online Dictionary' target='ia-uwdc' href='" + entry.url + "'></a>");
                         link.appendTo(entryDiv);
                         let uwdcDiv = $("<div class='entry-uwdc'></div>");
                         uwdcDiv.html(entry.html);
@@ -159,3 +170,11 @@ function getHelp(text) {
         });
     });
 }
+
+$(document).ready(function () {
+    chrome.runtime.sendMessage({ method: "getSidebarStatus" }, function (response) {
+        // response.sidebarStatus: on / off or undefined
+        console.log(response.sidebarStatus);
+        updateSlider(response.sidebarStatus);
+    });
+});
