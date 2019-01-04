@@ -100,7 +100,7 @@ function getHelp(text) {
     searchItemDiv.text("Searching for " + text + "...");
     searchItemDiv.appendTo(result);
 
-    chrome.runtime.sendMessage({ surfaceForm: text }, function (lemmas) {
+    chrome.runtime.sendMessage({ method: "disambiguation", surfaceForm: text }, function (lemmas) {
         console.log("lemmas received!");
 
         searchItemDiv.empty();
@@ -109,26 +109,31 @@ function getHelp(text) {
 
         if (lemmas.length == 0) {
             // if no lemma(s) found, use the given surface form by default, in case of...
-            lemmas.push(text);
+            let defaultLemma = { lemma: text, url: undefined };
+            lemmas.push(defaultLemma);
         }
 
         for (let i = 0; i < lemmas.length; i++) {
             let lemmaDiv = $("<div class='lemma'></div>");
-            lemmaDiv.text("Searching for " + lemmas[i] + "...");
+            lemmaDiv.text("Searching for " + lemmas[i].lemma + "...");
             lemmaDiv.appendTo(searchItemDiv);
             lemmaDivs.push(lemmaDiv);
         }
 
-        chrome.runtime.sendMessage({ lemmas: lemmas }, function (dictionaryLookupResult) {
+        chrome.runtime.sendMessage({ method: "dictionaryLookup", lemmas: lemmas }, function (dictionaryLookupResult) {
             console.log("dictionary lookup received!");
 
             for (let i = 0; i < dictionaryLookupResult.length; i++) {
-                let lemma = lemmas[i];
+                let lemma = lemmas[i].lemma;
                 let lemmaDiv = lemmaDivs[i];
                 let entries = dictionaryLookupResult[i].entries;
                 lemmaDiv.empty();
                 let heading = $("<h1 class='lemma-heading'></h1>");
                 heading.html(lemma);
+                if (lemmas[i].url) {
+                    let link = $("<a class='lemma-url' target='ia-arnastofnun' href='" + lemmas[i].url + "'></a>");
+                    link.appendTo(heading);
+                }
                 heading.appendTo(lemmaDiv);
                 if (entries.length > 0) {
                     for (let j = 0; j < entries.length; j++) {
