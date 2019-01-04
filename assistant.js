@@ -57,19 +57,24 @@ function updateSlider(sidebarStatus) {
 }
 
 function help() {
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        tabId = tabs[0].id;
-        chrome.tabs.executeScript(tabId, {
-            code: "window.getSelection().toString();"
-        }, function (selection) {
-            if (selection && selection.length > 0) {
-                let selectedText = selection[0];
-                getHelp(selectedText);
-            } else {
-                showMessage("Failed to retrieve selected text!");
-            }
+    let userInput = $("#user-input").val().trim();
+    if (userInput.length > 0) {
+        getHelp(userInput);
+    } else {
+        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+            tabId = tabs[0].id;
+            chrome.tabs.executeScript(tabId, {
+                code: "window.getSelection().toString();"
+            }, function (selection) {
+                if (selection && selection.length > 0) {
+                    let selectedText = selection[0];
+                    getHelp(selectedText);
+                } else {
+                    showMessage("Failed to retrieve selected text!");
+                }
+            });
         });
-    });
+        }
     // chrome.tabs.executeScript(null, {
     //     code: "window.getSelection().toString();"
     // }, function (selection) {
