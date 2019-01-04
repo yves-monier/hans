@@ -3,10 +3,12 @@
   "version": "1.0",
   "description": "Icelandic assistant",
   "permissions": [
+    "tabs",
     "activeTab",
     "declarativeContent",
     "storage",
-    "http://bin.arnastofnun.is"
+    "http://*/",
+    "https://*/"
   ],
   "background": {
     "page": "background.html",
@@ -31,18 +33,22 @@
   "content_scripts": [
     {
       "matches": [
-        "http://*/*",
-        "https://*/*"
+        "http://*.is/*",
+        "https://*.is/*",
+        "https://icelandiconline.com/*"
       ],
       "css": [
-        "core.css"
+        "content.css"
       ],
       "js": [
-        "core.js"
+        "jquery-2.2.4.min.js", "content.js"
       ],
       "run_at": "document_end",
-      "all_frames": true
+      "all_frames": false
     }
+  ],
+  "web_accessible_resources": [
+    "popup.html", "assistant.html"
   ],
   "manifest_version": 2
 }

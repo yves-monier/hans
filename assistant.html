@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <script src="jquery-2.2.4.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow-y: hidden;
+        }
+
+        #assistant {
+            width: 300px;
+            height: 100%;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+
+        #slider {
+            flex: 0 0 24px;
+            height: 40px;
+            background-color: #eee;
+            border-top-left-radius: 16px;
+            border-bottom-left-radius: 16px;
+        }
+
+        #assistant-in {
+            padding: 10px;
+            padding-right: 0;
+            /*width: 300px;*/
+            flex: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background-color: #eee;
+        }
+
+        #controls {
+            display: flex;
+            align-items: flex-start;
+            padding-bottom: 10px;
+            flex: 0 0 auto;
+        }
+
+        #controls #clear {
+            margin-left: auto;
+            margin-right: 10px;
+        }
+
+        #controls button {
+            padding: 0.125rem 0.25rem;
+        }
+
+        #result {
+            flex: 0 1 auto;
+            overflow-y: auto;
+        }
+
+        #result::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        #result::-webkit-scrollbar-track {
+            background: #ddd;
+        }
+
+        #result::-webkit-scrollbar-thumb {
+            background: #666;
+        }
+
+        #result>.search-item {
+            margin-top: 0.5rem;
+        }
+
+        #result>.search-item>.lemma {
+            margin: 0.5rem;
+            margin-left: 0;
+            background-color: #eee;
+            padding-bottom: 0.25rem;
+            border-bottom: 1px dotted steelblue;
+        }
+
+        #result>.search-item>.lemma:last-child {
+            border-bottom: 2px solid steelblue;
+        }
+
+        #result>.search-item>.lemma>h1.lemma-heading {
+            font-size: 1rem;
+        }
+
+        #result>.search-item>.lemma>h1.lemma-heading .lemma-url {
+            margin-right: 0.5rem;
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-image: url("images/arnastofnun.png");
+            background-position: left top;
+            background-repeat: no-repeat;
+        }
+
+        /*#result>.search-item>.lemma>h1.lemma-heading .lemma-url:before {
+            display: inline;
+            content: '(';
+        }
+
+        #result>.search-item>.lemma>h1.lemma-heading .lemma-url:after {
+            display: inline;
+            content: ')';
+        }*/
+
+        #result>.search-item>.lemma>.entry {
+            display: flex;
+        }
+
+        #result>.search-item>.lemma>.entry>.entry-url {
+            margin-right: 0.5rem;
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-image: url("images/uwdc.png");
+            background-position: left top;
+            background-repeat: no-repeat;
+        }
+
+        #busy {
+            display: none;
+            width: 400px;
+            height: 5px;
+            background-color: midnightblue;
+            flex: 0 0 auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="assistant">
+        <div id="slider"></div>
+        <div id="assistant-in">
+            <div id="controls">
+                <button id="help" title="Help">Hjálpa</button>
+                <button id="clear" title="Clear">Hreinsa</button>
+            </div>
+            <div id="result">
+            </div>
+            <div id="busy"></div>
+        </div>
+        <script src="assistant.js"></script>
+    </div>
+</body>
+
+</html>
