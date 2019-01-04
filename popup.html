@@ -5,36 +5,25 @@
     <meta charset="UTF-8">
     <script src="jquery-2.2.4.min.js"></script>
     <style>
-        #popup.result {
-            width: 400px;
+        #popup {
+            width: 200px;
         }
 
-        #information {
-            display: none;
-        }
-
-        .lemma-div {
-            margin: 0.5rem;
-            padding: 0.5rem;
-            background-color: #eee;
-        }
-
-        #busy {
-            display: none;
-            width: 400px;
-            height: 10px;
-            background-color: blue;
+        #credits {
+            font-size: 80%;
         }
     </style>
 </head>
 
 <body>
     <div id="popup">
-        <button id="help">Hjálpa</button>
-        <div id="information">
-            <h1>Upplýsingar</h1>
-            <div id="information-body"></div>
-            <div id="busy"></div>
+        <div id="controls">
+            <button id="toggle-sidebar" title="Toggle sidebar"></button>
+        </div>
+        <div id="credits">
+            <p>Linguistic services gracefully powered by <a href="http://bin.arnastofnun.is">Stofnun Árna Magnússonar í
+                    íslenskum fræðum</a> and <a href="https://uwdc.library.wisc.edu/collections/IcelOnline">University
+                    of Wisconsin Digital Collections, Icelandic Online Dictionary and Readings</a></p>
         </div>
         <script src="popup.js"></script>
     </div>
