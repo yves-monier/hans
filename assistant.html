@@ -65,6 +65,18 @@
             overflow-y: auto;
         }
 
+        #result::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        #result::-webkit-scrollbar-track {
+            background: #ddd;
+        }
+
+        #result::-webkit-scrollbar-thumb {
+            background: #666;
+        }
+
         #result>.search-item {
             margin-top: 0.5rem;
         }
@@ -82,8 +94,28 @@
         }
 
         #result>.search-item>.lemma>h1.lemma-heading {
-            font-size: 1rem;
+            font-size: 0.5rem;
         }
+
+        #result>.search-item>.lemma>h1.lemma-heading .lemma-url {
+            margin-left: 1rem;
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-image: url("images/arnastofnun.png");
+            background-position: left top;
+            background-repeat: no-repeat;
+        }
+
+        /*#result>.search-item>.lemma>h1.lemma-heading .lemma-url:before {
+            display: inline;
+            content: '(';
+        }
+
+        #result>.search-item>.lemma>h1.lemma-heading .lemma-url:after {
+            display: inline;
+            content: ')';
+        }*/
 
         #busy {
             display: none;
