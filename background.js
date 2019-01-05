@@ -285,4 +285,9 @@ chrome.runtime.onMessage.addListener(
       // sendResponse({ data: "provide help about: " + request.surfaceForm });
     }
   });
+
+  // google translate:
+  /*
+  https://translate.google.fr/translate_a/single?client=webapp&sl=is&tl=fr&hl=fr&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&pc=1&otf=1&ssel=0&tsel=0&kc=1&tk=342556.242781&q=Pósthússtræti verður lokað fyrir bílaumferð í dag og um helgina vegna veðurs. Reykjavíkurborg hefur ákveðið að loka götunni í góða veðrinu
+  */
 ////});
