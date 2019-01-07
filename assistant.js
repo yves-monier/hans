@@ -34,6 +34,10 @@ $(function () {
     $('#slider').click(function () {
         toggleSidebar();
     });
+
+    $("#result").on("click", ".search-item .lemma .lemma-heading", function() {
+        $(".entry", $(this).parent()).show(500);
+    });
 });
 
 function toggleSidebar() {
@@ -190,6 +194,8 @@ function getHelp(text) {
                     lemmaDiv.append(noResultDiv);
                 }
             }
+
+            $(".search-item:not(:last-child) .entry", result).hide(500);
 
             // scroll result div to bottom
             let scrollHeight = result.prop("scrollHeight");
