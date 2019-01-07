@@ -35,7 +35,8 @@
       "matches": [
         "http://*.is/*",
         "https://*.is/*",
-        "https://icelandiconline.com/*"
+        "https://icelandiconline.com/*",
+        "https://www.facebook.com/groups/PracticeLearnIcelandic/*"
       ],
       "css": [
         "content.css"
