@@ -1,4 +1,4 @@
-# Project Title
+# Icelandic assistant
 
 I use [https://icelandiconline.com](https://icelandiconline.com) for learning Icelandic. Apart from its own learning resources, icelandiconline.com provides grammatical and is-en dictionary links that I've been using often enough to decide to develop a Chrome extension doing automatically for me what I had to do manually before: copy a word somewhere from my current lesson, display its [grammatical analysis](http://bin.arnastofnun.is/leit) web site, then search the displayed base form in the [IS-EN dictionary lookup](http://digicoll.library.wisc.edu/IcelOnline/Search.TEId.html) web site.
 
@@ -31,6 +31,7 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
   
 ## TODO
 
+- Find a smarter name than Icelandic assistant :-)
 - In case of N>1 parts of speech (e.g. slaka being either Kvenkynsnafnorð or Sagnorð, veik beyging), display one icon per analysis targeting the relevant url + tooltip showing the part of speech
 - Find a way to use google translate without "using" the translate API :-o
 - Before issuing various GETs to bin.arnastofnun.is and digicoll.library.wisc.edu, first check if we've already searched the word in the currently displayed entries. In such case, just expand and scroll to them.
