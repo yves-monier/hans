@@ -36,7 +36,14 @@ $(function () {
     });
 
     $("#result").on("click", ".search-item .lemma .lemma-heading", function() {
-        $(".entry", $(this).parent()).show(500);
+        let lemmaObj = $(this).parent();
+        if (lemmaObj.hasClass("off")) {
+            $(".entry", lemmaObj).show(500);
+            lemmaObj.removeClass("off");
+        } else {
+            $(".entry", lemmaObj).hide(500);
+            lemmaObj.addClass("off");
+        }
     });
 });
 
@@ -195,7 +202,9 @@ function getHelp(text) {
                 }
             }
 
-            $(".search-item:not(:last-child) .entry", result).hide(500);
+            let previousLemmaObjs = $(".search-item:not(:last-child) .lemma", result);
+            previousLemmaObjs.addClass("off");
+            $(".entry", previousLemmaObjs).hide(500);
 
             // scroll result div to bottom
             let scrollHeight = result.prop("scrollHeight");
