@@ -25,6 +25,14 @@
 //     });
 // };
 
+function lemmaExists(lemmas, lemma) {
+  for (let i = 0; i < lemmas.length; i++) {
+    if (lemmas[i].lemma == lemma)
+      return true;
+  }
+  return false;
+}
+
 // query http://bin.arnastofnun.is/leit/ to get lemma(s)
 // http://bin.arnastofnun.is/leit/?q=heiti
 // http://dev.phpbin.ja.is/ajax_leit.php?q=heiti
@@ -60,8 +68,12 @@ async function getLemmas(form, firstQuery) {
           url2 = "http://bin.arnastofnun.is/leit/?id=" + id
           // console.log("Analysis " + i + ": " + lemma + " (" + pos + ") " + url2);
         }
-        let analysis = { lemma: lemma, url: url2 }
-        lemmas.push(analysis);
+        if (! lemmaExists(lemmas, lemma)) {
+          // duplicates probably have different part-of-speech, but subsequent dictionary lookup 
+          // will reflect that and return corresponding entries
+          let analysis = { lemma: lemma, url: url2 }
+          lemmas.push(analysis);
+        }
       });
 
       if (lis.length == 0) {
@@ -77,15 +89,19 @@ async function getLemmas(form, firstQuery) {
           pos = pos.trim();
           // console.log("Analysis: " + lemma + " (" + pos + ")");
           let arnastofnunUrl = "http://bin.arnastofnun.is/leit/?q=" + encodeURIComponent(form);
-          let analysis = { lemma: lemma, url: arnastofnunUrl }
-          lemmas.push(analysis);
+          if (! lemmaExists(lemmas, lemma)) {
+            // duplicates probably have different part-of-speech, but subsequent dictionary lookup 
+            // will reflect that and return corresponding entries
+            let analysis = { lemma: lemma, url: arnastofnunUrl }
+            lemmas.push(analysis);
+          }
         } else {
           // found nothing...
         }
       }
     });
   } catch (error) {
-    console.error(error);
+    console.log("error: " + error);
   }
 
   return lemmas;
@@ -128,7 +144,7 @@ async function getDictionaryEntries(dictionaryLookup, givenUrl) {
       }
     });
   } catch (error) {
-    console.error(error);
+    console.log("error: " + error);
   }
 
   return newUrls;
@@ -169,7 +185,7 @@ function processDictionaryEntryElements(dictionaryLookup, entryElements, fromUrl
 //       processDictionaryEntryElements(dictionaryLookup, entryElements, refUrl);
 //     });
 //   } catch (error) {
-//     console.error(error);
+//     console.log("error: " + error);
 //   }
 //   return true;
 // }
@@ -178,7 +194,7 @@ function oneResultForLemma(dictionaryLookup, htmlObj, url) {
   let lemmaAnalysis = dictionaryLookup.lemma;
   let lemma = lemmaAnalysis.lemma;
 
-  let entry = { html: htmlObj.html(), url: url };
+  let entry = { html: htmlObj.html(), url: url, source: "uwdc" };
   dictionaryLookup.entries.push(entry);
 }
 
@@ -229,6 +245,48 @@ async function dictionaryLookup(lemmas) {
   return dictionaryLookupResult;
 }
 
+async function googleTranslate(lemmas) {
+  let dictionaryLookupResult = [];
+
+  for (let i = 0; i < lemmas.length; i++) {
+    let lemma = lemmas[i];
+    let dictionaryLookup = {};
+    dictionaryLookup.lemma = lemma;
+    dictionaryLookup.entries = [];
+
+    dictionaryLookupResult.push(dictionaryLookup);
+
+    let url = "https://translate.google.fr/translate_a/single?client=webapp&sl=is&tl=fr&hl=fr&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&pc=1&otf=1&ssel=0&tsel=0&kc=1&tk=342556.242781&q=" + escape(lemma.lemma);
+
+    try {
+      let jqxhr = await $.get(url, function (data) {
+        // success
+        console.log("google translate: " + data);
+        // let htmlDoc = parser.parseFromString(data, "text/html");
+        // let entryElements = $(".entry", htmlDoc);
+        // if (entryElements.length > 0) {
+        //   processDictionaryEntryElements(dictionaryLookup, entryElements, url, newUrls);
+        // } else {
+        //   let hrefs = $(".nestlevel .lemma a[href^='/cgi-bin/IcelOnline']", htmlDoc); // e.g. for vegna
+        //   if (hrefs.length > 0) {
+        //     hrefs.each(function () {
+        //       let refUrl = "http://digicoll.library.wisc.edu" + $(this).attr("href");
+        //       // getDictionaryEntriesRef(dictionaryLookup, refUrl);
+        //       newUrls.push(refUrl);
+        //     });
+        //   } else {
+        //     noResultForLemma(dictionaryLookup);
+        //   }
+        // }
+      });
+    } catch (error) {
+      console.log("error: " + error);
+    }
+  }
+
+  return dictionaryLookupResult;
+}
+
 async function doDisambiguation(surfaceForm, sendResponse) {
   let lemmas = await disambiguation(surfaceForm);
   sendResponse(lemmas);
@@ -236,8 +294,19 @@ async function doDisambiguation(surfaceForm, sendResponse) {
 
 async function doDictionaryLookup(lemmas, sendResponse) {
   let dictionaryLookupResult = await dictionaryLookup(lemmas);
+
+  // let googleTranslateResult = await googleTranslate(lemmas);
+  // for (let i = 0; i < googleTranslateResult.length; i++) {
+  //   dictionaryLookupResult.push(googleTranslateResult[i]);
+  // }
+
   sendResponse(dictionaryLookupResult);
 }
+
+// async function doGoogleTranslate(lemmas, sendResponse) {
+//   let dictionaryLookupResult = await googleTranslate(lemmas);
+//   sendResponse(dictionaryLookupResult);
+// }
 
 chrome.declarativeContent.onPageChanged.removeRules(undefined, function () {
   chrome.declarativeContent.onPageChanged.addRules([{
@@ -287,7 +356,11 @@ chrome.runtime.onMessage.addListener(
   });
 
   // google translate:
-  /*
-  https://translate.google.fr/translate_a/single?client=webapp&sl=is&tl=fr&hl=fr&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&pc=1&otf=1&ssel=0&tsel=0&kc=1&tk=342556.242781&q=Pósthússtræti verður lokað fyrir bílaumferð í dag og um helgina vegna veðurs. Reykjavíkurborg hefur ákveðið að loka götunni í góða veðrinu
-  */
+/*
+https://translate.google.fr/translate_a/single?client=webapp&sl=is&tl=fr&hl=fr&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&pc=1&otf=1&ssel=0&tsel=0&kc=1&tk=342556.242781&q=Pósthússtræti verður lokað fyrir bílaumferð í dag og um helgina vegna veðurs. Reykjavíkurborg hefur ákveðið að loka götunni í góða veðrinu
+
+https://stackoverflow.com/questions/22936421/google-translate-iframe-workaround
+
+https://gist.github.com/carolineschnapp/806456
+*/
 ////});
