@@ -29,3 +29,9 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 - Thanks to [Stofnun Árna Magnússonar í íslenskum fræðum](http://bin.arnastofnun.is/leit/) and [University of Wisconsin-Madison's Icelandic Online Dictionary](http://digicoll.library.wisc.edu/IcelOnline/Search.TEId.html): the icelandic assistant is nothing but a wrapper on top of their online services.
 - BTW also thanks to [https://icelandiconline.com](https://icelandiconline.com) for providing their online resources.
   
+## TODO
+
+- In case of N>1 parts of speech (e.g. slaka being either Kvenkynsnafnorð or Sagnorð, veik beyging), display one icon per analysis targeting the relevant url + tooltip showing the part of speech
+- Find a way to use google translate without "using" the translate API :-o
+- Before issuing various GETs to bin.arnastofnun.is and digicoll.library.wisc.edu, first check if we've already searched the word in the currently displayed entries. In such case, just expand and scroll to them.
+  
