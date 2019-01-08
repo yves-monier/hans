@@ -46,25 +46,26 @@ function assistantMessageListener(request, sender) {
 
 // https://stackoverflow.com/questions/10100540/chrome-extension-inject-sidebar-into-page
 
+let assistantIframe;
+
 // Avoid recursive frame insertion...
-let iframe;
 let extensionOrigin = 'chrome-extension://' + chrome.runtime.id;
 if (!location.ancestorOrigins.contains(extensionOrigin)) {
-    iframe = document.createElement('iframe');
-    iframe.style.background = "transparent";
-    iframe.style.height = "100%";
-    iframe.style.width = "24px";
-    iframe.style.position = "fixed";
-    iframe.style.top = "0px";
-    iframe.style.right = "0px";
-    iframe.style.zIndex = "9000000000000000000";
-    iframe.style.boxSizing = "border-box";
+    assistantIframe = document.createElement('iframe');
+    assistantIframe.style.background = "transparent";
+    assistantIframe.style.height = "100%";
+    assistantIframe.style.width = "24px";
+    assistantIframe.style.position = "fixed";
+    assistantIframe.style.top = "0px";
+    assistantIframe.style.right = "0px";
+    assistantIframe.style.zIndex = "9000000000000000000";
+    assistantIframe.style.boxSizing = "border-box";
     // iframe.style.boxShadow = "inset 1px 0 0 steelblue";
-    iframe.frameBorder = "none";
-    iframe.src = chrome.extension.getURL("assistant.html")
-    document.body.appendChild(iframe);
+    assistantIframe.frameBorder = "none";
+    assistantIframe.src = chrome.extension.getURL("assistant.html")
+    document.body.appendChild(assistantIframe);
 
-    $(iframe).load(function () {
+    $(assistantIframe).load(function () {
         chrome.runtime.sendMessage({ method: "getSidebarStatus" }, function (response) {
             // response.sidebarStatus: on / off or undefined
             console.log(response.sidebarStatus);
@@ -74,7 +75,7 @@ if (!location.ancestorOrigins.contains(extensionOrigin)) {
 }
 
 function showSidebar(onOrOff) {
-    if (iframe) {
+    if (assistantIframe) {
         let newWidth;
         if ("on" == onOrOff) {
             newWidth = "300px";
@@ -82,7 +83,7 @@ function showSidebar(onOrOff) {
             newWidth = "24px";
         }
         // iframe.style.width = newWidth;
-        $(iframe).animate({
+        $(assistantIframe).animate({
             width: newWidth
         }, 500, function () {
             // Animation complete

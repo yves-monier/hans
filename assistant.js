@@ -35,7 +35,7 @@ $(function () {
         toggleSidebar();
     });
 
-    $("#result").on("click", ".search-item .lemma .lemma-heading", function() {
+    $("#result").on("click", ".search-item .lemma .lemma-heading", function () {
         let lemmaObj = $(this).parent();
         if (lemmaObj.hasClass("off")) {
             $(".entry", lemmaObj).show(500);
@@ -127,7 +127,7 @@ function clearMessage() {
 
 function getHelp(text) {
     clearMessage();
-    
+
     let assistant = $('#assistant');
     let result = $('#result');
     let busy = $('#busy');
@@ -210,6 +210,28 @@ function getHelp(text) {
             let scrollHeight = result.prop("scrollHeight");
             result.scrollTop(scrollHeight);
         });
+    });
+
+    const GOOGLE_TRANSLATE_BASE_URL = "https://translate.google.fr/#view=home&op=translate&sl=is&tl=en&text=";
+    let googleTranslateUrl = GOOGLE_TRANSLATE_BASE_URL + encodeURIComponent(text); // loka%C3%B0
+    // $("#google-translate").prop("src", googleTranslateUrl);
+
+    chrome.tabs.query({ currentWindow: true }, function (tabs) {
+        if (tabs) {
+            for (let i = 0; i < tabs.length; i++) {
+                let url = tabs[i].url;
+                if (url.startsWith(GOOGLE_TRANSLATE_BASE_URL)) {
+                    chrome.tabs.update(tabs[i].id, { url: googleTranslateUrl });
+                    return;
+                }
+            }
+
+            let googleTranslateLink = $("#google-translate-link");
+            if (googleTranslateLink.length > 0) {
+                googleTranslateLink.prop("href", googleTranslateUrl);
+                googleTranslateLink[0].click();
+            }
+        }
     });
 }
 
