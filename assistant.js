@@ -125,6 +125,45 @@ function clearMessage() {
     message.empty();
 }
 
+function deepEquals(result1, result2) {
+    let lemma1 = result1.lemma;
+    let lemma2 = result2.lemma;
+
+    if (lemma1.lemma.toLowerCase() != lemma2.lemma.toLowerCase())
+        return false;
+
+    if (result1.entries.length != result2.entries.length)
+        return false;
+
+    for (let i = 0; i < result1.entries.length; i++) {
+        let entry1 = result1.entries[i];
+        let entry2 = result2.entries[i];
+        if (entry1.html.localeCompare(entry2.html) != 0)
+            return false;
+    }
+
+    return true;
+}
+
+function getUniqueResults(results) {
+    let uniqueResults = [];
+    for (let i = 0; i < results.length; i++) {
+        let result1 = results[i];
+        let alreadyExists = false;
+        for (let j = 0; j < uniqueResults.length; j++) {
+            let result2 = uniqueResults[j];
+            if (deepEquals(result1, result2)) {
+                alreadyExists = true;
+                break;
+            }
+        }
+        if (!alreadyExists) {
+            uniqueResults.push(result1);
+        }
+    }
+    return uniqueResults;
+}
+
 function getHelp(text) {
     clearMessage();
 
@@ -163,7 +202,8 @@ function getHelp(text) {
         }
 
         for (let i = 0; i < lemmas.length; i++) {
-            let lemmaDiv = $("<div class='lemma'></div>");
+            lemmas[i].index = i;
+            let lemmaDiv = $("<div class='lemma pending-lemma'></div>");
             lemmaDiv.text("Searching for " + lemmas[i].lemma + "...");
             lemmaDiv.appendTo(searchItemDiv);
             lemmaDivs.push(lemmaDiv);
@@ -172,10 +212,13 @@ function getHelp(text) {
         chrome.runtime.sendMessage({ method: "dictionaryLookup", lemmas: lemmas }, function (dictionaryLookupResult) {
             console.log("dictionary lookup received!");
 
-            for (let i = 0; i < dictionaryLookupResult.length; i++) {
+            let uniqueResults = getUniqueResults(dictionaryLookupResult);
+
+            for (let i = 0; i < uniqueResults.length; i++) {
                 let lemma = lemmas[i].lemma;
-                let lemmaDiv = lemmaDivs[i];
-                let entries = dictionaryLookupResult[i].entries;
+                let lemmaDiv = lemmaDivs[lemmas[i].index];
+                let entries = uniqueResults[i].entries;
+                lemmaDiv.removeClass("pending-lemma");
                 lemmaDiv.empty();
                 let heading = $("<h1 class='lemma-heading'></h1>");
                 heading.html(lemma);
@@ -201,6 +244,8 @@ function getHelp(text) {
                     lemmaDiv.append(noResultDiv);
                 }
             }
+
+            $(".pending-lemma", searchItemDiv).remove();
 
             let previousLemmaObjs = $(".search-item:not(:last-child) .lemma", result);
             previousLemmaObjs.addClass("off");
