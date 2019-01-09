@@ -25,9 +25,9 @@
 //     });
 // };
 
-function lemmaExists(lemmas, lemma) {
+function lemmaExists(lemmas, baseform) {
   for (let i = 0; i < lemmas.length; i++) {
-    if (lemmas[i].lemma == lemma)
+    if (lemmas[i].baseform == baseform)
       return true;
   }
   return false;
@@ -53,8 +53,8 @@ async function getLemmas(form, firstQuery) {
       let lis = $("ul li", htmlDoc);
       lis.each(function (i) {
         let a = $("a", this);
-        let lemma = a.text();
-        lemma = lemma.trim();
+        let baseform = a.text();
+        baseform = baseform.trim();
         let pos = $(this).contents().filter(function () {
           return this.nodeType == 3;
         })[0].nodeValue;
@@ -66,13 +66,13 @@ async function getLemmas(form, firstQuery) {
         if (m !== null) {
           let id = m[1];
           url2 = "http://bin.arnastofnun.is/leit/?id=" + id
-          // console.log("Analysis " + i + ": " + lemma + " (" + pos + ") " + url2);
+          // console.log("Analysis " + i + ": " + baseform + " (" + pos + ") " + url2);
         }
-        if (! lemmaExists(lemmas, lemma)) {
+        if (! lemmaExists(lemmas, baseform)) {
           // duplicates probably have different part-of-speech, but subsequent dictionary lookup 
           // will reflect that and return corresponding entries
-          let analysis = { lemma: lemma, url: url2 }
-          lemmas.push(analysis);
+          let lemma = { baseform: baseform, url: url2 }
+          lemmas.push(lemma);
         }
       });
 
@@ -80,20 +80,20 @@ async function getLemmas(form, firstQuery) {
         let h2s = $(".page-header h2", htmlDoc);
         if (h2s.length > 0) {
           let h2 = h2s[0];
-          let lemma = $(h2).contents().filter(function () {
+          let baseform = $(h2).contents().filter(function () {
             return this.nodeType == 3;
           })[0].nodeValue;
-          lemma = lemma.trim();
+          baseform = baseform.trim();
           let small = $("small", h2);
           let pos = small.text();
           pos = pos.trim();
-          // console.log("Analysis: " + lemma + " (" + pos + ")");
+          // console.log("Analysis: " + baseform + " (" + pos + ")");
           let arnastofnunUrl = "http://bin.arnastofnun.is/leit/?q=" + encodeURIComponent(form);
-          if (! lemmaExists(lemmas, lemma)) {
+          if (! lemmaExists(lemmas, baseform)) {
             // duplicates probably have different part-of-speech, but subsequent dictionary lookup 
             // will reflect that and return corresponding entries
-            let analysis = { lemma: lemma, url: arnastofnunUrl }
-            lemmas.push(analysis);
+            let lemma = { baseform: baseform, url: arnastofnunUrl }
+            lemmas.push(lemma);
           }
         } else {
           // found nothing...
@@ -109,8 +109,8 @@ async function getLemmas(form, firstQuery) {
 
 // query http://digicoll.library.wisc.edu/IcelOnline for dictionary entries
 async function getDictionaryEntries(dictionaryLookup, givenUrl) {
-  let lemmaAnalysis = dictionaryLookup.lemma;
-  let lemma = lemmaAnalysis.lemma;
+  let lemma = dictionaryLookup.lemma;
+  let baseform = lemma.baseform;
 
   let newUrls = [];
 
@@ -119,7 +119,7 @@ async function getDictionaryEntries(dictionaryLookup, givenUrl) {
   if (givenUrl) {
     url = givenUrl;
   } else {
-    url = "http://digicoll.library.wisc.edu/cgi-bin/IcelOnline/IcelOnline.TEId-idx?type=simple&size=First+100&rgn=lemma&q1=" + escape(lemma) + "&submit=Search";
+    url = "http://digicoll.library.wisc.edu/cgi-bin/IcelOnline/IcelOnline.TEId-idx?type=simple&size=First+100&rgn=lemma&q1=" + escape(baseform) + "&submit=Search";
   }
 
   try {
@@ -151,8 +151,8 @@ async function getDictionaryEntries(dictionaryLookup, givenUrl) {
 }
 
 function processDictionaryEntryElements(dictionaryLookup, entryElements, fromUrl, newUrls) {
-  let lemmaAnalysis = dictionaryLookup.lemma;
-  let lemma = lemmaAnalysis.lemma;
+  let lemma = dictionaryLookup.lemma;
+  let baseform = lemma.baseform;
 
   entryElements.each(function () {
     // console.log("Dictionary entry:\n" + $(this).html());
@@ -173,8 +173,8 @@ function processDictionaryEntryElements(dictionaryLookup, entryElements, fromUrl
 }
 
 // async function getDictionaryEntriesRef(dictionaryLookup, refUrl) {
-//   let lemmaAnalysis = dictionaryLookup.lemma;
-//   let lemma = lemmaAnalysis.lemma;
+//   let lemma = dictionaryLookup.lemma;
+//   let baseform = lemma.baseform;
 
 //   try {
 //     let jqxhr = await $.get(refUrl, function (data) {
@@ -191,8 +191,8 @@ function processDictionaryEntryElements(dictionaryLookup, entryElements, fromUrl
 // }
 
 function oneResultForLemma(dictionaryLookup, htmlObj, url) {
-  let lemmaAnalysis = dictionaryLookup.lemma;
-  let lemma = lemmaAnalysis.lemma;
+  let lemma = dictionaryLookup.lemma;
+  let baseform = lemma.baseform;
 
   let entry = { html: htmlObj.html(), url: url, source: "uwdc" };
   dictionaryLookup.entries.push(entry);
@@ -256,7 +256,7 @@ async function googleTranslate(lemmas) {
 
     dictionaryLookupResult.push(dictionaryLookup);
 
-    let url = "https://translate.google.fr/translate_a/single?client=webapp&sl=is&tl=fr&hl=fr&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&pc=1&otf=1&ssel=0&tsel=0&kc=1&tk=342556.242781&q=" + escape(lemma.lemma);
+    let url = "https://translate.google.fr/translate_a/single?client=webapp&sl=is&tl=fr&hl=fr&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&pc=1&otf=1&ssel=0&tsel=0&kc=1&tk=342556.242781&q=" + escape(lemma.baseform);
 
     try {
       let jqxhr = await $.get(url, function (data) {

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <script src="jquery-2.2.4.min.js"></script>
-    <link href="https://fonts.googleapis.com/css?family=Fjalla+One|Open+Sans" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Bree+Serif|Open+Sans" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -137,6 +137,7 @@
         #result {
             flex: 1 1 auto;
             overflow-y: auto;
+            position: relative; /* so that it's the 1st positioned parent when playing with scrollTop */
         }
 
         #controls,
@@ -187,8 +188,11 @@
         #result>.search-item>.lemma>h1.lemma-heading {
             font-size: 0.9rem;
             font-weight: normal;
-            font-family: 'Fjalla One', sans-serif;
+            font-family: 'Bree Serif', serif;
             color: midnightblue;
+        }
+        #result>.search-item>.lemma.no-entry>h1.lemma-heading {
+            color: darkred;
         }
 
         #result>.search-item>.lemma>h1.lemma-heading .lemma-url {

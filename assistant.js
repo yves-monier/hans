@@ -129,7 +129,7 @@ function deepEquals(result1, result2) {
     let lemma1 = result1.lemma;
     let lemma2 = result2.lemma;
 
-    if (lemma1.lemma.toLowerCase() != lemma2.lemma.toLowerCase())
+    if (lemma1.baseform.toLowerCase() != lemma2.baseform.toLowerCase())
         return false;
 
     if (result1.entries.length != result2.entries.length)
@@ -148,32 +148,49 @@ function deepEquals(result1, result2) {
 function getUniqueResults(results) {
     let uniqueResults = [];
     for (let i = 0; i < results.length; i++) {
-        let result1 = results[i];
+        let newResult = results[i];
         let alreadyExists = false;
         for (let j = 0; j < uniqueResults.length; j++) {
-            let result2 = uniqueResults[j];
-            if (deepEquals(result1, result2)) {
+            let existingResult = uniqueResults[j];
+            if (deepEquals(existingResult, newResult)) {
+                if (existingResult.lemma.baseform != newResult.lemma.baseform) {
+                    // merge base forms for detailed display (e.g. "grein, Grein")
+                    existingResult.lemma.baseform = existingResult.lemma.baseform + ", " + newResult.lemma.baseform;
+                }
                 alreadyExists = true;
                 break;
             }
         }
         if (!alreadyExists) {
-            uniqueResults.push(result1);
+            uniqueResults.push(newResult);
         }
     }
     return uniqueResults;
 }
 
 function getHelp(text) {
+    text = text.replace(/\u00AD/g, ''); // &shy; (plenty of them on https://www.mbl.is/frettir/)
+    text = text.trim();
+    // console.log(text);
+
     clearMessage();
 
     let assistant = $('#assistant');
     let result = $('#result');
     let busy = $('#busy');
 
-    text = text.replace(/\u00AD/g, ''); // &shy; (plenty of them on https://www.mbl.is/frettir/)
-    text = text.trim();
-    // console.log(text);
+    let alreadySearchedItems = $(".search-item[data-search='" + escape(text) + "']", result);
+    if (alreadySearchedItems.length > 0) {
+        let alreadySearched = $(alreadySearchedItems[0]);
+        let alreadySearchedLemmas = $(".lemma", alreadySearched);
+        alreadySearchedLemmas.removeClass("off");
+        $(".entry", alreadySearchedLemmas).show(500, function () {
+            let newScrollTop = result.scrollTop();
+            newScrollTop += alreadySearched.position().top;
+            result.scrollTop(newScrollTop);
+        });
+        return;
+    }
 
     // issuing http $.get from https (icelandiconline.com...) triggers a mixed-content error
     // tried to add permissions in manifest.json, with no success:
@@ -184,7 +201,7 @@ function getHelp(text) {
     //
     // => https://developer.chrome.com/extensions/messaging
 
-    let searchItemDiv = $("<div class='search-item'></div>");
+    let searchItemDiv = $("<div class='search-item' data-search='" + escape(text) + "'></div>");
     searchItemDiv.text("Searching for " + text + "...");
     searchItemDiv.appendTo(result);
 
@@ -197,14 +214,14 @@ function getHelp(text) {
 
         if (lemmas.length == 0) {
             // if no lemma(s) found, use the given surface form by default, in case of...
-            let defaultLemma = { lemma: text, url: undefined };
+            let defaultLemma = { baseform: text, url: undefined };
             lemmas.push(defaultLemma);
         }
 
         for (let i = 0; i < lemmas.length; i++) {
             lemmas[i].index = i;
-            let lemmaDiv = $("<div class='lemma pending-lemma'></div>");
-            lemmaDiv.text("Searching for " + lemmas[i].lemma + "...");
+            let lemmaDiv = $("<div class='lemma searching-lemma'></div>");
+            lemmaDiv.text("Searching for " + lemmas[i].baseform + "...");
             lemmaDiv.appendTo(searchItemDiv);
             lemmaDivs.push(lemmaDiv);
         }
@@ -215,18 +232,22 @@ function getHelp(text) {
             let uniqueResults = getUniqueResults(dictionaryLookupResult);
 
             for (let i = 0; i < uniqueResults.length; i++) {
-                let lemma = lemmas[i].lemma;
-                let lemmaDiv = lemmaDivs[lemmas[i].index];
+                // let baseform = lemmas[i].baseform;
+                let baseform = uniqueResults[i].lemma.baseform;
                 let entries = uniqueResults[i].entries;
-                lemmaDiv.removeClass("pending-lemma");
+
+                let lemmaDiv = lemmaDivs[lemmas[i].index];
+                lemmaDiv.removeClass("searching-lemma");
                 lemmaDiv.empty();
+
                 let heading = $("<h1 class='lemma-heading'></h1>");
-                heading.html(lemma);
+                heading.html(baseform);
                 if (lemmas[i].url) {
                     let link = $("<a class='lemma-url' title='Show on http://bin.arnastofnun.is' target='ia-arnastofnun' href='" + lemmas[i].url + "'></a>");
                     heading.prepend(link);
                 }
                 heading.appendTo(lemmaDiv);
+
                 if (entries.length > 0) {
                     for (let j = 0; j < entries.length; j++) {
                         let entry = entries[j];
@@ -239,13 +260,14 @@ function getHelp(text) {
                         entryDiv.appendTo(lemmaDiv);
                     }
                 } else {
-                    let noResultDiv = $("<div class='no-lemma-result'></div>");
-                    noResultDiv.text("Found no dictionary entry for " + lemma);
+                    let noResultDiv = $("<div class='entry'></div>");
+                    noResultDiv.text("Found no dictionary entry for " + baseform);
                     lemmaDiv.append(noResultDiv);
+                    lemmaDiv.addClass("no-entry");
                 }
             }
 
-            $(".pending-lemma", searchItemDiv).remove();
+            $(".searching-lemma", searchItemDiv).remove();
 
             let previousLemmaObjs = $(".search-item:not(:last-child) .lemma", result);
             previousLemmaObjs.addClass("off");
