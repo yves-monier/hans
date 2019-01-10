@@ -203,10 +203,15 @@ function getHelp(text) {
 
     let searchItemDiv = $("<div class='search-item' data-search='" + escape(text) + "'></div>");
     searchItemDiv.text("Searching for " + text + "...");
-    searchItemDiv.appendTo(result);
+    // searchItemDiv.appendTo(result);
+    result.prepend(searchItemDiv);
 
     chrome.runtime.sendMessage({ method: "disambiguation", surfaceForm: text }, function (lemmas) {
         console.log("lemmas received!");
+
+        let previousLemmaObjs = $(".search-item:not(:first-child) .lemma", result);
+        previousLemmaObjs.addClass("off");
+        $(".entry", previousLemmaObjs).hide(250);
 
         searchItemDiv.empty();
 
@@ -269,13 +274,9 @@ function getHelp(text) {
 
             $(".searching-lemma", searchItemDiv).remove();
 
-            let previousLemmaObjs = $(".search-item:not(:last-child) .lemma", result);
-            previousLemmaObjs.addClass("off");
-            $(".entry", previousLemmaObjs).hide(500);
-
-            // scroll result div to bottom
-            let scrollHeight = result.prop("scrollHeight");
-            result.scrollTop(scrollHeight);
+            // // scroll result div to bottom
+            // let scrollHeight = result.prop("scrollHeight");
+            // result.scrollTop(scrollHeight);
         });
     });
 
