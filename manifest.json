@@ -1,6 +1,6 @@
 {
   "name": "Icelandic assistant",
-  "version": "1.0",
+  "version": "1.0.0",
   "description": "Icelandic assistant",
   "permissions": [
     "tabs",
