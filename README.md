@@ -33,4 +33,5 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 - Find a smarter name than Icelandic assistant :-)
 - In case of N>1 parts of speech (e.g. slaka being either Kvenkynsnafnorð or Sagnorð, veik beyging), display one icon per analysis targeting the relevant url + tooltip showing the part of speech
+- enable to choose google translate's target language (option)
 - Use github Issues for TODOs  

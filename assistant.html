@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <script src="jquery-2.2.4.min.js"></script>
-    <link href="https://fonts.googleapis.com/css?family=Bree+Serif|Open+Sans" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Francois+One|Noto+Serif|Inconsolata" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -62,7 +62,7 @@
             left: 10px;
             font-weight: bold;
             content: "<";
-            color: midnightblue;
+            color: darkblue;
         }
 
         #assistant.on>#slider::after {
@@ -76,10 +76,10 @@
             height: 100%;
             display: flex;
             flex-direction: column;
-            background-color: #eee;
+            background-color: #f0f0f0;
             border-left: 1px solid #aaa;
             position: relative;
-            opacity: 0.85;
+            opacity: 0.95;
         }
 
         #assistant-in:before {
@@ -115,12 +115,12 @@
             padding: 0;
             width: 24px;
             height: 24px;
-            border: 1px solid #c50b1e;
-            background-color: #003897;
+            border: 1px solid darkred;
+            background-color: darkblue;
             border-radius: 50%;
         }
         #controls #clear:hover {
-            background-color: white;
+            background-color: royalblue;
         }
         #controls #clear #clear-icon {
             fill: white;
@@ -128,7 +128,7 @@
             height: 16px;
         }
         #controls #clear:hover #clear-icon {
-            fill: #003897;
+            /*fill: darkblue;*/
         }
 
         #controls button {
@@ -179,18 +179,19 @@
             background-color: #eee;
             padding-bottom: 0.25rem;
             border-bottom: 1px dotted steelblue;
-            font-family: 'Open Sans', sans-serif;
+            font-family: 'Noto Serif', serif;
         }
 
         #result>.search-item>.lemma:last-child {
             border-bottom: 2px solid steelblue;
+            padding-bottom: 0.5rem;
         }
 
         #result>.search-item>.lemma>h1.lemma-heading {
-            font-size: 0.9rem;
+            font-size: 1rem;
             font-weight: normal;
-            font-family: 'Bree Serif', serif;
-            color: midnightblue;
+            font-family: 'Francois One', sans-serif;
+            color: darkblue;
         }
         #result>.search-item>.lemma.no-entry>h1.lemma-heading {
             color: darkred;
@@ -219,6 +220,9 @@
         #result>.search-item>.lemma>.entry {
             display: flex;
         }
+        #result>.search-item>.lemma>.entry {
+            margin-top: 0.5rem;
+        }
 
         #result>.search-item>.lemma>.entry>.entry-url {
             margin-right: 0.5rem;
@@ -231,13 +235,84 @@
             background-repeat: no-repeat;
         }
 
+        .entry-uwdc>.headwd>.graminfl>.gram {
+            text-transform: capitalize;
+            font-family: 'Inconsolata', monospace;
+            background-color: darkred;
+            color: white;
+            padding: 0 4px;
+            border-radius: 8px;
+        }
+        .entry-uwdc>.headwd>.lemma {
+            font-weight: bold;
+        }
+        .entry-uwdc .sense {
+            margin-top: 0.33rem;
+        }
+
+        .entry-uwdc .hw-placeholder {
+        }
+        .entry-uwdc .hw-actual {
+            display: none;
+        }
+        .search-item>.lemma>.entry:hover>.entry-uwdc .hw-placeholder {
+            display: none;
+        }
+        .search-item>.lemma>.entry:hover>.entry-uwdc .hw-actual {
+            display: initial;
+            font-style: italic;
+            font-weight: bold;
+        }
+
+        .orth + .sense {
+            display: inline-block;
+        }
+        .orth + .sense:before {
+            content: "\00a0\279c\00a0";
+        }
+
         #busy {
             display: none;
             width: 400px;
             height: 5px;
-            background-color: midnightblue;
+            background-color: darkblue;
             flex: 0 0 auto;
         }
+
+        .searching-item:after,
+        .searching-lemma:after {
+            content: '';
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background-color: darkblue;
+            margin-left: 1rem;
+            border-radius: 50%;
+            -webkit-animation: sk-rotatePlane 1.2s infinite ease-in-out;
+                    animation: sk-rotatePlane 1.2s infinite ease-in-out; 
+        }
+
+        @-webkit-keyframes sk-rotatePlane {
+        0% {
+            -webkit-transform: perspective(120px) rotateX(0deg) rotateY(0deg);
+                    transform: perspective(120px) rotateX(0deg) rotateY(0deg); }
+        50% {
+            -webkit-transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg);
+                    transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg); }
+        100% {
+            -webkit-transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
+                    transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg); } }
+
+        @keyframes sk-rotatePlane {
+        0% {
+            -webkit-transform: perspective(120px) rotateX(0deg) rotateY(0deg);
+                    transform: perspective(120px) rotateX(0deg) rotateY(0deg); }
+        50% {
+            -webkit-transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg);
+                    transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg); }
+        100% {
+            -webkit-transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
+                    transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg); } }
     </style>
 </head>
 

@@ -168,12 +168,37 @@ function getUniqueResults(results) {
     return uniqueResults;
 }
 
+function enrichEntry(entry) {
+    let regex = /~~/g;
+    let hw = entry.hw;
+    let enrichment = "<span class='hw-placeholder'>~~</span><span class='hw-actual'>" + escape(hw) + "</span>";
+    let html = entry.html;
+    let enrichedHtml = html.replace(regex, enrichment);
+    entry.html = enrichedHtml;
+}
+
+const GOOGLE_TRANSLATE_BASE_URL = "https://translate.google.fr/#view=home&op=translate&sl=is&tl=en&text=";
+
+function googleTranslate(text) {
+    let googleTranslateLink = $("#google-translate-link");
+    if (googleTranslateLink.length > 0) {
+        let googleTranslateUrl = GOOGLE_TRANSLATE_BASE_URL + encodeURIComponent(text); // loka%C3%B0
+        googleTranslateLink.prop("href", googleTranslateUrl);
+        googleTranslateLink[0].click();
+    }
+}
+
 function getHelp(text) {
     text = text.replace(/\u00AD/g, ''); // &shy; (plenty of them on https://www.mbl.is/frettir/)
     text = text.trim();
-    // console.log(text);
 
     clearMessage();
+
+    if (text.indexOf(" ") != -1) {
+        // if text contains whitespace, just send it to google translate (disambiguation and dictionary lookup wouldn't work)
+        googleTranslate(text);
+        return;
+    }
 
     let assistant = $('#assistant');
     let result = $('#result');
@@ -201,13 +226,15 @@ function getHelp(text) {
     //
     // => https://developer.chrome.com/extensions/messaging
 
-    let searchItemDiv = $("<div class='search-item' data-search='" + escape(text) + "'></div>");
+    let searchItemDiv = $("<div class='search-item searching-item' data-search='" + escape(text) + "'></div>");
     searchItemDiv.text("Searching for " + text + "...");
     // searchItemDiv.appendTo(result);
     result.prepend(searchItemDiv);
 
     chrome.runtime.sendMessage({ method: "disambiguation", surfaceForm: text }, function (lemmas) {
-        console.log("lemmas received!");
+        // console.log("lemmas received!");
+
+        searchItemDiv.removeClass("searching-item");
 
         let previousLemmaObjs = $(".search-item:not(:first-child) .lemma", result);
         previousLemmaObjs.addClass("off");
@@ -256,6 +283,7 @@ function getHelp(text) {
                 if (entries.length > 0) {
                     for (let j = 0; j < entries.length; j++) {
                         let entry = entries[j];
+                        enrichEntry(entry);
                         let entryDiv = $("<div class='entry'></div>");
                         let link = $("<a class='entry-url' title='Show on UWDC Icelandic Online Dictionary' target='ia-uwdc' href='" + entry.url + "'></a>");
                         link.appendTo(entryDiv);
@@ -280,25 +308,20 @@ function getHelp(text) {
         });
     });
 
-    const GOOGLE_TRANSLATE_BASE_URL = "https://translate.google.fr/#view=home&op=translate&sl=is&tl=en&text=";
-    let googleTranslateUrl = GOOGLE_TRANSLATE_BASE_URL + encodeURIComponent(text); // loka%C3%B0
-    // $("#google-translate").prop("src", googleTranslateUrl);
-
     chrome.tabs.query({ currentWindow: true }, function (tabs) {
         if (tabs) {
             for (let i = 0; i < tabs.length; i++) {
                 let url = tabs[i].url;
+                // if a google translate tab exists, update it
                 if (url.startsWith(GOOGLE_TRANSLATE_BASE_URL)) {
+                    let googleTranslateUrl = GOOGLE_TRANSLATE_BASE_URL + encodeURIComponent(text); // loka%C3%B0
                     chrome.tabs.update(tabs[i].id, { url: googleTranslateUrl });
                     return;
                 }
             }
 
-            let googleTranslateLink = $("#google-translate-link");
-            if (googleTranslateLink.length > 0) {
-                googleTranslateLink.prop("href", googleTranslateUrl);
-                googleTranslateLink[0].click();
-            }
+            // if no existing google translate tab, open one
+            googleTranslate(text);
         }
     });
 }

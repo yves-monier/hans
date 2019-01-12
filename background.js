@@ -68,7 +68,7 @@ async function getLemmas(form, firstQuery) {
           url2 = "http://bin.arnastofnun.is/leit/?id=" + id
           // console.log("Analysis " + i + ": " + baseform + " (" + pos + ") " + url2);
         }
-        if (! lemmaExists(lemmas, baseform)) {
+        if (!lemmaExists(lemmas, baseform)) {
           // duplicates probably have different part-of-speech, but subsequent dictionary lookup 
           // will reflect that and return corresponding entries
           let lemma = { baseform: baseform, url: url2 }
@@ -89,7 +89,7 @@ async function getLemmas(form, firstQuery) {
           pos = pos.trim();
           // console.log("Analysis: " + baseform + " (" + pos + ")");
           let arnastofnunUrl = "http://bin.arnastofnun.is/leit/?q=" + encodeURIComponent(form);
-          if (! lemmaExists(lemmas, baseform)) {
+          if (!lemmaExists(lemmas, baseform)) {
             // duplicates probably have different part-of-speech, but subsequent dictionary lookup 
             // will reflect that and return corresponding entries
             let lemma = { baseform: baseform, url: arnastofnunUrl }
@@ -194,7 +194,18 @@ function oneResultForLemma(dictionaryLookup, htmlObj, url) {
   let lemma = dictionaryLookup.lemma;
   let baseform = lemma.baseform;
 
-  let entry = { html: htmlObj.html(), url: url, source: "uwdc" };
+  let headwdObj = $(".headwd > .lemma", htmlObj);
+  let headwd = "???";
+  if (headwdObj.length > 0) {
+    headwd = headwdObj.contents().filter(function () {
+      return this.nodeType == 3;
+    })[0].nodeValue;
+  }
+
+  let regex = new RegExp('\\/', 'g');
+  headwd = headwd.replace(regex, ''); // e.g. "tal/a" => "tala"
+
+  let entry = { html: htmlObj.html(), hw: headwd, url: url, source: "uwdc" };
   dictionaryLookup.entries.push(entry);
 }
 
