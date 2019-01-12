@@ -343,20 +343,58 @@ if (chrome.browserAction) {
   });
 }
 
+function getOptions() {
+  let options = {};
+  options.sidebarStatus = localStorage['sidebarStatus'];
+  if (options.sidebarStatus != "on") {
+    options.sidebarStatus = "off";
+  }
+  options.googleTranslate = localStorage['googleTranslate'];
+  if (options.googleTranslate != "on") {
+    options.googleTranslate = "off";
+  }
+  options.googleTranslateTarget = localStorage['googleTranslateTarget'];
+  return options;
+}
+
+function setOptions(options) {
+  if (options.sidebarStatus == "on") {
+    localStorage['sidebarStatus'] = "on";
+  } else {
+    localStorage['sidebarStatus'] = "off";
+  }
+
+  if (options.googleTranslate == "on") {
+    localStorage['googleTranslate'] = "on";
+  } else {
+    localStorage['googleTranslate'] = "off";
+  }
+
+  if (options.googleTranslateTarget) {
+    localStorage['googleTranslateTarget'] = options.googleTranslateTarget;
+  }
+}
+
 chrome.runtime.onMessage.addListener(
   function (request, sender, sendResponse) {
     if (request.method == "disambiguation") {
       doDisambiguation(request.surfaceForm, sendResponse);
       return true;
-    } if (request.method == "dictionaryLookup") {
+    } else if (request.method == "dictionaryLookup") {
       doDictionaryLookup(request.lemmas, sendResponse);
       return true;
-    } if (request.method == "getSidebarStatus") {
+    } else if (request.method == "getSidebarStatus") {
       let sidebarStatus = localStorage['sidebarStatus'];
       sendResponse({ sidebarStatus: sidebarStatus });
-    } if (request.method == "setSidebarStatus") {
+    } else if (request.method == "setSidebarStatus") {
       let sidebarStatus = request.param;
       localStorage['sidebarStatus'] = sidebarStatus;
+      sendResponse({});
+    } else if (request.method == "getOptions") {
+      let options = getOptions();
+      sendResponse({ options: options });
+    } else if (request.method == "setOptions") {
+      setOptions(request.options);
       sendResponse({});
     } else {
       // console.log(sender.tab ?

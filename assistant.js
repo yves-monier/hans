@@ -47,6 +47,28 @@ $(function () {
     });
 });
 
+// Credits https://coderwall.com/p/ostduq/escape-html-with-javascript
+
+// List of HTML entities for escaping.
+var htmlEscapes = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#x27;',
+    '/': '&#x2F;'
+};
+
+// Regex containing the keys listed immediately above.
+var htmlEscaper = /[&<>"'\/]/g;
+
+// Escape a string for HTML interpolation.
+function htmlEscape(string) {
+    return ('' + string).replace(htmlEscaper, function (match) {
+        return htmlEscapes[match];
+    });
+};
+
 function toggleSidebar() {
     chrome.runtime.sendMessage({ method: "getSidebarStatus" }, function (response) {
         // response.sidebarStatus: on / off or undefined
@@ -169,11 +191,14 @@ function getUniqueResults(results) {
 }
 
 function enrichEntry(entry) {
-    let regex = /~~/g;
     let hw = entry.hw;
-    let enrichment = "<span class='hw-placeholder'>~~</span><span class='hw-actual'>" + escape(hw) + "</span>";
+    let regex1 = /[^~]~/g;
+    let regex2 = /[^~]~~/g;
+    let enrichment1 = "<span class='hw-placeholder'>~</span><span class='hw-actual'>" + htmlEscape(hw) + "</span>";
+    let enrichment2 = "<span class='hw-placeholder'>~~</span><span class='hw-actual'>" + htmlEscape(hw) + "</span>";
     let html = entry.html;
-    let enrichedHtml = html.replace(regex, enrichment);
+    let enrichedHtml = html.replace(regex1, enrichment1); // segja
+    enrichedHtml = enrichedHtml.replace(regex2, enrichment2); // tala
     entry.html = enrichedHtml;
 }
 
