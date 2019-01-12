@@ -192,13 +192,10 @@ function getUniqueResults(results) {
 
 function enrichEntry(entry) {
     let hw = entry.hw;
-    let regex1 = /[^~]~/g;
-    let regex2 = /[^~]~~/g;
-    let enrichment1 = "<span class='hw-placeholder'>~</span><span class='hw-actual'>" + htmlEscape(hw) + "</span>";
-    let enrichment2 = "<span class='hw-placeholder'>~~</span><span class='hw-actual'>" + htmlEscape(hw) + "</span>";
+    let regex = /(~+)/g;
+    let enrichment = "<span class='hw-placeholder'>$1</span><span class='hw-actual'>" + htmlEscape(hw) + "</span>";
     let html = entry.html;
-    let enrichedHtml = html.replace(regex1, enrichment1); // segja
-    enrichedHtml = enrichedHtml.replace(regex2, enrichment2); // tala
+    let enrichedHtml = html.replace(regex, enrichment); // tala, segja, sjón
     entry.html = enrichedHtml;
 }
 

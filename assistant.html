@@ -247,21 +247,19 @@
             font-weight: bold;
         }
         .entry-uwdc .sense {
-            margin-top: 0.33rem;
+            margin-bottom: 0.5rem;
         }
-
-        .entry-uwdc .hw-placeholder {
+        .entry-uwdc .sense .re {
+            margin-top: 0.5rem;
         }
-        .entry-uwdc .hw-actual {
+        .search-item>.lemma>.entry>.entry-uwdc .hw-placeholder {
             display: none;
         }
-        .search-item>.lemma>.entry:hover>.entry-uwdc .hw-placeholder {
-            display: none;
-        }
-        .search-item>.lemma>.entry:hover>.entry-uwdc .hw-actual {
+        .search-item>.lemma>.entry>.entry-uwdc .hw-actual {
             display: initial;
-            font-style: italic;
-            font-weight: bold;
+            /*font-style: italic;
+            font-weight: bold;*/
+            text-decoration: underline;
         }
 
         .orth + .sense {
