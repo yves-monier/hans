@@ -199,15 +199,19 @@ function enrichEntry(entry) {
     entry.html = enrichedHtml;
 }
 
-const GOOGLE_TRANSLATE_BASE_URL = "https://translate.google.fr/#view=home&op=translate&sl=is&tl=en&text=";
+const GOOGLE_TRANSLATE_BASE_URL = "https://translate.google.fr/#view=home&op=translate&sl=is&tl="; // + <target language>&text=<text>
 
 function googleTranslate(text) {
-    let googleTranslateLink = $("#google-translate-link");
-    if (googleTranslateLink.length > 0) {
-        let googleTranslateUrl = GOOGLE_TRANSLATE_BASE_URL + encodeURIComponent(text); // loka%C3%B0
-        googleTranslateLink.prop("href", googleTranslateUrl);
-        googleTranslateLink[0].click();
-    }
+    chrome.runtime.sendMessage({ method: "getOptions" }, function (response) {
+        if (response.options.googleTranslate == "on") {
+            let googleTranslateLink = $("#google-translate-link");
+            if (googleTranslateLink.length > 0) {
+                let googleTranslateUrl = GOOGLE_TRANSLATE_BASE_URL + response.options.googleTranslateTarget + "&text=" + encodeURIComponent(text); // loka%C3%B0
+                googleTranslateLink.prop("href", googleTranslateUrl);
+                googleTranslateLink[0].click();
+            }
+        }
+    });
 }
 
 function getHelp(text) {
@@ -330,20 +334,24 @@ function getHelp(text) {
         });
     });
 
-    chrome.tabs.query({ currentWindow: true }, function (tabs) {
-        if (tabs) {
-            for (let i = 0; i < tabs.length; i++) {
-                let url = tabs[i].url;
-                // if a google translate tab exists, update it
-                if (url.startsWith(GOOGLE_TRANSLATE_BASE_URL)) {
-                    let googleTranslateUrl = GOOGLE_TRANSLATE_BASE_URL + encodeURIComponent(text); // loka%C3%B0
-                    chrome.tabs.update(tabs[i].id, { url: googleTranslateUrl });
-                    return;
-                }
-            }
+    chrome.runtime.sendMessage({ method: "getOptions" }, function (response) {
+        if (response.options.googleTranslate == "on") {
+            chrome.tabs.query({ currentWindow: true }, function (tabs) {
+                if (tabs) {
+                    for (let i = 0; i < tabs.length; i++) {
+                        let url = tabs[i].url;
+                        // if a google translate tab exists, update it
+                        if (url.startsWith(GOOGLE_TRANSLATE_BASE_URL)) {
+                            let googleTranslateUrl = GOOGLE_TRANSLATE_BASE_URL + response.options.googleTranslateTarget + "&text=" + encodeURIComponent(text); // loka%C3%B0
+                            chrome.tabs.update(tabs[i].id, { url: googleTranslateUrl });
+                            return;
+                        }
+                    }
 
-            // if no existing google translate tab, open one
-            googleTranslate(text);
+                    // if no existing google translate tab, open one
+                    googleTranslate(text);
+                }
+            });
         }
     });
 }

@@ -354,20 +354,27 @@ function getOptions() {
     options.googleTranslate = "off";
   }
   options.googleTranslateTarget = localStorage['googleTranslateTarget'];
+  if (!options.googleTranslateTarget) {
+    options.googleTranslateTarget = "en";
+  }
   return options;
 }
 
 function setOptions(options) {
-  if (options.sidebarStatus == "on") {
-    localStorage['sidebarStatus'] = "on";
-  } else {
-    localStorage['sidebarStatus'] = "off";
+  if (options.sidebarStatus) {
+    if (options.sidebarStatus == "on") {
+      localStorage['sidebarStatus'] = "on";
+    } else {
+      localStorage['sidebarStatus'] = "off";
+    }
   }
 
-  if (options.googleTranslate == "on") {
-    localStorage['googleTranslate'] = "on";
-  } else {
-    localStorage['googleTranslate'] = "off";
+  if (options.googleTranslate) {
+    if (options.googleTranslate == "on") {
+      localStorage['googleTranslate'] = "on";
+    } else {
+      localStorage['googleTranslate'] = "off";
+    }
   }
 
   if (options.googleTranslateTarget) {
