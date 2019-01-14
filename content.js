@@ -68,7 +68,7 @@ if (!location.ancestorOrigins.contains(extensionOrigin)) {
     $(assistantIframe).load(function () {
         chrome.runtime.sendMessage({ method: "getSidebarStatus" }, function (response) {
             // response.sidebarStatus: on / off or undefined
-            console.log(response.sidebarStatus);
+            // console.log(response.sidebarStatus);
             showSidebar(response.sidebarStatus);
         });
     });
@@ -90,3 +90,28 @@ function showSidebar(onOrOff) {
         });
     }
 }
+
+function getSelectedText() {
+    let text = "";
+    if (window.getSelection) {
+        text = window.getSelection().toString();
+    } else if (document.selection && document.selection.type != "Control") {
+        text = document.selection.createRange().text;
+    }
+    return text;
+}
+
+// document.onkeypress = function (e) {
+//     console.log("kp");
+// }
+// Mouse listener for any move event on the current document.
+document.addEventListener('keypress', function (e) {
+    let srcElement = e.srcElement;
+
+    // 65/97: 'A'/'a'
+    if ((e.keyCode == 65 || e.keyCode == 97) && assistantIframe && srcElement && srcElement.nodeName == 'BODY') {
+        let selectedText = getSelectedText();
+        // see https://javascript.info/cross-window-communication
+        assistantIframe.contentWindow.postMessage({ method: "getHelp", param: selectedText }, "*");
+    }
+}, false);

@@ -359,7 +359,19 @@ function getHelp(text) {
 $(document).ready(function () {
     chrome.runtime.sendMessage({ method: "getSidebarStatus" }, function (response) {
         // response.sidebarStatus: on / off or undefined
-        console.log(response.sidebarStatus);
+        //console.log(response.sidebarStatus);
         updateSlider(response.sidebarStatus);
+    });
+
+    // see https://javascript.info/cross-window-communication
+    window.addEventListener("message", function (e) {
+        // if (event.origin != 'http://javascript.info') {
+        //   // something from an unknown domain, let's ignore it
+        //   return;
+        // }
+        if (e.data.method && e.data.method == "getHelp") {
+            let selectedText = e.data.param;
+            getHelp(selectedText);
+        }
     });
 });
