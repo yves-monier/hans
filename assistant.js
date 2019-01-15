@@ -191,11 +191,25 @@ function getUniqueResults(results) {
 }
 
 function enrichEntry(entry) {
-    let hw = entry.hw;
-    let regex = /(~+)/g;
-    let enrichment = "<span class='hw-placeholder'>$1</span><span class='hw-actual'>" + htmlEscape(hw) + "</span>";
+    let hwFull = entry.hw;
+    let slashPos = hwFull.indexOf('/');
+    if (slashPos != -1) {
+        let regex = new RegExp('\\/', 'g');
+        hwFull = hwFull.replace(regex, ''); // e.g. "tal/a" => "tala"
+    }
+
+    let regexFull = /(~~)/g;
+    let enrichmentFull = "<span class='hw-placeholder'>$1</span><span class='hw-actual'>" + htmlEscape(hwFull) + "</span>";
     let html = entry.html;
-    let enrichedHtml = html.replace(regex, enrichment); // tala, segja, sjón
+    let enrichedHtml = html.replace(regexFull, enrichmentFull); // tala, segja, sjón
+
+    if (slashPos != -1) {
+        let hwBeforeSlash = entry.hw.substring(0, slashPos);
+        let regexBeforeSlash = /(~)/g;
+        let enrichmentBeforeSlash = "<span class='hw-placeholder'>$1</span><span class='hw-actual'>" + htmlEscape(hwBeforeSlash) + "</span>";
+        enrichedHtml = enrichedHtml.replace(regexBeforeSlash, enrichmentBeforeSlash); // tala, segja, sjón
+    }
+
     entry.html = enrichedHtml;
 }
 

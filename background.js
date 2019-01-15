@@ -202,8 +202,8 @@ function oneResultForLemma(dictionaryLookup, htmlObj, url) {
     })[0].nodeValue;
   }
 
-  let regex = new RegExp('\\/', 'g');
-  headwd = headwd.replace(regex, ''); // e.g. "tal/a" => "tala"
+  // let regex = new RegExp('\\/', 'g');
+  // headwd = headwd.replace(regex, ''); // e.g. "tal/a" => "tala"
 
   let entry = { html: htmlObj.html(), hw: headwd, url: url, source: "uwdc" };
   dictionaryLookup.entries.push(entry);
