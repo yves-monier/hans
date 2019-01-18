@@ -35,8 +35,8 @@ $(function () {
         toggleSidebar();
     });
 
-    $("#result").on("click", ".search-item .lemma .lemma-heading", function () {
-        let lemmaObj = $(this).parent();
+    $("#result").on("click", ".search-item .lemma .lemma-heading-in", function () {
+        let lemmaObj = $(this).closest(".lemma");
         if (lemmaObj.hasClass("off")) {
             $(".entry", lemmaObj).show(500);
             lemmaObj.removeClass("off");
@@ -292,7 +292,7 @@ function getHelp(text) {
 
         if (lemmas.length == 0) {
             // if no lemma(s) found, use the given surface form by default, in case of...
-            let defaultLemma = { baseform: text, url: undefined };
+            let defaultLemma = { baseform: text, url: [] };
             lemmas.push(defaultLemma);
         }
 
@@ -319,10 +319,16 @@ function getHelp(text) {
                 lemmaDiv.empty();
 
                 let heading = $("<h1 class='lemma-heading'></h1>");
-                heading.html(baseform);
-                if (lemmas[i].url) {
-                    let link = $("<a class='lemma-url' title='Show on http://bin.arnastofnun.is' target='ia-arnastofnun' href='" + lemmas[i].url + "'></a>");
-                    heading.prepend(link);
+                let headingIn = $("<span class='lemma-heading-in'></span>");
+                headingIn.html(baseform);
+                heading.append(headingIn);
+
+                if (lemmas[i].disambiguation.length > 0) {
+                    for (let d=lemmas[i].disambiguation.length-1;d>=0; d--) {
+                        let disamb = lemmas[i].disambiguation[d];
+                        let link = $("<a class='lemma-url' title='" + disamb.pos + " - show on http://bin.arnastofnun.is' target='ia-arnastofnun' href='" + disamb.url + "'></a>");
+                        heading.prepend(link);
+                    }
                 }
                 heading.appendTo(lemmaDiv);
 

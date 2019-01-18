@@ -25,12 +25,12 @@
 //     });
 // };
 
-function lemmaExists(lemmas, baseform) {
+function findLemma(lemmas, baseform) {
   for (let i = 0; i < lemmas.length; i++) {
     if (lemmas[i].baseform == baseform)
-      return true;
+      return lemmas[i];
   }
-  return false;
+  return null;
 }
 
 // query http://bin.arnastofnun.is/leit/ to get lemma(s)
@@ -62,16 +62,20 @@ async function getLemmas(form, firstQuery) {
         let onclick = a[0].getAttribute("onclick");
         let regex = /'(\d+)'/gm;
         let m = regex.exec(onclick);
-        let url2 = url;
+        let arnastofnunUrl = url;
         if (m !== null) {
           let id = m[1];
-          url2 = "http://bin.arnastofnun.is/leit/?id=" + id
-          // console.log("Analysis " + i + ": " + baseform + " (" + pos + ") " + url2);
+          arnastofnunUrl = "http://bin.arnastofnun.is/leit/?id=" + id
+          // console.log("Analysis " + i + ": " + baseform + " (" + pos + ") " + arnastofnunUrl);
         }
-        if (!lemmaExists(lemmas, baseform)) {
+        let disamb = { pos: pos, url: arnastofnunUrl };
+        let lemma = findLemma(lemmas, baseform);
+        if (lemma != null) {
           // duplicates probably have different part-of-speech, but subsequent dictionary lookup 
           // will reflect that and return corresponding entries
-          let lemma = { baseform: baseform, url: url2 }
+          lemma.disambiguation.push(disamb);
+        } else {
+          lemma = { baseform: baseform, disambiguation: [disamb] };
           lemmas.push(lemma);
         }
       });
@@ -89,10 +93,14 @@ async function getLemmas(form, firstQuery) {
           pos = pos.trim();
           // console.log("Analysis: " + baseform + " (" + pos + ")");
           let arnastofnunUrl = "http://bin.arnastofnun.is/leit/?q=" + encodeURIComponent(form);
-          if (!lemmaExists(lemmas, baseform)) {
+          let disamb = { pos: pos, url: arnastofnunUrl };
+          let lemma = findLemma(lemmas, baseform);
+          if (lemma != null) {
             // duplicates probably have different part-of-speech, but subsequent dictionary lookup 
             // will reflect that and return corresponding entries
-            let lemma = { baseform: baseform, url: arnastofnunUrl }
+            lemma.disambiguation.push(disamb);
+          } else {
+            lemma = { baseform: baseform, disambiguation: [disamb] };
             lemmas.push(lemma);
           }
         } else {
