@@ -6,7 +6,7 @@ I use [https://icelandiconline.com](https://icelandiconline.com) for learning Ic
 
 ## Getting Started
 
-- Clone or donwload/unzip the project wherever you want
+- Clone or download/unzip the project, wherever you want
 - Follow [instructions](https://developer.chrome.com/extensions/getstarted) about installing a Chrome developer/unpacked extension:
 
   1. *Open the Extension Management page by navigating to chrome://extensions. The Extension Management page can also be opened by clicking on the Chrome menu, hovering over More Tools then selecting Extensions.*
