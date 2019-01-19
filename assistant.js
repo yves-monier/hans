@@ -35,14 +35,16 @@ $(function () {
         toggleSidebar();
     });
 
-    $("#result").on("click", ".search-item .lemma .lemma-heading-in", function () {
-        let lemmaObj = $(this).closest(".lemma");
-        if (lemmaObj.hasClass("off")) {
-            $(".entry", lemmaObj).show(500);
-            lemmaObj.removeClass("off");
-        } else {
-            $(".entry", lemmaObj).hide(500);
-            lemmaObj.addClass("off");
+    $("#result").on("click", ".search-item .morpho .morpho-heading", function (e) {
+        if (e.target == e.currentTarget) {
+            let morphoObj = $(this).closest(".morpho");
+            if (morphoObj.hasClass("off")) {
+                $(".entry", morphoObj).show(500);
+                morphoObj.removeClass("off");
+            } else {
+                $(".entry", morphoObj).hide(500);
+                morphoObj.addClass("off");
+            }
         }
     });
 });
@@ -148,10 +150,10 @@ function clearMessage() {
 }
 
 function deepEquals(result1, result2) {
-    let lemma1 = result1.lemma;
-    let lemma2 = result2.lemma;
+    let morpho1 = result1.morphos[0];
+    let morpho2 = result2.morphos[0];
 
-    if (lemma1.baseform.toLowerCase() != lemma2.baseform.toLowerCase())
+    if (morpho1.baseform.toLowerCase() != morpho2.baseform.toLowerCase())
         return false;
 
     if (result1.entries.length != result2.entries.length)
@@ -169,15 +171,15 @@ function deepEquals(result1, result2) {
 
 function getUniqueResults(results) {
     let uniqueResults = [];
+
     for (let i = 0; i < results.length; i++) {
         let newResult = results[i];
         let alreadyExists = false;
         for (let j = 0; j < uniqueResults.length; j++) {
             let existingResult = uniqueResults[j];
             if (deepEquals(existingResult, newResult)) {
-                if (existingResult.lemma.baseform != newResult.lemma.baseform) {
-                    // merge base forms for detailed display (e.g. "grein, Grein")
-                    existingResult.lemma.baseform = existingResult.lemma.baseform + ", " + newResult.lemma.baseform;
+                if (existingResult.morphos[0].baseform != newResult.morphos[0].baseform) { // e.g. "grein, Grein"
+                    existingResult.morphos.push(newResult.morphos[0]);
                 }
                 alreadyExists = true;
                 break;
@@ -187,6 +189,7 @@ function getUniqueResults(results) {
             uniqueResults.push(newResult);
         }
     }
+
     return uniqueResults;
 }
 
@@ -241,7 +244,7 @@ function getHelp(text) {
     clearMessage();
 
     if (text.indexOf(" ") != -1) {
-        // if text contains whitespace, just send it to google translate (disambiguation and dictionary lookup wouldn't work)
+        // if text contains whitespace, just send it to google translate (morpho analysis and dictionary lookup wouldn't work)
         googleTranslate(text);
         return;
     }
@@ -253,9 +256,9 @@ function getHelp(text) {
     let alreadySearchedItems = $(".search-item[data-search='" + escape(text) + "']", result);
     if (alreadySearchedItems.length > 0) {
         let alreadySearched = $(alreadySearchedItems[0]);
-        let alreadySearchedLemmas = $(".lemma", alreadySearched);
-        alreadySearchedLemmas.removeClass("off");
-        $(".entry", alreadySearchedLemmas).show(500, function () {
+        let alreadySearchedMorphos = $(".morpho", alreadySearched);
+        alreadySearchedMorphos.removeClass("off");
+        $(".entry", alreadySearchedMorphos).show(500, function () {
             let newScrollTop = result.scrollTop();
             newScrollTop += alreadySearched.position().top;
             result.scrollTop(newScrollTop);
@@ -277,61 +280,64 @@ function getHelp(text) {
     // searchItemDiv.appendTo(result);
     result.prepend(searchItemDiv);
 
-    chrome.runtime.sendMessage({ method: "disambiguation", surfaceForm: text }, function (lemmas) {
-        // console.log("lemmas received!");
+    chrome.runtime.sendMessage({ method: "morphoAnalysis", surfaceForm: text }, function (morphos) {
+        // console.log("morpho analysis received!");
 
         searchItemDiv.removeClass("searching-item");
 
-        let previousLemmaObjs = $(".search-item:not(:first-child) .lemma", result);
+        let previousLemmaObjs = $(".search-item:not(:first-child) .morpho", result);
         previousLemmaObjs.addClass("off");
         $(".entry", previousLemmaObjs).hide(250);
 
         searchItemDiv.empty();
 
-        let lemmaDivs = [];
+        let morphoDivs = [];
 
-        if (lemmas.length == 0) {
-            // if no lemma(s) found, use the given surface form by default, in case of...
-            let defaultLemma = { baseform: text, url: [] };
-            lemmas.push(defaultLemma);
+        if (morphos.length == 0) {
+            // if no morpho(s) found, use the given surface form by default, in case of...
+            let defaultMorpho = { baseform: text, url: [] };
+            morphos.push(defaultMorpho);
         }
 
-        for (let i = 0; i < lemmas.length; i++) {
-            lemmas[i].index = i;
-            let lemmaDiv = $("<div class='lemma searching-lemma'></div>");
-            lemmaDiv.text("Searching for " + lemmas[i].baseform + "...");
-            lemmaDiv.appendTo(searchItemDiv);
-            lemmaDivs.push(lemmaDiv);
+        for (let i = 0; i < morphos.length; i++) {
+            let morphoDiv = $("<div class='morpho searching-morpho'></div>");
+            morphoDiv.text("Searching for " + morphos[i].baseform + "...");
+            morphoDiv.appendTo(searchItemDiv);
+            morphoDivs.push(morphoDiv);
         }
 
-        chrome.runtime.sendMessage({ method: "dictionaryLookup", lemmas: lemmas }, function (dictionaryLookupResult) {
-            console.log("dictionary lookup received!");
+        chrome.runtime.sendMessage({ method: "dictionaryLookup", morphos: morphos }, function (dictionaryLookupResult) {
+            // console.log("dictionary lookup received!");
 
             let uniqueResults = getUniqueResults(dictionaryLookupResult);
 
             for (let i = 0; i < uniqueResults.length; i++) {
-                // let baseform = lemmas[i].baseform;
-                let baseform = uniqueResults[i].lemma.baseform;
-                let entries = uniqueResults[i].entries;
+                let uniqueResult = uniqueResults[i];
 
-                let lemmaDiv = lemmaDivs[lemmas[i].index];
-                lemmaDiv.removeClass("searching-lemma");
-                lemmaDiv.empty();
+                let morphoDiv = morphoDivs[i];
+                morphoDiv.removeClass("searching-morpho");
+                morphoDiv.empty();
 
-                let heading = $("<h1 class='lemma-heading'></h1>");
-                let headingIn = $("<span class='lemma-heading-in'></span>");
-                headingIn.html(baseform);
-                heading.append(headingIn);
+                let heading = $("<h1 class='morphos-heading'></h1>");
 
-                if (lemmas[i].disambiguation.length > 0) {
-                    for (let d=lemmas[i].disambiguation.length-1;d>=0; d--) {
-                        let disamb = lemmas[i].disambiguation[d];
-                        let link = $("<a class='lemma-url' title='" + disamb.pos + " - show on http://bin.arnastofnun.is' target='ia-arnastofnun' href='" + disamb.url + "'></a>");
-                        heading.prepend(link);
+                let resultMorphos = uniqueResult.morphos;
+                for (let rm = 0; rm < resultMorphos.length; rm++) {
+                    let morpho = resultMorphos[rm];
+                    let baseform = morpho.baseform;
+                    let morphoHeading = $("<span class='morpho-heading'></span>");
+                    morphoHeading.html(baseform);
+                    heading.append(morphoHeading);
+                    if (morpho.morphoanalysis.length > 0) {
+                        for (let m=morpho.morphoanalysis.length-1;m>=0; m--) {
+                            let morphoanalysis = morpho.morphoanalysis[m];
+                            let link = $("<a class='morpho-url' title='" + morphoanalysis.pos + " - show on http://bin.arnastofnun.is' target='ia-arnastofnun' href='" + morphoanalysis.url + "'></a>");
+                            morphoHeading.prepend(link);
+                        }
                     }
                 }
-                heading.appendTo(lemmaDiv);
+                heading.appendTo(morphoDiv);
 
+                let entries = uniqueResult.entries;
                 if (entries.length > 0) {
                     for (let j = 0; j < entries.length; j++) {
                         let entry = entries[j];
@@ -342,17 +348,20 @@ function getHelp(text) {
                         let uwdcDiv = $("<div class='entry-uwdc'></div>");
                         uwdcDiv.html(entry.html);
                         uwdcDiv.appendTo(entryDiv);
-                        entryDiv.appendTo(lemmaDiv);
+                        entryDiv.appendTo(morphoDiv);
                     }
                 } else {
                     let noResultDiv = $("<div class='entry'></div>");
                     noResultDiv.text("Found no dictionary entry for " + baseform);
-                    lemmaDiv.append(noResultDiv);
-                    lemmaDiv.addClass("no-entry");
+                    morphoDiv.append(noResultDiv);
+                    morphoDiv.addClass("no-entry");
                 }
             }
 
-            $(".searching-lemma", searchItemDiv).remove();
+            for (let i = uniqueResults.length; i < morphos.length; i++) {
+                // $(".searching-morpho", searchItemDiv).remove();
+                morphoDivs[i].remove();
+            }
 
             // // scroll result div to bottom
             // let scrollHeight = result.prop("scrollHeight");

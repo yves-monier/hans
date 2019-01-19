@@ -25,20 +25,20 @@
 //     });
 // };
 
-function findLemma(lemmas, baseform) {
-  for (let i = 0; i < lemmas.length; i++) {
-    if (lemmas[i].baseform == baseform)
-      return lemmas[i];
+function findMorpho(morphoAnalysis, baseform) {
+  for (let i = 0; i < morphoAnalysis.length; i++) {
+    if (morphoAnalysis[i].baseform == baseform)
+      return morphoAnalysis[i];
   }
   return null;
 }
 
-// query http://bin.arnastofnun.is/leit/ to get lemma(s)
+// query http://bin.arnastofnun.is/leit/ to get morpho(s)
 // http://bin.arnastofnun.is/leit/?q=heiti
 // http://dev.phpbin.ja.is/ajax_leit.php?q=heiti
 // http://bin.arnastofnun.is/leit/?id=434170
-async function getLemmas(form, firstQuery) {
-  let lemmas = [];
+async function getMorphos(form, firstQuery) {
+  let morphoAnalysis = [];
 
   let url = "http://dev.phpbin.ja.is/ajax_leit.php?q=" + encodeURIComponent(form);
   if (!firstQuery) {
@@ -68,15 +68,15 @@ async function getLemmas(form, firstQuery) {
           arnastofnunUrl = "http://bin.arnastofnun.is/leit/?id=" + id
           // console.log("Analysis " + i + ": " + baseform + " (" + pos + ") " + arnastofnunUrl);
         }
-        let disamb = { pos: pos, url: arnastofnunUrl };
-        let lemma = findLemma(lemmas, baseform);
-        if (lemma != null) {
+        let newMorpho = { baseform: baseform, pos: pos, url: arnastofnunUrl };
+        let morpho = findMorpho(morphoAnalysis, baseform);
+        if (morpho != null) {
           // duplicates probably have different part-of-speech, but subsequent dictionary lookup 
           // will reflect that and return corresponding entries
-          lemma.disambiguation.push(disamb);
+          morpho.morphoanalysis.push(newMorpho);
         } else {
-          lemma = { baseform: baseform, disambiguation: [disamb] };
-          lemmas.push(lemma);
+          morpho = { baseform: baseform, morphoanalysis: [newMorpho] };
+          morphoAnalysis.push(morpho);
         }
       });
 
@@ -93,15 +93,15 @@ async function getLemmas(form, firstQuery) {
           pos = pos.trim();
           // console.log("Analysis: " + baseform + " (" + pos + ")");
           let arnastofnunUrl = "http://bin.arnastofnun.is/leit/?q=" + encodeURIComponent(form);
-          let disamb = { pos: pos, url: arnastofnunUrl };
-          let lemma = findLemma(lemmas, baseform);
-          if (lemma != null) {
+          let newMorpho = { baseform: baseform, pos: pos, url: arnastofnunUrl };
+          let morpho = findMorpho(morphoAnalysis, baseform);
+          if (morpho != null) {
             // duplicates probably have different part-of-speech, but subsequent dictionary lookup 
             // will reflect that and return corresponding entries
-            lemma.disambiguation.push(disamb);
+            morpho.morphoanalysis.push(newMorpho);
           } else {
-            lemma = { baseform: baseform, disambiguation: [disamb] };
-            lemmas.push(lemma);
+            morpho = { baseform: baseform, morphoanalysis: [newMorpho] };
+            morphoAnalysis.push(morpho);
           }
         } else {
           // found nothing...
@@ -112,13 +112,13 @@ async function getLemmas(form, firstQuery) {
     console.log("error: " + error);
   }
 
-  return lemmas;
+  return morphoAnalysis;
 }
 
 // query http://digicoll.library.wisc.edu/IcelOnline for dictionary entries
 async function getDictionaryEntries(dictionaryLookup, givenUrl) {
-  let lemma = dictionaryLookup.lemma;
-  let baseform = lemma.baseform;
+  let morpho = dictionaryLookup.morphos[0];
+  let baseform = morpho.baseform;
 
   let newUrls = [];
 
@@ -159,8 +159,8 @@ async function getDictionaryEntries(dictionaryLookup, givenUrl) {
 }
 
 function processDictionaryEntryElements(dictionaryLookup, entryElements, fromUrl, newUrls) {
-  let lemma = dictionaryLookup.lemma;
-  let baseform = lemma.baseform;
+  let morpho = dictionaryLookup.morphos[0];
+  let baseform = morpho.baseform;
 
   entryElements.each(function () {
     // console.log("Dictionary entry:\n" + $(this).html());
@@ -180,27 +180,9 @@ function processDictionaryEntryElements(dictionaryLookup, entryElements, fromUrl
   }
 }
 
-// async function getDictionaryEntriesRef(dictionaryLookup, refUrl) {
-//   let lemma = dictionaryLookup.lemma;
-//   let baseform = lemma.baseform;
-
-//   try {
-//     let jqxhr = await $.get(refUrl, function (data) {
-//       // success
-//       let parser = new DOMParser();
-//       let htmlDoc = parser.parseFromString(data, "text/html");
-//       let entryElements = $(".entry", htmlDoc);
-//       processDictionaryEntryElements(dictionaryLookup, entryElements, refUrl);
-//     });
-//   } catch (error) {
-//     console.log("error: " + error);
-//   }
-//   return true;
-// }
-
 function oneResultForLemma(dictionaryLookup, htmlObj, url) {
-  let lemma = dictionaryLookup.lemma;
-  let baseform = lemma.baseform;
+  let morpho = dictionaryLookup.morphos[0];
+  let baseform = morpho.baseform;
 
   let headwdObj = $(".headwd > .lemma", htmlObj);
   let headwd = "???";
@@ -220,7 +202,7 @@ function oneResultForLemma(dictionaryLookup, htmlObj, url) {
 function noResultForLemma(dictionaryLookup) {
 }
 
-async function disambiguation(surfaceForm) {
+async function morphoAnalysis(surfaceForm) {
   surfaceForm = surfaceForm.replace(/\u00AD/g, ''); // &shy; (plenty of them on https://www.mbl.is/frettir/)
   surfaceForm = surfaceForm.trim();
 
@@ -233,21 +215,21 @@ async function disambiguation(surfaceForm) {
   //
   // => https://developer.chrome.com/extensions/messaging
 
-  let lemmas = await getLemmas(surfaceForm, true);
-  if (lemmas.length == 0) {
-    lemmas = await getLemmas(surfaceForm, false);
+  let morphos = await getMorphos(surfaceForm, true);
+  if (morphos.length == 0) {
+    morphos = await getMorphos(surfaceForm, false);
   }
 
-  return lemmas;
+  return morphos;
 }
 
-async function dictionaryLookup(lemmas) {
+async function dictionaryLookup(morphos) {
   let dictionaryLookupResult = [];
 
-  for (let i = 0; i < lemmas.length; i++) {
-    let lemma = lemmas[i];
+  for (let i = 0; i < morphos.length; i++) {
+    let morpho = morphos[i];
     let dictionaryLookup = {};
-    dictionaryLookup.lemma = lemma;
+    dictionaryLookup.morphos = [morpho];
     dictionaryLookup.entries = [];
 
     dictionaryLookupResult.push(dictionaryLookup);
@@ -264,57 +246,15 @@ async function dictionaryLookup(lemmas) {
   return dictionaryLookupResult;
 }
 
-async function googleTranslate(lemmas) {
-  let dictionaryLookupResult = [];
-
-  for (let i = 0; i < lemmas.length; i++) {
-    let lemma = lemmas[i];
-    let dictionaryLookup = {};
-    dictionaryLookup.lemma = lemma;
-    dictionaryLookup.entries = [];
-
-    dictionaryLookupResult.push(dictionaryLookup);
-
-    let url = "https://translate.google.fr/translate_a/single?client=webapp&sl=is&tl=fr&hl=fr&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&pc=1&otf=1&ssel=0&tsel=0&kc=1&tk=342556.242781&q=" + escape(lemma.baseform);
-
-    try {
-      let jqxhr = await $.get(url, function (data) {
-        // success
-        console.log("google translate: " + data);
-        // let htmlDoc = parser.parseFromString(data, "text/html");
-        // let entryElements = $(".entry", htmlDoc);
-        // if (entryElements.length > 0) {
-        //   processDictionaryEntryElements(dictionaryLookup, entryElements, url, newUrls);
-        // } else {
-        //   let hrefs = $(".nestlevel .lemma a[href^='/cgi-bin/IcelOnline']", htmlDoc); // e.g. for vegna
-        //   if (hrefs.length > 0) {
-        //     hrefs.each(function () {
-        //       let refUrl = "http://digicoll.library.wisc.edu" + $(this).attr("href");
-        //       // getDictionaryEntriesRef(dictionaryLookup, refUrl);
-        //       newUrls.push(refUrl);
-        //     });
-        //   } else {
-        //     noResultForLemma(dictionaryLookup);
-        //   }
-        // }
-      });
-    } catch (error) {
-      console.log("error: " + error);
-    }
-  }
-
-  return dictionaryLookupResult;
+async function doMorphoAnalysis(surfaceForm, sendResponse) {
+  let morphos = await morphoAnalysis(surfaceForm);
+  sendResponse(morphos);
 }
 
-async function doDisambiguation(surfaceForm, sendResponse) {
-  let lemmas = await disambiguation(surfaceForm);
-  sendResponse(lemmas);
-}
+async function doDictionaryLookup(morphos, sendResponse) {
+  let dictionaryLookupResult = await dictionaryLookup(morphos);
 
-async function doDictionaryLookup(lemmas, sendResponse) {
-  let dictionaryLookupResult = await dictionaryLookup(lemmas);
-
-  // let googleTranslateResult = await googleTranslate(lemmas);
+  // let googleTranslateResult = await googleTranslate(morphos);
   // for (let i = 0; i < googleTranslateResult.length; i++) {
   //   dictionaryLookupResult.push(googleTranslateResult[i]);
   // }
@@ -322,8 +262,8 @@ async function doDictionaryLookup(lemmas, sendResponse) {
   sendResponse(dictionaryLookupResult);
 }
 
-// async function doGoogleTranslate(lemmas, sendResponse) {
-//   let dictionaryLookupResult = await googleTranslate(lemmas);
+// async function doGoogleTranslate(morphos, sendResponse) {
+//   let dictionaryLookupResult = await googleTranslate(morphos);
 //   sendResponse(dictionaryLookupResult);
 // }
 
@@ -392,11 +332,11 @@ function setOptions(options) {
 
 chrome.runtime.onMessage.addListener(
   function (request, sender, sendResponse) {
-    if (request.method == "disambiguation") {
-      doDisambiguation(request.surfaceForm, sendResponse);
+    if (request.method == "morphoAnalysis") {
+      doMorphoAnalysis(request.surfaceForm, sendResponse);
       return true;
     } else if (request.method == "dictionaryLookup") {
-      doDictionaryLookup(request.lemmas, sendResponse);
+      doDictionaryLookup(request.morphos, sendResponse);
       return true;
     } else if (request.method == "getSidebarStatus") {
       let sidebarStatus = localStorage['sidebarStatus'];
