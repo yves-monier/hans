@@ -129,10 +129,6 @@ function help() {
     //     let selectedText = selection[0];
     //     getHelp(selectedText);
     // });
-
-    // TODO issues with:
-    // sýna http://www.ruv.is/frett/katrin-jakobsdottir-oflug-i-spretthlaupi
-    // veðurs https://icelandiconline.com/course/Icelandic%20Online%203/121(1)
 }
 
 function showMessage(msg) {
@@ -169,6 +165,8 @@ function deepEquals(result1, result2) {
     return true;
 }
 
+// for "hestur" arnastofnun gives "hestur" and "Hestur". uwdc returns the same result for both
+// => in such case we want to display the same/single result under "hestur, Hestur"
 function getUniqueResults(results) {
     let uniqueResults = [];
 
@@ -320,10 +318,17 @@ function getHelp(text) {
 
                 let heading = $("<h1 class='morphos-heading'></h1>");
 
+                let searchBaseform = "";
                 let resultMorphos = uniqueResult.morphos;
                 for (let rm = 0; rm < resultMorphos.length; rm++) {
                     let morpho = resultMorphos[rm];
                     let baseform = morpho.baseform;
+
+                    if (searchBaseform.length>0) {
+                        searchBaseform += ", ";
+                    }
+                    searchBaseform += baseform;
+
                     let morphoHeading = $("<span class='morpho-heading'></span>");
                     morphoHeading.html(baseform);
                     heading.append(morphoHeading);
@@ -352,7 +357,7 @@ function getHelp(text) {
                     }
                 } else {
                     let noResultDiv = $("<div class='entry'></div>");
-                    noResultDiv.text("Found no dictionary entry for " + baseform);
+                    noResultDiv.text("Found no dictionary entry for " + searchBaseform);
                     morphoDiv.append(noResultDiv);
                     morphoDiv.addClass("no-entry");
                 }
