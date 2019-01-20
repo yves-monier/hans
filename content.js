@@ -115,3 +115,23 @@ document.addEventListener('keypress', function (e) {
         assistantIframe.contentWindow.postMessage({ method: "getHelp", param: selectedText }, "*");
     }
 }, false);
+
+// document.addEventListener('selectstart', function (e) {
+//     console.log("selection started");
+// });
+
+// document.addEventListener('selectionchange', function (e) {
+//     let selection = window.getSelection();
+//     let text = selection.toString();
+//     if (text != "") {
+//         console.log("selection: " + text);
+//         if (selection.rangeCount > 0) {
+//             for (let i = 0; i < selection.rangeCount; i++) {
+//                 let range = selection.getRangeAt(i);
+//                 console.log("range: " + range);
+//             }
+//         }
+//     } else {
+//         console.log("no selection");
+//     }
+// });
