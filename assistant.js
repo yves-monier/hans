@@ -318,22 +318,23 @@ function getHelp(text) {
 
                 let heading = $("<h1 class='morphos-heading'></h1>");
 
-                let searchBaseform = "";
+                let searchBaseform = text; // default value if no morpho analysis found
                 let resultMorphos = uniqueResult.morphos;
                 for (let rm = 0; rm < resultMorphos.length; rm++) {
                     let morpho = resultMorphos[rm];
                     let baseform = morpho.baseform;
 
-                    if (searchBaseform.length>0) {
-                        searchBaseform += ", ";
+                    if (rm == 0) {
+                        searchBaseform = baseform;
+                    } else {
+                        searchBaseform += ", " + baseform;
                     }
-                    searchBaseform += baseform;
 
                     let morphoHeading = $("<span class='morpho-heading'></span>");
                     morphoHeading.html(baseform);
                     heading.append(morphoHeading);
-                    if (morpho.morphoanalysis.length > 0) {
-                        for (let m=morpho.morphoanalysis.length-1;m>=0; m--) {
+                    if (morpho.morphoanalysis && morpho.morphoanalysis.length > 0) {
+                        for (let m = morpho.morphoanalysis.length - 1; m >= 0; m--) {
                             let morphoanalysis = morpho.morphoanalysis[m];
                             let link = $("<a class='morpho-url' title='" + morphoanalysis.pos + " - show on http://bin.arnastofnun.is' target='ia-arnastofnun' href='" + morphoanalysis.url + "'></a>");
                             morphoHeading.prepend(link);
