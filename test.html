@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js">
+<!--<![endif]-->
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="">
+    <script>
+        let currentAnchorNode = null;
+        let currentAnchorOffset = 0;
+        let currentFocusNode = null;
+        let currentFocusOffset = 0;
+        let currentSelection = "";
+        let timeoutId = null;
+
+        document.addEventListener('keypress', function (e) {
+            let srcElement = e.srcElement;
+
+            if (srcElement.tagName == 'INPUT')
+                return;
+
+            // 65/97: 'A'/'a'
+            if ((e.keyCode == 65 || e.keyCode == 97) && assistantIframe && srcElement && srcElement.nodeName == 'BODY') {
+                let selectedText = getSelectedText();
+                // see https://javascript.info/cross-window-communication
+                assistantIframe.contentWindow.postMessage({ method: "getHelp", param: selectedText }, "*");
+            } else if (e.keyCode == 39) {
+                console.log("right");
+            } else if (e.keyCode == 37) {
+                console.log("left");
+            }
+        }, false);
+
+        document.addEventListener('selectionchange', function (e) {
+            if (timeoutId != null) {
+                clearTimeout(timeoutId);
+            }
+            timeoutId = setTimeout(onSelectionChange, 2000);
+        });
+
+        function selectNextWord(fromFocusNode, fromFocusOffset) {
+            let nextAnchorNode = null;
+            let nextAnchorOffset = null;
+            let nextFocusNode = null;
+            let nextFocusOffset = null;
+
+            // currentFocusNode.nextSibling
+
+            return [nextAnchorNode, nextAnchorOffset, nextFocusNode, nextFocusOffset];
+        }
+
+        function onSelectionChange() {
+            timeoutId = null;
+
+            let selection = window.getSelection();
+
+            currentAnchorNode = selection.anchorNode;
+            currentAnchorOffset = selection.anchorOffset;
+            currentFocusNode = selection.focusNode;
+            currentFocusOffset = selection.focusOffset;
+            currentSelection = selection.toString();
+
+            if (currentSelection != "") {
+                if (selection.rangeCount > 0) {
+                    for (let i = 0; i < selection.rangeCount; i++) {
+                        let range = selection.getRangeAt(i);
+                        console.log("range " + i + ": " + range);
+                    }
+                }
+
+                let [nextAnchorNode, nextAnchorOffset, nextFocusNode, nextFocusOffset] = selectNextWord(currentFocusNode, currentFocusOffset);
+
+                console.log("selection: " + currentSelection);
+            } else {
+                console.log("no selection");
+            }
+        }
+    </script>
+
+    <style>
+        #renderer {
+            margin-top: 1rem;
+        }
+        .cp-phrase {
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!--[if lt IE 7]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+
+    <p>
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required minlength="4" maxlength="8" size="10">
+    </p>
+
+    <div id="renderer">
+        <div class="row">
+            <h3 id="learningObjectDescription" class="" style="opacity: 1;">Útihátíðir og innihátíðir </h3>
+        </div>
+
+        <div id="exercise-container" class="row" style="overflow: hidden; position: relative;">
+            <div id="exercise" style="transform: translateX(0px) scaleX(1); position: relative; will-change: transform; width: 100%;">
+                <div>
+
+                    <div class="cp-main-container-no-col" style="justify-content: normal;">
+                        <div class="cp-content cp-no-col">
+                            <div class="phrases">
+                                <div class="cp-phrase"><strong class=" cp-span-text">TÍU
+                                        ÞÚSUND MANNS Á ÞJÓÐHÁTÍÐ</strong></div>
+                                <div class="cp-phrase"><span class="cp-span-text">Um tíu þúsund manns eru komnir á
+                                        þjóðhátíð í Vestmannaeyjum og mótshaldarar búast við að fleiri komi á svæðið í
+                                        kvöld. <span><strong><span>Herjólf</span>s</strong>dalur er nú að fyllast af tjöldum</span>. Dagskráin
+                                        verður mjög
+                                        fjölbreytt, bæði fyrir börn og fullorðna, og margar íslenskar hljómsveitir
+                                        spila á hátíðinni. Til að flytja þjóðhátíðargesti til Eyja verða stanslausar
+                                        ferðir bæði á sjó og í lofti milli lands og Eyja. Herjólfur siglir margar
+                                        aukaferðir milli Þorlákshafnar og Eyja.</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cp-main-container-no-col" style="justify-content: normal;">
+
+                        <div class="cp-content cp-no-col">
+                            <div class="phrases">
+
+                                <div class="cp-phrase"><span class="cp-span-text">Dagskráin verður ógleymanleg eins og
+                                        alltaf. Þar verður bjargsig, brenna á Fjósakletti, flugeldasýning, sem verður
+                                        glæsilegri en nokkru sinni fyrr að sögn þjóðhátíðarnefndar. Á
+                                        laugardagskvöldinu verður svo varðeldur og brekkusöngurinn – eini sanni! Gestir
+                                        eiga vafalaust eftir að skemmta sér konunglega, engin spurning!</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cp-main-container-no-col" style="justify-content: normal;">
+
+                        <div class="cp-content cp-no-col">
+                            <div class="phrases">
+
+                                <div class="cp-phrase"><span class="cp-span-text">Þeir sem nenna ekki á útihátíð í
+                                        Vestmannaeyjum geta haft það huggulegt í Reykjavík. Tónlistarhátíðin Innipúkinn
+                                        verður haldin á Nasa um helgina og er þetta í áttunda skipti sem hún er haldin.
+                                        Hátíðin er tileinkuð þeim sem vilja eyða helginni í Reykjavík á meðan aðrir
+                                        hópast áútihátíðir víða um land.</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cp-main-container-no-col" style="justify-content: normal;">
+
+                        <div class="cp-content cp-no-col">
+                            <div class="phrases">
+
+                                <div class="cp-phrase"><span class="cp-span-text">Á Innipúkanum er alltaf hlýtt, nóg af
+                                        góðri tónlist og yndislegu fólki, svo fer maður bara heim til sín að sofa. Í
+                                        rúminu sínu (en ekki í tjaldi)! Hátíðarhöldin verða föstudags- og
+                                        laugardagskvöld, húsið verðuropnað kl. 19 bæði kvöldin og stendur dagskráin
+                                        fram eftir nóttu.</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cp-main-container-no-col" style="justify-content: normal;">
+
+                        <div class="cp-content cp-no-col">
+                            <div class="phrases">
+
+                                <div class="cp-phrase"><span class="cp-span-text">Í ár verður einstaklega glæsileg
+                                        dagskrá. FJÖLMARGAR HLJÓMSVEITIR VERÐA Á SVIÐINU: Hjaltalín, FM Belfast,
+                                        Múgsefjun, Dr. Spock, Hjálmar, Morðingjarnir, Megas og Senuþjófarnir, Benni
+                                        Hemm Hemm, Grjóthrun í Hólshreppi, Soundspell, Boys in a Band, Dísa,
+                                        Sprengjuhöllin, Borko og síðast en ekki síst Geir Ólafs.</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
