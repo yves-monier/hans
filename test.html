@@ -43,8 +43,39 @@
             if (timeoutId != null) {
                 clearTimeout(timeoutId);
             }
-            timeoutId = setTimeout(onSelectionChange, 2000);
+            timeoutId = setTimeout(onSelectionChange, 1000);
         });
+
+        function dumpCurrentSelection() {
+            if (currentAnchorNode == null || currentFocusNode == null)
+                return;
+
+            console.log("selection: " + currentSelection + ", anchorOffset: " + currentAnchorOffset + ", focusOffset: " + currentFocusOffset);
+
+            if (currentFocusNode == currentAnchorNode) {
+                console.log("currentFocusNode == currentAnchorNode");
+            } else {
+                let comp = currentAnchorNode.compareDocumentPosition(currentFocusNode);
+
+                // if (comp & Node.DOCUMENT_POSITION_DISCONNECTED) {
+                // }
+                if (comp & Node.DOCUMENT_POSITION_PRECEDING) {
+                    console.log("currentFocusNode PRECEDING currentAnchorNode");
+                }
+                if (comp & Node.DOCUMENT_POSITION_FOLLOWING) {
+                    console.log("currentFocusNode FOLLOWING currentAnchorNode");
+                }
+                if (comp & Node.DOCUMENT_POSITION_CONTAINS) {
+                    console.log("currentFocusNode CONTAINS currentAnchorNode");
+                }
+                if (comp & Node.DOCUMENT_POSITION_CONTAINED_BY) {
+                    console.log("currentFocusNode CONTAINED_BY currentAnchorNode");
+                }
+                if (comp & Node.DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC) {
+                    console.log("currentFocusNode IMPLEMENTATION_SPECIFIC currentAnchorNode");
+                }
+            }
+        }
 
         function selectNextWord(fromFocusNode, fromFocusOffset) {
             let nextAnchorNode = null;
@@ -69,16 +100,16 @@
             currentSelection = selection.toString();
 
             if (currentSelection != "") {
-                if (selection.rangeCount > 0) {
-                    for (let i = 0; i < selection.rangeCount; i++) {
-                        let range = selection.getRangeAt(i);
-                        console.log("range " + i + ": " + range);
-                    }
-                }
-
                 let [nextAnchorNode, nextAnchorOffset, nextFocusNode, nextFocusOffset] = selectNextWord(currentFocusNode, currentFocusOffset);
 
-                console.log("selection: " + currentSelection);
+                dumpCurrentSelection();
+
+                // if (selection.rangeCount > 0) {
+                //     for (let i = 0; i < selection.rangeCount; i++) {
+                //         let range = selection.getRangeAt(i);
+                //         console.log("range " + i + ": " + range);
+                //     }
+                // }
             } else {
                 console.log("no selection");
             }
@@ -119,14 +150,14 @@
                             <div class="phrases">
                                 <div class="cp-phrase"><strong class=" cp-span-text">TÍU
                                         ÞÚSUND MANNS Á ÞJÓÐHÁTÍÐ</strong></div>
-                                <div class="cp-phrase"><span class="cp-span-text">Um tíu þúsund manns eru komnir á
-                                        þjóðhátíð í Vestmannaeyjum og mótshaldarar búast við að fleiri komi á svæðið í
-                                        kvöld. <span><strong><span>Herjólf</span>s</strong>dalur er nú að fyllast af tjöldum</span>. Dagskráin
-                                        verður mjög
-                                        fjölbreytt, bæði fyrir börn og fullorðna, og margar íslenskar hljómsveitir
-                                        spila á hátíðinni. Til að flytja þjóðhátíðargesti til Eyja verða stanslausar
-                                        ferðir bæði á sjó og í lofti milli lands og Eyja. Herjólfur siglir margar
-                                        aukaferðir milli Þorlákshafnar og Eyja.</span></div>
+                                <div class="cp-phrase"><span class="cp-span-text">
+                                        Um tíu <span><strong><i>þúsund</i> manns</strong></span> eru komnir á þjóðhátíð
+                                        í Vestmannaeyjum og mótshaldarar búast við að fleiri komi á svæðið í kvöld.
+                                        Herjólfsdalur er nú að fyllast af tjöldum. Dagskráin verður mjög fjölbreytt,
+                                        bæði fyrir börn og fullorðna, og margar íslenskar hljómsveitir spila á
+                                        hátíðinni. Til að flytja þjóðhátíðargesti til Eyja verða stanslausar ferðir
+                                        bæði á sjó og í lofti milli lands og Eyja. Herjólfur siglir margar aukaferðir
+                                        milli Þorlákshafnar og Eyja.</span></div>
                             </div>
                         </div>
                     </div>
