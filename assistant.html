@@ -18,6 +18,15 @@
             overflow-y: hidden;
         }
 
+        #shadow {
+            position: absolute;
+            width: 16px;
+            left: 8px;
+            top: 0;
+            height: 100%;
+            background: linear-gradient(to right, rgba(0,0,0,0) 0%,rgba(0,0,0,0.075) 100%);           
+        }
+
         #assistant {
             width: 300px;
             height: 100%;
@@ -323,6 +332,8 @@
 </head>
 
 <body>
+    <div id="shadow">
+    </div>
     <div id="assistant">
         <div id="slider" title="Toggle sidebar">
         </div>
