@@ -15,6 +15,7 @@
 // };
 
 $(function () {
+
     loadOptions();
 
     $('#toggle-sidebar').click(function () {
@@ -38,11 +39,20 @@ $(function () {
         });
     });
 
-    let checkbox = $("#use-google-translate");
+    let autoHelpSelectionCheckbox = $("#auto-help-selection");
+    autoHelpSelectionCheckbox.change(function () {
+        if (autoHelpSelectionCheckbox.is(":checked")) {
+            saveOption("autoHelpSelection", "on");
+        } else {
+            saveOption("autoHelpSelection", "off");
+        }
+    });
+
+    let googleTranslateCheckbox = $("#use-google-translate");
     let select = $("#google-translate-target");
 
-    checkbox.change(function () {
-        if (checkbox.is(":checked")) {
+    googleTranslateCheckbox.change(function () {
+        if (googleTranslateCheckbox.is(":checked")) {
             saveOption("googleTranslate", "on");
             select.prop("disabled", false);
         } else {
@@ -71,6 +81,7 @@ function loadOptions() {
 
     chrome.runtime.sendMessage({ method: "getOptions" }, function (response) {
         let options = response.options;
+
         let button = document.getElementById("toggle-sidebar");
         // options.sidebarStatus: on / off
         if ("on" === options.sidebarStatus) {
@@ -79,18 +90,26 @@ function loadOptions() {
             button.innerHTML = "Sýna skenkur / Show sidebar";
         }
 
-        let checkbox = $("#use-google-translate");
-        let select = $("#google-translate-target");
-        if (options.googleTranslate == "on") {
-            checkbox.prop('checked', true);
-            select.prop("disabled", false);
+        let autoHelpSelectionCheckbox = $("#auto-help-selection");
+        if (options.autoHelpSelection == "on") {
+            autoHelpSelectionCheckbox.prop('checked', true);
         } else {
-            checkbox.prop('checked', false);
-            select.prop("disabled", true);
+            autoHelpSelectionCheckbox.prop('checked', false);
+        }
+
+        let googleTranslateCheckbox = $("#use-google-translate");
+        let googleTranslateSelect = $("#google-translate-target");
+        if (options.googleTranslate == "on") {
+            googleTranslateCheckbox.prop('checked', true);
+            googleTranslateSelect.prop("disabled", false);
+        } else {
+            googleTranslateCheckbox.prop('checked', false);
+            googleTranslateSelect.prop("disabled", true);
         }
 
         let target = options.googleTranslateTarget;
-        $("option[value=" + target + "]", select).prop('selected', true);
+        $("option[value=" + target + "]", googleTranslateSelect).prop('selected', true);
+
     });
 }
 
@@ -102,5 +121,10 @@ function saveOption(option, value) {
 
 function saveOptions(options) {
     chrome.runtime.sendMessage({ method: "setOptions", options: options }, function (response) {
+    });
+    
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        tabId = tabs[0].id;
+        chrome.tabs.sendMessage(tabId, { method: "setOptions", param: options });
     });
 }

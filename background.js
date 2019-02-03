@@ -297,6 +297,10 @@ function getOptions() {
   if (options.sidebarStatus != "on") {
     options.sidebarStatus = "off";
   }
+  options.autoHelpSelection = localStorage['autoHelpSelection'];
+  if (options.autoHelpSelection != "on") {
+    options.autoHelpSelection = "off";
+  }
   options.googleTranslate = localStorage['googleTranslate'];
   if (options.googleTranslate != "on") {
     options.googleTranslate = "off";
@@ -315,6 +319,12 @@ function setOptions(options) {
     } else {
       localStorage['sidebarStatus'] = "off";
     }
+  }
+
+  if (options.autoHelpSelection == "on") {
+    localStorage['autoHelpSelection'] = "on";
+  } else {
+    localStorage['autoHelpSelection'] = "off";
   }
 
   if (options.googleTranslate) {
