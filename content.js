@@ -138,7 +138,7 @@ document.addEventListener('keyup', function (e) {
         return;
 
     if (e.keyCode == 39) {
-        console.log("right");
+        // console.log("right");
         if (currentFocusNode == currentAnchorNode) {
             let maxOffset = Math.max(currentFocusOffset, currentAnchorOffset);
             let [nextAnchorNode, nextAnchorOffset, nextFocusNode, nextFocusOffset] = selectNextWord(currentFocusNode, maxOffset);
@@ -146,7 +146,7 @@ document.addEventListener('keyup', function (e) {
             console.log("current selection is multi-nodes!");
         }
     } else if (e.keyCode == 37) {
-        console.log("left");
+        // console.log("left");
         if (currentFocusNode == currentAnchorNode) {
             let minOffset = Math.min(currentFocusOffset, currentAnchorOffset);
             let [nextAnchorNode, nextAnchorOffset, nextFocusNode, nextFocusOffset] = selectPrevWord(currentFocusNode, minOffset);
@@ -176,31 +176,31 @@ function dumpCurrentSelection() {
     if (currentAnchorNode == null || currentFocusNode == null)
         return;
 
-    console.log("selection: " + currentSelection + ", anchorOffset: " + currentAnchorOffset + ", focusOffset: " + currentFocusOffset);
+    // console.log("selection: " + currentSelection + ", anchorOffset: " + currentAnchorOffset + ", focusOffset: " + currentFocusOffset);
 
-    if (currentFocusNode == currentAnchorNode) {
-        console.log("currentFocusNode == currentAnchorNode");
-    } else {
-        let comp = currentAnchorNode.compareDocumentPosition(currentFocusNode);
+    // if (currentFocusNode == currentAnchorNode) {
+    //     console.log("currentFocusNode == currentAnchorNode");
+    // } else {
+    //     let comp = currentAnchorNode.compareDocumentPosition(currentFocusNode);
 
-        // if (comp & Node.DOCUMENT_POSITION_DISCONNECTED) {
-        // }
-        if (comp & Node.DOCUMENT_POSITION_PRECEDING) {
-            console.log("currentFocusNode PRECEDING currentAnchorNode");
-        }
-        if (comp & Node.DOCUMENT_POSITION_FOLLOWING) {
-            console.log("currentFocusNode FOLLOWING currentAnchorNode");
-        }
-        if (comp & Node.DOCUMENT_POSITION_CONTAINS) {
-            console.log("currentFocusNode CONTAINS currentAnchorNode");
-        }
-        if (comp & Node.DOCUMENT_POSITION_CONTAINED_BY) {
-            console.log("currentFocusNode CONTAINED_BY currentAnchorNode");
-        }
-        if (comp & Node.DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC) {
-            console.log("currentFocusNode IMPLEMENTATION_SPECIFIC currentAnchorNode");
-        }
-    }
+    //     // if (comp & Node.DOCUMENT_POSITION_DISCONNECTED) {
+    //     // }
+    //     if (comp & Node.DOCUMENT_POSITION_PRECEDING) {
+    //         console.log("currentFocusNode PRECEDING currentAnchorNode");
+    //     }
+    //     if (comp & Node.DOCUMENT_POSITION_FOLLOWING) {
+    //         console.log("currentFocusNode FOLLOWING currentAnchorNode");
+    //     }
+    //     if (comp & Node.DOCUMENT_POSITION_CONTAINS) {
+    //         console.log("currentFocusNode CONTAINS currentAnchorNode");
+    //     }
+    //     if (comp & Node.DOCUMENT_POSITION_CONTAINED_BY) {
+    //         console.log("currentFocusNode CONTAINED_BY currentAnchorNode");
+    //     }
+    //     if (comp & Node.DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC) {
+    //         console.log("currentFocusNode IMPLEMENTATION_SPECIFIC currentAnchorNode");
+    //     }
+    // }
 }
 
 function isWordCharacter(ch) {
