@@ -256,7 +256,9 @@ function getHelp(text) {
         let alreadySearched = $(alreadySearchedItems[0]);
         let alreadySearchedMorphos = $(".morpho", alreadySearched);
         alreadySearchedMorphos.removeClass("off");
-        $(".entry", alreadySearchedMorphos).show(500, function () {
+        let entriesToHighlight = $(".entry", alreadySearchedMorphos);
+        entriesToHighlight.addClass("highlight").show(500, function () {
+            entriesToHighlight.removeClass("highlight");
             let newScrollTop = result.scrollTop();
             newScrollTop += alreadySearched.position().top;
             result.scrollTop(newScrollTop);
