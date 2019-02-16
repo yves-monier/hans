@@ -1,7 +1,7 @@
 {
-  "name": "Icelandic assistant",
+  "name": "Hans",
   "version": "1.0.0",
-  "description": "Icelandic assistant",
+  "description": "Hans, Icelandic assistant",
   "permissions": [
     "tabs",
     "activeTab",
