@@ -35,6 +35,6 @@ for row in rows:
         if not(first):
             print(",", end='')
         first = False
-        print('\n  {{ "{}", "{}", "{}" }}'.format(abbr, word_is, word_en), end='')
+        print('\n  {{ "abbr": "{}", "is": "{}", "en": "{}" }}'.format(abbr, word_is, word_en), end='')
 
 print("\n]")

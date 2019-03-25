@@ -49,27 +49,60 @@ $(function () {
     });
 });
 
-// Credits https://coderwall.com/p/ostduq/escape-html-with-javascript
+//
+// HTML enrichment is now done in background.js: replacement of ~/~~ and some abbreviations
+//
 
-// List of HTML entities for escaping.
-var htmlEscapes = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#x27;',
-    '/': '&#x2F;'
-};
+// // Credits https://coderwall.com/p/ostduq/escape-html-with-javascript
 
-// Regex containing the keys listed immediately above.
-var htmlEscaper = /[&<>"'\/]/g;
+// // List of HTML entities for escaping.
+// var htmlEscapes = {
+//     '&': '&amp;',
+//     '<': '&lt;',
+//     '>': '&gt;',
+//     '"': '&quot;',
+//     "'": '&#x27;',
+//     '/': '&#x2F;'
+// };
 
-// Escape a string for HTML interpolation.
-function htmlEscape(string) {
-    return ('' + string).replace(htmlEscaper, function (match) {
-        return htmlEscapes[match];
-    });
-};
+// // Regex containing the keys listed immediately above.
+// var htmlEscaper = /[&<>"'\/]/g;
+
+// // Escape a string for HTML interpolation.
+// function htmlEscape(string) {
+//     return ('' + string).replace(htmlEscaper, function (match) {
+//         return htmlEscapes[match];
+//     });
+// }
+
+// function enrichEntry(entry) {
+//     let hwFull = entry.hw;
+
+//     // search for '/' or '.' headword separator (see http://digicoll.library.wisc.edu/cgi-bin/IcelOnline/IcelOnline.TEId-idx?type=HTML&rgn=DIV1&id=IcelOnline.IEOrd&target=IcelOnline.IEOrd.Guide)
+//     let separatorPos = hwFull.indexOf('/');
+//     if (separatorPos == -1) {
+//         separatorPos = hwFull.indexOf('.');
+//     }
+//     if (separatorPos != -1) {
+//         let regex = new RegExp('\\/|\\.', 'g');
+//         hwFull = hwFull.replace(regex, ''); // e.g. "tal/a" => "tala"
+//     }
+
+//     let regexFull = /(~~)/g;
+//     let enrichmentFull = "<span class='hw-placeholder'>$1</span><span class='hw-actual'>" + htmlEscape(hwFull) + "</span>";
+//     let html = entry.html;
+//     let enrichedHtml = html.replace(regexFull, enrichmentFull); // tala, segja, sjón, ...
+
+//     let hwBeforeSeparator = entry.hw;
+//     if (separatorPos != -1) {
+//         hwBeforeSeparator = hwBeforeSeparator.substring(0, separatorPos);
+//     }
+//     let regexBeforeSeparator = /(~)/g;
+//     let enrichmentBeforeSeparator = "<span class='hw-placeholder'>$1</span><span class='hw-actual'>" + htmlEscape(hwBeforeSeparator) + "</span>";
+//     enrichedHtml = enrichedHtml.replace(regexBeforeSeparator, enrichmentBeforeSeparator); // tala, segja, sjón
+
+//     entry.html = enrichedHtml;
+// }
 
 function toggleSidebar() {
     chrome.runtime.sendMessage({ method: "getSidebarStatus" }, function (response) {
@@ -189,35 +222,6 @@ function getUniqueResults(results) {
     }
 
     return uniqueResults;
-}
-
-function enrichEntry(entry) {
-    let hwFull = entry.hw;
-
-    // search for '/' or '.' headword separator (see http://digicoll.library.wisc.edu/cgi-bin/IcelOnline/IcelOnline.TEId-idx?type=HTML&rgn=DIV1&id=IcelOnline.IEOrd&target=IcelOnline.IEOrd.Guide)
-    let separatorPos = hwFull.indexOf('/');
-    if (separatorPos == -1) {
-        separatorPos = hwFull.indexOf('.');
-    }
-    if (separatorPos != -1) {
-        let regex = new RegExp('\\/|\\.', 'g');
-        hwFull = hwFull.replace(regex, ''); // e.g. "tal/a" => "tala"
-    }
-
-    let regexFull = /(~~)/g;
-    let enrichmentFull = "<span class='hw-placeholder'>$1</span><span class='hw-actual'>" + htmlEscape(hwFull) + "</span>";
-    let html = entry.html;
-    let enrichedHtml = html.replace(regexFull, enrichmentFull); // tala, segja, sjón, ...
-
-    let hwBeforeSeparator = entry.hw;
-    if (separatorPos != -1) {
-        hwBeforeSeparator = hwBeforeSeparator.substring(0, separatorPos);
-    }
-    let regexBeforeSeparator = /(~)/g;
-    let enrichmentBeforeSeparator = "<span class='hw-placeholder'>$1</span><span class='hw-actual'>" + htmlEscape(hwBeforeSeparator) + "</span>";
-    enrichedHtml = enrichedHtml.replace(regexBeforeSeparator, enrichmentBeforeSeparator); // tala, segja, sjón
-
-    entry.html = enrichedHtml;
 }
 
 const GOOGLE_TRANSLATE_BASE_URL = "https://translate.google.fr/#view=home&op=translate&sl=is&tl="; // + <target language>&text=<text>
@@ -349,7 +353,7 @@ function getHelp(text) {
                 if (entries.length > 0) {
                     for (let j = 0; j < entries.length; j++) {
                         let entry = entries[j];
-                        enrichEntry(entry);
+                        // enrichEntry(entry); // now done in background.js
                         let entryDiv = $("<div class='entry'></div>");
                         let link = $("<a class='entry-url' title='Show on UWDC Icelandic Online Dictionary' target='ia-uwdc' href='" + entry.url + "'></a>");
                         link.appendTo(entryDiv);

@@ -164,7 +164,8 @@ document.addEventListener('selectionchange', function (e) {
 
     onSelectionChange();
 
-    if (currentSelection.length > 0 && currentOptions != null && currentOptions.autoHelpSelection == "on") {
+    // ignore single-char selection
+    if (currentSelection.length > 1 && currentOptions != null && currentOptions.autoHelpSelection == "on") {
         if (timeoutId != null) {
             clearTimeout(timeoutId);
         }
