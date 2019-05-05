@@ -188,6 +188,9 @@ async function getMorphos(form, firstQuery) {
           pos = pos.trim();
           // console.log("Analysis: " + baseform + " (" + pos + ")");
           let arnastofnunUrl = "http://bin.arnastofnun.is/leit/?q=" + encodeURIComponent(form);
+		  if (!firstQuery) {
+			arnastofnunUrl = arnastofnunUrl + "&id=&ordmyndir=on";
+		  }
           let newMorpho = { baseform: baseform, pos: pos, url: arnastofnunUrl };
           let morpho = findMorpho(morphoAnalysis, baseform);
           if (morpho != null) {
