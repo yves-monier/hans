@@ -135,9 +135,16 @@ function findMorpho(morphoAnalysis, baseform) {
 async function getMorphos(form, firstQuery) {
   let morphoAnalysis = [];
 
-  let url = "http://dev.phpbin.ja.is/ajax_leit.php?q=" + encodeURIComponent(form);
+  let encodedForm = encodeURIComponent(form);
+
+  // let url = "http://dev.phpbin.ja.is/ajax_leit.php?q=" + encodedForm;
+  // if (!firstQuery) {
+  //   url = url + "&id=&ordmyndir=on";
+  // }
+
+  let url = "https://bin.arnastofnun.is/php_bin/ajaxleit2.php?q=" + encodedForm;
   if (!firstQuery) {
-    url = url + "&id=&ordmyndir=on";
+    url = url + "&ordmyndir=on";
   }
 
   try {
@@ -150,19 +157,37 @@ async function getMorphos(form, firstQuery) {
         let a = $("a", this);
         let baseform = a.text();
         baseform = baseform.trim();
-        let pos = $(this).contents().filter(function () {
-          return this.nodeType == 3;
-        })[0].nodeValue;
-        pos = pos.trim();
-        let onclick = a[0].getAttribute("onclick");
-        let regex = /'(\d+)'/gm;
-        let m = regex.exec(onclick);
-        let arnastofnunUrl = url;
-        if (m !== null) {
-          let id = m[1];
-          arnastofnunUrl = "http://bin.arnastofnun.is/leit/?id=" + id
-          // console.log("Analysis " + i + ": " + baseform + " (" + pos + ") " + arnastofnunUrl);
+        let pos = "???";
+        if (false) {
+          // old web site
+          pos = $(this).contents().filter(function () {
+            return this.nodeType == 3;
+          })[0].nodeValue;
+        } else {
+          // new web site (2019.09.29)
+          pos = $(".hinfo-ordflokkur", this).text();          
         }
+        pos = pos.trim();
+
+        let arnastofnunUrl = url;
+        if (false) {
+          // old web site
+          let onclick = a[0].getAttribute("onclick");
+          let regex = /'(\d+)'/gm;
+          let m = regex.exec(onclick);
+          if (m !== null) {
+            let id = m[1];
+            arnastofnunUrl = "http://bin.arnastofnun.is/leit/?id=" + id
+            // console.log("Analysis " + i + ": " + baseform + " (" + pos + ") " + arnastofnunUrl);
+          }
+        } else {
+          // new web site (2019.09.29)
+          let href = a[0].getAttribute("href");
+          if (href != null && href.length > 0) {
+            arnastofnunUrl = "https://bin.arnastofnun.is" + href;
+          }
+        }
+        
         let newMorpho = { baseform: baseform, pos: pos, url: arnastofnunUrl };
         let morpho = findMorpho(morphoAnalysis, baseform);
         if (morpho != null) {
@@ -187,10 +212,12 @@ async function getMorphos(form, firstQuery) {
           let pos = small.text();
           pos = pos.trim();
           // console.log("Analysis: " + baseform + " (" + pos + ")");
-          let arnastofnunUrl = "http://bin.arnastofnun.is/leit/?q=" + encodeURIComponent(form);
-		  if (!firstQuery) {
-			arnastofnunUrl = arnastofnunUrl + "&id=&ordmyndir=on";
-		  }
+          // let arnastofnunUrl = "http://bin.arnastofnun.is/leit/?q=" + encodedForm;
+          let arnastofnunUrl = "http://bin.arnastofnun.is/leit/" + encodedForm;
+          if (!firstQuery) {
+            // arnastofnunUrl = arnastofnunUrl + "&id=&ordmyndir=on";
+            arnastofnunUrl = "https://bin.arnastofnun.is/leit/beygingarmynd/" + encodedForm;
+          }
           let newMorpho = { baseform: baseform, pos: pos, url: arnastofnunUrl };
           let morpho = findMorpho(morphoAnalysis, baseform);
           if (morpho != null) {
