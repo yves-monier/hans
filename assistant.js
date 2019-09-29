@@ -421,4 +421,29 @@ $(document).ready(function () {
             getHelp(selectedText);
         }
     });
+
+    // credits https://stackoverflow.com/questions/1064089/inserting-a-text-where-cursor-is-using-javascript-jquery
+    $(".key").click(function () {
+        let input = $("#user-input").get(0);
+        let ch = $(this).text();
+        if (document.selection) {
+            input.focus();
+            var sel = document.selection.createRange();
+            sel.text = ch;
+            input.focus();
+        } else if (input.selectionStart || input.selectionStart === 0) {
+            var startPos = input.selectionStart;
+            var endPos = input.selectionEnd;
+            var scrollTop = input.scrollTop;
+            input.value = input.value.substring(0, startPos) +
+                ch + input.value.substring(endPos, input.value.length);
+            input.focus();
+            input.selectionStart = startPos + ch.length;
+            input.selectionEnd = startPos + ch.length;
+            input.scrollTop = scrollTop;
+        } else {
+            input.value += ch;
+            input.focus();
+        }
+    });
 });
