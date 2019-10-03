@@ -44,7 +44,7 @@ let abbreviations = [
   // { "abbr": "dat", "is": "??gufall", "en": "dative" },
   // { "abbr": "dat+acc", "is": "er merki vi? s?gn sem tekur me? s?r andlag ? ??gufalli og ?olfalli", "en": "indicates a verb with dative + accusative objects" },
   { "abbr": "e-a", "is": "einhverja", "en": "somebody (feminine)" },
-  { "abbr": "e-ð", "is": "eitthvað", "en": "something" },
+  { "abbr": "e-ï¿½", "is": "eitthvaï¿½", "en": "something" },
   { "abbr": "e-n", "is": "einhvern", "en": "somebody (masculine)" },
   { "abbr": "e-m", "is": "einhverjum", "en": "somebody" },
   { "abbr": "e-s", "is": "einhvers", "en": "somebody's" },
@@ -155,6 +155,9 @@ async function getMorphos(form, firstQuery) {
       let lis = $("ul li", htmlDoc);
       lis.each(function (i) {
         let a = $("a", this);
+        if (a.length == 0)
+          return;
+        
         let baseform = a.text();
         baseform = baseform.trim();
         let pos = "???";
