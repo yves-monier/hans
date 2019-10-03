@@ -124,6 +124,23 @@ function toggleSidebar() {
     });
 }
 
+function showSidebar() {
+    chrome.runtime.sendMessage({ method: "getSidebarStatus" }, function (response) {
+        // response.sidebarStatus: on / off or undefined
+        console.log(response.sidebarStatus);
+        if ("off" === response.sidebarStatus) {
+            let newStatus = "on";
+            chrome.runtime.sendMessage({ method: "setSidebarStatus", param: newStatus }, function (response) {
+                chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                    tabId = tabs[0].id;
+                    chrome.tabs.sendMessage(tabId, { method: "showSidebar", param: newStatus });
+                    updateSlider(newStatus);
+                });
+            });
+        }
+    });
+}
+
 function updateSlider(sidebarStatus) {
     if ("on" === sidebarStatus) {
         $("#assistant").addClass("on");
@@ -250,6 +267,8 @@ function getHelp(text) {
         googleTranslate(text);
         return;
     }
+
+    showSidebar();
 
     let assistant = $('#assistant');
     let result = $('#result');
@@ -378,6 +397,8 @@ function getHelp(text) {
             // // scroll result div to bottom
             // let scrollHeight = result.prop("scrollHeight");
             // result.scrollTop(scrollHeight);
+
+            // showSidebar();
         });
     });
 
