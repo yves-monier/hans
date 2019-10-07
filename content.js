@@ -284,8 +284,10 @@ function getCurrentSelectionHelp() {
         timeoutId = null;
     }
 
-    // see https://javascript.info/cross-window-communication
-    assistantIframe.contentWindow.postMessage({ method: "getHelp", param: currentSelection }, "*");
+    if (currentSelection.length > 0) {
+        // see https://javascript.info/cross-window-communication
+        assistantIframe.contentWindow.postMessage({ method: "getHelp", param: currentSelection }, "*");
+    }
 }
 
 function onSelectionChange() {
