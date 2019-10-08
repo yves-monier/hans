@@ -454,8 +454,14 @@ async function dictionaryLookup(morphos) {
     if (newUrls.length > 0) {
       for (let j = 0; j < newUrls.length; j++) {
         let newUrl = newUrls[j];
-        await getDictionaryEntries(dictionaryLookup, newUrl);
-      }
+        let newUrls2 = await getDictionaryEntries(dictionaryLookup, newUrl);
+        if (newUrls2.length > 0) {
+          for (let j2 = 0; j2 < newUrls2.length; j2++) {
+            let newUrl2 = newUrls2[j2];
+            /*let newUrls3 =*/ await getDictionaryEntries(dictionaryLookup, newUrl2);
+          }
+        }
+          }
     }
   }
 
