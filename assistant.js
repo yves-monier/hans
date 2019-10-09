@@ -262,8 +262,8 @@ function getHelp(text) {
 
     clearMessage();
 
-    if (text.indexOf(" ") != -1) {
-        // if text contains whitespace, just send it to google translate (morpho analysis and dictionary lookup wouldn't work)
+    if (text.indexOf(" ") != -1 || text.indexOf("\n") != -1) {
+        // if text contains whitespace or carriage return, just send it to google translate (morpho analysis and dictionary lookup wouldn't work)
         googleTranslate(text);
         return;
     }
