@@ -44,7 +44,7 @@ let abbreviations = [
   // { "abbr": "dat", "is": "??gufall", "en": "dative" },
   // { "abbr": "dat+acc", "is": "er merki vi? s?gn sem tekur me? s?r andlag ? ??gufalli og ?olfalli", "en": "indicates a verb with dative + accusative objects" },
   { "abbr": "e-a", "is": "einhverja", "en": "somebody (feminine)" },
-  { "abbr": "e-ð", "is": "eitthvað", "en": "something" },
+  { "abbr": "e-ï¿½", "is": "eitthvaï¿½", "en": "something" },
   { "abbr": "e-n", "is": "einhvern", "en": "somebody (masculine)" },
   { "abbr": "e-m", "is": "einhverjum", "en": "somebody" },
   { "abbr": "e-s", "is": "einhvers", "en": "somebody's" },
@@ -135,7 +135,8 @@ function findMorpho(morphoAnalysis, baseform) {
 async function getMorphos(form, firstQuery) {
   let morphoAnalysis = [];
 
-  let url = "http://dev.phpbin.ja.is/ajax_leit.php?q=" + encodeURIComponent(form);
+  // let url = "http://dev.phpbin.ja.is/ajax_leit.php?q=" + encodeURIComponent(form);
+  let url = "http://bin.arnastofnun.is/php_bin/ajaxleit2.php?q=" + encodeURIComponent(form);
   if (!firstQuery) {
     url = url + "&id=&ordmyndir=on";
   }
@@ -166,7 +167,7 @@ async function getMorphos(form, firstQuery) {
         let newMorpho = { baseform: baseform, pos: pos, url: arnastofnunUrl };
         let morpho = findMorpho(morphoAnalysis, baseform);
         if (morpho != null) {
-          // duplicates probably have different part-of-speech, but subsequent dictionary lookup 
+          // duplicates probably have different part-of-speech, but subsequent dictionary lookup
           // will reflect that and return corresponding entries
           morpho.morphoanalysis.push(newMorpho);
         } else {
@@ -191,7 +192,7 @@ async function getMorphos(form, firstQuery) {
           let newMorpho = { baseform: baseform, pos: pos, url: arnastofnunUrl };
           let morpho = findMorpho(morphoAnalysis, baseform);
           if (morpho != null) {
-            // duplicates probably have different part-of-speech, but subsequent dictionary lookup 
+            // duplicates probably have different part-of-speech, but subsequent dictionary lookup
             // will reflect that and return corresponding entries
             morpho.morphoanalysis.push(newMorpho);
           } else {
