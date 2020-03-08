@@ -107,13 +107,15 @@ $(function () {
 function toggleSidebar() {
     chrome.runtime.sendMessage({ method: "getSidebarStatus" }, function (response) {
         // response.sidebarStatus: on / off or undefined
-        console.log(response.sidebarStatus);
+        let msg = "toggleSidebar " + response.sidebarStatus + " => ";
         let newStatus;
         if ("on" === response.sidebarStatus) {
             newStatus = "off";
         } else {
             newStatus = "on";
         }
+        msg += newStatus;
+        console.log(msg);
         chrome.runtime.sendMessage({ method: "setSidebarStatus", param: newStatus }, function (response) {
             chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
                 tabId = tabs[0].id;
