@@ -1,7 +1,7 @@
 {
   "name": "Hans, Icelandic assistant",
   "short_name": "Hans",
-  "version": "1.0.1",
+  "version": "1.2.0",
   "author": "Yves Monier",
   "description": "Aims to make learning Icelandic easier. Named after Hans, the dependable Icelandic assistant in 'Voyage au centre de la Terre'",
   "permissions": [

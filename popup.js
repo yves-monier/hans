@@ -29,7 +29,7 @@ $(function () {
                 newStatus = "on";
             }
             chrome.runtime.sendMessage({ method: "setSidebarStatus", param: newStatus }, function (response) {
-                setSidebarButtonTitle();
+                // setSidebarButtonTitle();
 
                 chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
                     tabId = tabs[0].id;

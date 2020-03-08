@@ -126,6 +126,23 @@ function toggleSidebar() {
     });
 }
 
+function showSidebar() {
+    chrome.runtime.sendMessage({ method: "getSidebarStatus" }, function (response) {
+        // response.sidebarStatus: on / off or undefined
+        console.log(response.sidebarStatus);
+        if ("off" === response.sidebarStatus) {
+            let newStatus = "on";
+            chrome.runtime.sendMessage({ method: "setSidebarStatus", param: newStatus }, function (response) {
+                chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                    tabId = tabs[0].id;
+                    chrome.tabs.sendMessage(tabId, { method: "showSidebar", param: newStatus });
+                    updateSlider(newStatus);
+                });
+            });
+        }
+    });
+}
+
 function updateSlider(sidebarStatus) {
     if ("on" === sidebarStatus) {
         $("#assistant").addClass("on");
@@ -247,11 +264,13 @@ function getHelp(text) {
 
     clearMessage();
 
-    if (text.indexOf(" ") != -1) {
-        // if text contains whitespace, just send it to google translate (morpho analysis and dictionary lookup wouldn't work)
+    if (text.indexOf(" ") != -1 || text.indexOf("\n") != -1) {
+        // if text contains whitespace or carriage return, just send it to google translate (morpho analysis and dictionary lookup wouldn't work)
         googleTranslate(text);
         return;
     }
+
+    showSidebar();
 
     let assistant = $('#assistant');
     let result = $('#result');
@@ -380,6 +399,8 @@ function getHelp(text) {
             // // scroll result div to bottom
             // let scrollHeight = result.prop("scrollHeight");
             // result.scrollTop(scrollHeight);
+
+            // showSidebar();
         });
     });
 
@@ -421,6 +442,31 @@ $(document).ready(function () {
         if (e.data.method && e.data.method == "getHelp") {
             let selectedText = e.data.param;
             getHelp(selectedText);
+        }
+    });
+
+    // credits https://stackoverflow.com/questions/1064089/inserting-a-text-where-cursor-is-using-javascript-jquery
+    $(".key").click(function () {
+        let input = $("#user-input").get(0);
+        let ch = $(this).text();
+        if (document.selection) {
+            input.focus();
+            var sel = document.selection.createRange();
+            sel.text = ch;
+            input.focus();
+        } else if (input.selectionStart || input.selectionStart === 0) {
+            var startPos = input.selectionStart;
+            var endPos = input.selectionEnd;
+            var scrollTop = input.scrollTop;
+            input.value = input.value.substring(0, startPos) +
+                ch + input.value.substring(endPos, input.value.length);
+            input.focus();
+            input.selectionStart = startPos + ch.length;
+            input.selectionEnd = startPos + ch.length;
+            input.scrollTop = scrollTop;
+        } else {
+            input.value += ch;
+            input.focus();
         }
     });
 });
