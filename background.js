@@ -44,7 +44,7 @@ let abbreviations = [
   // { "abbr": "dat", "is": "??gufall", "en": "dative" },
   // { "abbr": "dat+acc", "is": "er merki vi? s?gn sem tekur me? s?r andlag ? ??gufalli og ?olfalli", "en": "indicates a verb with dative + accusative objects" },
   { "abbr": "e-a", "is": "einhverja", "en": "somebody (feminine)" },
-  { "abbr": "e-ï¿½", "is": "eitthvaï¿½", "en": "something" },
+  { "abbr": "e-", "is": "eitthva", "en": "something" },
   { "abbr": "e-n", "is": "einhvern", "en": "somebody (masculine)" },
   { "abbr": "e-m", "is": "einhverjum", "en": "somebody" },
   { "abbr": "e-s", "is": "einhvers", "en": "somebody's" },
@@ -154,11 +154,11 @@ async function getMorphos(form, firstQuery) {
       let htmlDoc = parser.parseFromString(data, "text/html");
       let lis = $("ul li", htmlDoc);
       lis.each(function (i) {
-        let a = $("a", this);
-        if (a.length == 0)
+        let b = $("b", this);
+        if (b.length == 0)
           return;
         
-        let baseform = a.text();
+        let baseform = b.text();
         baseform = baseform.trim();
         let pos = "???";
         if (false) {
@@ -185,9 +185,12 @@ async function getMorphos(form, firstQuery) {
           }
         } else {
           // new web site (2019.09.29)
-          let href = a[0].getAttribute("href");
-          if (href != null && href.length > 0) {
-            arnastofnunUrl = "https://bin.arnastofnun.is" + href;
+          let a = $("a", b);
+          if (a.length > 0) {
+            let href = a[0].getAttribute("href");
+            if (href != null && href.length > 0) {
+              arnastofnunUrl = "https://bin.arnastofnun.is" + href;
+            }
           }
         }
         
@@ -211,7 +214,7 @@ async function getMorphos(form, firstQuery) {
             return this.nodeType == 3;
           })[0].nodeValue;
           baseform = baseform.trim();
-          let small = $("small", h2);
+          let small = $("small .hinfo-ordflokkur", h2);
           let pos = small.text();
           pos = pos.trim();
           // console.log("Analysis: " + baseform + " (" + pos + ")");
@@ -243,19 +246,94 @@ async function getMorphos(form, firstQuery) {
   return morphoAnalysis;
 }
 
+/*
+  karlkynsnafnorð: m (pl)
+  kvenkynsnafnorð: f (pl)
+  hvorugkynsnafnorð: n (pl)
+  sagnorð: v (acc), v, v refl, v impers 
+  persónufornafn: ... pron ... (3rd pers m sg pron / 3rd pers f sg pron, acc pron refl, ...)
+  lýsingarorð: adj
+  töluorð: num
+  atviksorð: adv
+  samtenging: conj
+  upphrópun: interj
+  forsetning: prep 
+
+  CF. https://bin.arnastofnun.is/DMII/infl-system/
+
+  TODO: could be "/" in dict. lookup POS e.g. adj / adv
+*/
+function dictToMorphoPOS(dp) {
+  if (dp === undefined) 
+    return [];
+
+  if (dp.startsWith("prep"))
+    return ["forsetning"];
+
+  if (dp.startsWith("interj"))
+    return ["upphrópun"];
+
+  if (dp.startsWith("conj"))
+    return ["samtenging"];
+
+  if (dp.startsWith("adv"))
+    return ["atviksorð"];
+
+  if (dp.startsWith("adj"))
+    return ["lýsingarorð"];
+
+  if (dp.startsWith("num"))
+    return ["töluorð", "raðtala"];
+
+  if (dp.includes("pron"))
+    return ["persónufornafn", "afturbeygt fornafn", "spurnarfornafn", "ábendingarfornafn", "óákveðið ábendingarfornafn", "óákveðið fornafn", "eignarfornafn", "afturbeygt eignarfornafn"];
+
+  if (dp.startsWith("m"))
+    return ["karlkynsnafnorð", "karlmannsnafn"];
+
+  if (dp.startsWith("f"))
+    return ["kvenkynsnafnorð", "kvennafn"];
+
+  if (dp.startsWith("n"))
+    return ["hvorugkynsnafnorð"];
+
+  if (dp.startsWith("v"))
+    return ["sagnorð"];
+
+  /*
+  What about mp:
+  greinir
+  upphrópun
+  nafnháttarmerki
+
+  What about dp:
+  in compounds
+  */
+
+  return [];
+}
+
 // query http://digicoll.library.wisc.edu/IcelOnline for dictionary entries
 async function getDictionaryEntries(dictionaryLookup, givenUrl) {
+  let newUrls = [];
+  
   let morpho = dictionaryLookup.morphos[0];
   let baseform = morpho.baseform;
-
-  let newUrls = [];
+  let morphoPOS = new Set();
+  if (morpho.morphoanalysis) {
+    for (let i = 0; i < morpho.morphoanalysis.length; i++) {
+      morphoPOS.add(morpho.morphoanalysis[i].pos);
+    }
+  }
 
   // the url needs escape-encoding, not encodeURIComponent-encoding (tested with ?kve?a)
   let url;
   if (givenUrl) {
     url = givenUrl;
   } else {
-    url = "http://digicoll.library.wisc.edu/cgi-bin/IcelOnline/IcelOnline.TEId-idx?type=simple&size=First+100&rgn=lemma&q1=" + escape(baseform) + "&submit=Search";
+    //url = "http://digicoll.library.wisc.edu/cgi-bin/IcelOnline/IcelOnline.TEId-idx?type=simple&size=First+100&rgn=lemma&q1=" + escape(baseform) + "&submit=Search";
+    // encodeURI is better for accents e.g. "fá"
+    url = "http://digicoll.library.wisc.edu/cgi-bin/IcelOnline/IcelOnline.TEId-idx?type=simple&size=First+100&rgn=lemma&q1=" + encodeURI(baseform) + "&submit=Search";
   }
 
   try {
@@ -267,16 +345,47 @@ async function getDictionaryEntries(dictionaryLookup, givenUrl) {
       if (entryElements.length > 0) {
         processDictionaryEntryElements(dictionaryLookup, entryElements, url, newUrls);
       } else {
-        let hrefs = $(".nestlevel .lemma a[href^='/cgi-bin/IcelOnline']", htmlDoc); // e.g. for vegna
-        if (hrefs.length > 0) {
-          hrefs.each(function () {
-            let refUrl = "http://digicoll.library.wisc.edu" + $(this).attr("href");
-            // getDictionaryEntriesRef(dictionaryLookup, refUrl);
-            newUrls.push(refUrl);
+        let nestlevels = $(".nestlevel", htmlDoc); // e.g. for vegna
+        let count = 0;
+        if (nestlevels.length > 0) {
+          nestlevels.each(function () {
+            let href = $(".lemma a[href^='/cgi-bin/IcelOnline']", this);
+            let refUrl = "http://digicoll.library.wisc.edu" + href.attr("href");
+            let pos = $(".pos", this).text();
+            let dictPOS = pos.split("/").map(item => item.trim()).filter(item => item.length > 0);
+            dictPOS.forEach(function(dp) {
+              let mps = dictToMorphoPOS(dp);
+              let posOk = false;
+              if (mps.length == 0) {
+                console.log("No POS mapping for: " + pos + " (" + dp + ")");
+              } else {
+                mps.forEach(function(mp) {
+                  if (morphoPOS.has(mp)) {
+                    posOk = true;
+                  }
+                });
+              }
+              if (posOk) {
+                // getDictionaryEntriesRef(dictionaryLookup, refUrl);
+                newUrls.push(refUrl);
+                count++;
+              }
+            });
           });
-        } else {
+        }
+        if (count == 0) {
           noResultForLemma(dictionaryLookup);
         }
+        // let hrefs = $(".nestlevel .lemma a[href^='/cgi-bin/IcelOnline']", htmlDoc); // e.g. for vegna
+        // if (hrefs.length > 0) {
+        //   hrefs.each(function () {
+        //     let refUrl = "http://digicoll.library.wisc.edu" + $(this).attr("href");
+        //     // getDictionaryEntriesRef(dictionaryLookup, refUrl);
+        //     newUrls.push(refUrl);
+        //   });
+        // } else {
+        //   noResultForLemma(dictionaryLookup);
+        // }
       }
     });
   } catch (error) {
@@ -431,10 +540,11 @@ async function morphoAnalysis(surfaceForm) {
   //
   // => https://developer.chrome.com/extensions/messaging
 
-  let morphos = await getMorphos(surfaceForm, true);
-  if (morphos.length == 0) {
-    morphos = await getMorphos(surfaceForm, false);
-  }
+  // let morphos = await getMorphos(surfaceForm, true);
+  // if (morphos.length == 0) {
+  //   morphos = await getMorphos(surfaceForm, false);
+  // }
+  let morphos = await getMorphos(surfaceForm, false);
 
   return morphos;
 }

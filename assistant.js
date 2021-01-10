@@ -17,14 +17,16 @@
 $(function () {
     $("#controls").submit(function (e) {
         e.preventDefault();
-        help();
+        withSelectedText(getHelp);
         return false;
     });
 
-    // $('#help').click(function () {
-    //     help();
-    // });
-
+    $('#hlusta').click(function (e) {
+        e.preventDefault();
+        withSelectedText(hlusta);
+        return false;
+    });
+    
     $('#clear').click(function (e) {
         $('#result').empty();
         e.preventDefault();
@@ -164,6 +166,38 @@ function help() {
                     selectedText = selectedText.trim();
                     if (selectedText.length > 0) {
                         getHelp(selectedText);
+                    } else {
+                        showMessage("Please select or enter a word first...");
+                    }
+                } else {
+                    showMessage("Failed to retrieve selected text!");
+                }
+            });
+        });
+    }
+    // chrome.tabs.executeScript(null, {
+    //     code: "window.getSelection().toString();"
+    // }, function (selection) {
+    //     let selectedText = selection[0];
+    //     getHelp(selectedText);
+    // });
+}
+
+function withSelectedText(f) {
+    let userInput = $("#user-input").val().trim();
+    if (userInput.length > 0) {
+        f(userInput);
+    } else {
+        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+            tabId = tabs[0].id;
+            chrome.tabs.executeScript(tabId, {
+                code: "window.getSelection().toString();"
+            }, function (selection) {
+                if (selection && selection.length > 0) {
+                    let selectedText = selection[0];
+                    selectedText = selectedText.trim();
+                    if (selectedText.length > 0) {
+                        f(selectedText);
                     } else {
                         showMessage("Please select or enter a word first...");
                     }
@@ -424,6 +458,28 @@ function getHelp(text) {
     });
 }
 
+function hlusta (text) {
+    // let p = document.getElementById('readspeaker-hit').getElementsByTagName('p')[0];
+    // p.textContent = 'text to read';
+    // let range = document.createRange();
+    // range.selectNodeContents(p);
+    // let selection = window.getSelection();
+    // selection.removeAllRanges();
+    // selection.addRange(range);
+    // let a = document.getElementById("readspeaker_button1").getElementsByClassName('rsbtn_play');
+    // if (a.length > 0) {
+    //  a[0].click();
+    // }
+    chrome.tabs.query({ url: 'https://www.hi.is/haskolinn/saga', currentWindow: true }, function (tabs) {
+        if (tabs.length > 0) {
+            let t = tabs[0];
+            chrome.tabs.sendMessage(t.id, { method: "hlusta", param: text }, function (response) {
+                console.log("hlusta: done");
+            });
+        }
+    });
+}
+
 $(document).ready(function () {
     chrome.runtime.sendMessage({ method: "getSidebarStatus" }, function (response) {
         // response.sidebarStatus: on / off or undefined
@@ -440,13 +496,24 @@ $(document).ready(function () {
         if (e.data.method && e.data.method == "getHelp") {
             let selectedText = e.data.param;
             getHelp(selectedText);
+        } else if (e.data.method && e.data.method == "hlusta") {
+            let text = e.data.param;
+            hlusta(text);
         }
     });
 
     // credits https://stackoverflow.com/questions/1064089/inserting-a-text-where-cursor-is-using-javascript-jquery
-    $(".key").click(function () {
+    $(".key").click(function (e) {
         let input = $("#user-input").get(0);
         let ch = $(this).text();
+        if (e.shiftKey) {
+            ch = ch.toUpperCase();
+        }
+        // let code = $(this).text().charCodeAt(0);
+        // if (e.shiftKey) {
+        //     code += 32;
+        // }
+        // let ch = String.fromCharCode(code);
         if (document.selection) {
             input.focus();
             var sel = document.selection.createRange();

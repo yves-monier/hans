@@ -49,6 +49,8 @@ function assistantMessageListener(request, sender) {
         showSidebar(sidebarStatus);
     } else if (request.method === "setOptions") {
         currentOptions = Object.assign(currentOptions, request.param);
+    } else if (request.method === "hlusta") {
+        hlusta(request.param);
     }
 }
 
@@ -80,6 +82,22 @@ if (!location.ancestorOrigins.contains(extensionOrigin)) {
             showSidebar(response.sidebarStatus);
         });
     });
+}
+
+function hlusta(text) {
+    console.log("content.js received 'hlusta' message: " + text);
+
+    let p = document.getElementById('readspeaker-hit').getElementsByTagName('p')[0];
+    p.textContent = text;
+    let range = document.createRange();
+    range.selectNodeContents(p);
+    let selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    let a = document.getElementById("readspeaker_button1").getElementsByClassName('rsbtn_play');
+    if (a.length > 0) {
+        a[0].click();
+    }
 }
 
 function showSidebar(onOrOff) {
@@ -123,12 +141,19 @@ let timeoutId = null;
 document.addEventListener('keypress', function (e) {
     let srcElement = e.srcElement;
 
-    // 65/97: 'A'/'a'
+    // see https://javascript.info/cross-window-communication
+
     if ((e.keyCode == 65 || e.keyCode == 97) && assistantIframe && srcElement && srcElement.nodeName == 'BODY') {
+        // 65/97: 'A'/'a'
         let selectedText = getSelectedText();
-        // see https://javascript.info/cross-window-communication
         assistantIframe.contentWindow.postMessage({ method: "getHelp", param: selectedText }, "*");
+    } else if ((e.keyCode == 72 || e.keyCode == 104) && assistantIframe && srcElement && srcElement.nodeName == 'BODY') {
+        // 72/104: 'H'/'h'
+        let selectedText = getSelectedText();
+        // assistantIframe.contentWindow.postMessage({ method: "hlusta", param: selectedText }, "*");
+        console.log("content.js, text: " + selectedText);
     }
+
 }, false);
 
 document.addEventListener('keyup', function (e) {
