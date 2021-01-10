@@ -168,7 +168,7 @@ async function getMorphos(form, firstQuery) {
           })[0].nodeValue;
         } else {
           // new web site (2019.09.29)
-          pos = $(".hinfo-ordflokkur", this).text();          
+          pos = $(".hinfo-ordflokkur", this).text();
         }
         pos = pos.trim();
 
@@ -193,11 +193,11 @@ async function getMorphos(form, firstQuery) {
             }
           }
         }
-        
+
         let newMorpho = { baseform: baseform, pos: pos, url: arnastofnunUrl };
         let morpho = findMorpho(morphoAnalysis, baseform);
         if (morpho != null) {
-          // duplicates probably have different part-of-speech, but subsequent dictionary lookup 
+          // duplicates probably have different part-of-speech, but subsequent dictionary lookup
           // will reflect that and return corresponding entries
           morpho.morphoanalysis.push(newMorpho);
         } else {
@@ -227,7 +227,7 @@ async function getMorphos(form, firstQuery) {
           let newMorpho = { baseform: baseform, pos: pos, url: arnastofnunUrl };
           let morpho = findMorpho(morphoAnalysis, baseform);
           if (morpho != null) {
-            // duplicates probably have different part-of-speech, but subsequent dictionary lookup 
+            // duplicates probably have different part-of-speech, but subsequent dictionary lookup
             // will reflect that and return corresponding entries
             morpho.morphoanalysis.push(newMorpho);
           } else {
@@ -571,7 +571,7 @@ async function dictionaryLookup(morphos) {
             /*let newUrls3 =*/ await getDictionaryEntries(dictionaryLookup, newUrl2);
           }
         }
-          }
+      }
     }
   }
 
