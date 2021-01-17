@@ -418,9 +418,9 @@ function getHelp(text) {
                         entryDiv.appendTo(morphoDiv);
                     }
                 } else {
-                    let noResultDiv = $("<div class='entry'></div>");
-                    noResultDiv.text("Found no dictionary entry for " + searchBaseform);
-                    morphoDiv.append(noResultDiv);
+                    // let noResultDiv = $("<div class='entry'></div>");
+                    // noResultDiv.text("Found no dictionary entry for " + searchBaseform);
+                    // morphoDiv.append(noResultDiv);
                     morphoDiv.addClass("no-entry");
                 }
             }

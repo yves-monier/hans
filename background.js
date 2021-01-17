@@ -351,13 +351,17 @@ async function getDictionaryEntries(dictionaryLookup, givenUrl) {
           nestlevels.each(function () {
             let href = $(".lemma a[href^='/cgi-bin/IcelOnline']", this);
             let refUrl = "http://digicoll.library.wisc.edu" + href.attr("href");
+
+            // TODO factorization of morphoPOS vs. dictPOS matching to keep only
+            // relevant dict entries
+            // See oneResultForLemma
             let pos = $(".pos", this).text();
             let dictPOS = pos.split("/").map(item => item.trim()).filter(item => item.length > 0);
             dictPOS.forEach(function(dp) {
               let mps = dictToMorphoPOS(dp);
               let posOk = false;
               if (mps.length == 0) {
-                console.log("No POS mapping for: " + pos + " (" + dp + ")");
+                console.log("[getDictionaryEntries] No POS mapping for: " + pos + " (" + dp + ")");
               } else {
                 mps.forEach(function(mp) {
                   if (morphoPOS.has(mp)) {
@@ -421,6 +425,13 @@ function oneResultForLemma(dictionaryLookup, htmlObj, url) {
   let morpho = dictionaryLookup.morphos[0];
   let baseform = morpho.baseform;
 
+  let morphoPOS = new Set();
+  if (morpho.morphoanalysis) {
+    for (let i = 0; i < morpho.morphoanalysis.length; i++) {
+      morphoPOS.add(morpho.morphoanalysis[i].pos);
+    }
+  }
+
   let headwdObj = $(".headwd > .lemma", htmlObj);
   let headwd = "???";
   if (headwdObj.length > 0) {
@@ -429,16 +440,41 @@ function oneResultForLemma(dictionaryLookup, htmlObj, url) {
     })[0].nodeValue;
   }
 
-  // let regex = new RegExp('\\/', 'g');
-  // headwd = headwd.replace(regex, ''); // e.g. "tal/a" => "tala"
+  // TODO factorization of morphoPOS vs. dictPOS matching to keep only
+  // relevant dict entries
+  // See getDictionaryEntries
+  let gramObjs = $(".headwd > .graminfl > .gram", htmlObj);
+  let dictPOS = [];
+  for (let ii=0; ii<gramObjs.length; ii++) {
+    let pos = $(gramObjs[ii]).text();
+    dictPOS.push(pos.trim());
+  }
+  let posOk = false;
+  dictPOS.forEach(function(dp) {
+    let mps = dictToMorphoPOS(dp);
+    if (mps.length == 0) {
+      // console.log("[oneResultForLemma] No POS mapping for: " + dp);
+    } else {
+      mps.forEach(function(mp) {
+        if (morphoPOS.has(mp)) {
+          posOk = true;
+        }
+      });
+    }
+  });
 
-  enrichIcelandic(headwd, htmlObj);
+  if (posOk) {
+    // let regex = new RegExp('\\/', 'g');
+    // headwd = headwd.replace(regex, ''); // e.g. "tal/a" => "tala"
 
-  let entry = { html: htmlObj.html(), hw: headwd, url: url, source: "uwdc" };
+    enrichIcelandic(headwd, htmlObj);
 
-  // enrichHeadword(entry);
+    let entry = { html: htmlObj.html(), hw: headwd, url: url, source: "uwdc" };
 
-  dictionaryLookup.entries.push(entry);
+    // enrichHeadword(entry);
+
+    dictionaryLookup.entries.push(entry);
+  }
 }
 
 // Credits https://coderwall.com/p/ostduq/escape-html-with-javascript
