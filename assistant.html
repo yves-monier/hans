@@ -199,7 +199,7 @@
             margin-top: 0.5rem;
         }
 
-        #result>.search-item>.morpho {
+        #result>.search-item>.morpho:not(.searching-morpho) {
             margin: 0.5rem;
             margin-left: 0;
             background-color: #eee;
@@ -325,6 +325,17 @@
             height: 5px;
             background-color: darkblue;
             flex: 0 0 auto;
+        }
+
+        .searching-item, .searching-morpho {
+            font-family: 'sans-serif';
+            color: #555;
+            font-size: 0.8rem;
+        }
+
+        .searching-morpho:first-child::before {
+            content: "Dictionary lookup:";
+            display: block;
         }
 
         /* Credits http://tobiasahlin.com/spinkit/ */

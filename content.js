@@ -303,6 +303,94 @@ function selectWord(node, startPos, endPos) {
     selection.addRange(range);
 }
 
+// ----------------------------------------------------
+//
+const IGNORED_ELEMENTS = [];
+const ACCEPTED_ELEMENTS = ["input", "INPUT", "select", "SELECT"];
+
+function collectTextOrInputNodes(node, arr) {
+    if (node.nodeType === 3) {
+        arr.push(node);
+        return;
+    }
+    if (node.nodeType === 1 && ACCEPTED_ELEMENTS.includes(node.nodeName)) {
+        // let type = node.getAttribute("type");
+        // if (!type || type == "text" || type == "TEXT") {
+        //     arr.push(node);
+        //     return;
+        // }
+        arr.push(node);
+        return;
+    }
+    if (node.hasChildNodes && !IGNORED_ELEMENTS.includes(node.nodeName)) {
+        if (!node.hasChildNodes()) return;
+        let children = node.childNodes;
+        for (let ii = 0; ii < children.length; ii++) {
+            collectTextOrInputNodes(children[ii], arr);
+        }
+    }
+}
+
+function getParents(node, max = -1) {
+    const result = [];
+    while (node = node.parentElement) {
+        result.push(node);
+        if (max > 0 && result.length == max) return result;
+    }
+    return result;
+}
+
+function getFirstCommonAncestor(pathA, pathB) {
+    return pathA.find((item) => pathB.indexOf(item) !== -1);
+}
+
+function getCurrentSelectionExt() {
+    let selectedText = undefined;
+    let selection = window.getSelection();
+    if (window.getSelection().rangeCount == 1) {
+        let range = window.getSelection().getRangeAt(0);
+        if (range.startContainer != range.endContainer) {
+            let startParents = getParents(range.startContainer, 5);
+            let endParents = getParents(range.endContainer, 5);
+            let commonParent = getFirstCommonAncestor(startParents, endParents);
+            if (commonParent) {
+                let nodes = [];
+                collectTextOrInputNodes(commonParent, nodes);
+                let ii = 0;
+                while (ii < nodes.length && nodes[ii] != range.startContainer) {
+                    ii++;
+                }
+                selectedText = "";
+                for (; ii < nodes.length; ii++) {
+                    let end = false;
+                    let nodeVal;
+                    if (nodes[ii].nodeType == 3) {
+                        nodeVal = nodes[ii].textContent;
+                        if (nodes[ii] == range.startContainer) {
+                            nodeVal = nodeVal.substring(range.startOffset);
+                        } else if (nodes[ii] == range.endContainer) {
+                            nodeVal = nodeVal.substring(0, range.endOffset);
+                            end = true;
+                        }
+                    } else {
+                        // input element
+                        nodeVal = nodes[ii].value;
+                    }
+                    nodeVal = nodeVal.replace(/\n/g, " ");
+                    nodeVal = nodeVal.replace(/\s+/g, " ");
+                    selectedText += nodeVal;
+                    if (end) {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    return selectedText;
+}
+//
+// ----------------------------------------------------
+
 function getCurrentSelectionHelp() {
     if (timeoutId != null) {
         clearTimeout(timeoutId);
@@ -310,6 +398,7 @@ function getCurrentSelectionHelp() {
     }
 
     if (currentSelection.length > 0) {
+        currentSelection = getCurrentSelectionExt() || currentSelection;
         // see https://javascript.info/cross-window-communication
         assistantIframe.contentWindow.postMessage({ method: "getHelp", param: currentSelection }, "*");
     }

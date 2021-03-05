@@ -335,7 +335,7 @@ function getHelp(text) {
     // => https://developer.chrome.com/extensions/messaging
 
     let searchItemDiv = $("<div class='search-item searching-item' data-search='" + escape(text) + "'></div>");
-    searchItemDiv.text("Searching for " + text + "...");
+    searchItemDiv.text("Morphological analysis: " + text + "...");
     // searchItemDiv.appendTo(result);
     result.prepend(searchItemDiv);
 
@@ -360,7 +360,8 @@ function getHelp(text) {
 
         for (let i = 0; i < morphos.length; i++) {
             let morphoDiv = $("<div class='morpho searching-morpho'></div>");
-            morphoDiv.text("Searching for " + morphos[i].baseform + "...");
+            let txt = morphos[i].baseform + "...";
+            morphoDiv.text(txt);
             morphoDiv.appendTo(searchItemDiv);
             morphoDivs.push(morphoDiv);
         }
@@ -392,7 +393,7 @@ function getHelp(text) {
                     }
 
                     let morphoHeading = $("<span class='morpho-heading'></span>");
-                    morphoHeading.html(baseform);
+                    morphoHeading.text(baseform);
                     heading.append(morphoHeading);
                     if (morpho.morphoanalysis && morpho.morphoanalysis.length > 0) {
                         for (let m = morpho.morphoanalysis.length - 1; m >= 0; m--) {
