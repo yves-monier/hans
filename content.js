@@ -303,7 +303,7 @@ function selectWord(node, startPos, endPos) {
     selection.addRange(range);
 }
 
-// ----------------------------------------------------
+// -------------------------------------------------------------------
 //
 const IGNORED_ELEMENTS = [];
 const ACCEPTED_ELEMENTS = ["input", "INPUT", "select", "SELECT"];
@@ -389,7 +389,7 @@ function getCurrentSelectionExt() {
     return selectedText;
 }
 //
-// ----------------------------------------------------
+// -------------------------------------------------------------------
 
 function getCurrentSelectionHelp() {
     if (timeoutId != null) {
