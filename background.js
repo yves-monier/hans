@@ -473,7 +473,10 @@ function oneResultForLemma(dictionaryLookup, htmlObj, url) {
 
     // enrichHeadword(entry);
 
-    dictionaryLookup.entries.push(entry);
+    let exist = dictionaryLookup.entries.find(e=>e.html == entry.html);
+    if (! exist) {
+      dictionaryLookup.entries.push(entry);
+    }
   }
 }
 
