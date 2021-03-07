@@ -182,12 +182,13 @@ document.addEventListener('keyup', function (e) {
 });
 
 document.addEventListener('selectionchange', function (e) {
-    // if (timeoutId != null) {
-    //     clearTimeout(timeoutId);
-    // }
-    // timeoutId = setTimeout(onSelectionChange, 1000);
+    let selection = window.getSelection();
 
-    onSelectionChange();
+    currentAnchorNode = selection.anchorNode;
+    currentAnchorOffset = selection.anchorOffset;
+    currentFocusNode = selection.focusNode;
+    currentFocusOffset = selection.focusOffset;
+    currentSelection = selection.toString().trim();
 
     // ignore single-char selection
     if (currentSelection.length > 1 && currentOptions != null && currentOptions.autoHelpSelection == "on") {
@@ -401,28 +402,5 @@ function getCurrentSelectionHelp() {
         currentSelection = getCurrentSelectionExt() || currentSelection;
         // see https://javascript.info/cross-window-communication
         assistantIframe.contentWindow.postMessage({ method: "getHelp", param: currentSelection }, "*");
-    }
-}
-
-function onSelectionChange() {
-    let selection = window.getSelection();
-
-    currentAnchorNode = selection.anchorNode;
-    currentAnchorOffset = selection.anchorOffset;
-    currentFocusNode = selection.focusNode;
-    currentFocusOffset = selection.focusOffset;
-    currentSelection = selection.toString().trim();
-
-    if (currentSelection.length > 0) {
-        // dumpCurrentSelection();
-
-        // if (selection.rangeCount > 0) {
-        //     for (let i = 0; i < selection.rangeCount; i++) {
-        //         let range = selection.getRangeAt(i);
-        //         console.log("range " + i + ": " + range);
-        //     }
-        // }
-    } else {
-        // console.log("no selection");
     }
 }
