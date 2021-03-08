@@ -44,7 +44,8 @@ let abbreviations = [
   // { "abbr": "dat", "is": "??gufall", "en": "dative" },
   // { "abbr": "dat+acc", "is": "er merki vi? s?gn sem tekur me? s?r andlag ? ??gufalli og ?olfalli", "en": "indicates a verb with dative + accusative objects" },
   { "abbr": "e-a", "is": "einhverja", "en": "somebody (feminine)" },
-  { "abbr": "e-", "is": "eitthva", "en": "something" },
+  // { "abbr": "e-", "is": "eitthva", "en": "something" },
+  { "abbr": "e-ð", "is": "eitthvað", "en": "something" },
   { "abbr": "e-n", "is": "einhvern", "en": "somebody (masculine)" },
   { "abbr": "e-m", "is": "einhverjum", "en": "somebody" },
   { "abbr": "e-s", "is": "einhvers", "en": "somebody's" },
@@ -157,7 +158,7 @@ async function getMorphos(form, firstQuery) {
         let b = $("b", this);
         if (b.length == 0)
           return;
-        
+
         let baseform = b.text();
         baseform = baseform.trim();
         let pos = "???";
@@ -264,7 +265,7 @@ async function getMorphos(form, firstQuery) {
   TODO: could be "/" in dict. lookup POS e.g. adj / adv
 */
 function dictToMorphoPOS(dp) {
-  if (dp === undefined) 
+  if (dp === undefined)
     return [];
 
   if (dp.startsWith("prep"))
@@ -316,7 +317,7 @@ function dictToMorphoPOS(dp) {
 // query http://digicoll.library.wisc.edu/IcelOnline for dictionary entries
 async function getDictionaryEntries(dictionaryLookup, givenUrl) {
   let newUrls = [];
-  
+
   let morpho = dictionaryLookup.morphos[0];
   let baseform = morpho.baseform;
   let morphoPOS = new Set();
@@ -357,13 +358,13 @@ async function getDictionaryEntries(dictionaryLookup, givenUrl) {
             // See oneResultForLemma
             let pos = $(".pos", this).text();
             let dictPOS = pos.split("/").map(item => item.trim()).filter(item => item.length > 0);
-            dictPOS.forEach(function(dp) {
+            dictPOS.forEach(function (dp) {
               let mps = dictToMorphoPOS(dp);
               let posOk = false;
               if (mps.length == 0) {
                 console.log("[getDictionaryEntries] No POS mapping for: " + pos + " (" + dp + ")");
               } else {
-                mps.forEach(function(mp) {
+                mps.forEach(function (mp) {
                   if (morphoPOS.has(mp)) {
                     posOk = true;
                   }
@@ -445,17 +446,17 @@ function oneResultForLemma(dictionaryLookup, htmlObj, url) {
   // See getDictionaryEntries
   let gramObjs = $(".headwd > .graminfl > .gram", htmlObj);
   let dictPOS = [];
-  for (let ii=0; ii<gramObjs.length; ii++) {
+  for (let ii = 0; ii < gramObjs.length; ii++) {
     let pos = $(gramObjs[ii]).text();
     dictPOS.push(pos.trim());
   }
   let posOk = false;
-  dictPOS.forEach(function(dp) {
+  dictPOS.forEach(function (dp) {
     let mps = dictToMorphoPOS(dp);
     if (mps.length == 0) {
       // console.log("[oneResultForLemma] No POS mapping for: " + dp);
     } else {
-      mps.forEach(function(mp) {
+      mps.forEach(function (mp) {
         if (morphoPOS.has(mp)) {
           posOk = true;
         }
@@ -473,8 +474,8 @@ function oneResultForLemma(dictionaryLookup, htmlObj, url) {
 
     // enrichHeadword(entry);
 
-    let exist = dictionaryLookup.entries.find(e=>e.html == entry.html);
-    if (! exist) {
+    let exist = dictionaryLookup.entries.find(e => e.html == entry.html);
+    if (!exist) {
       dictionaryLookup.entries.push(entry);
     }
   }
