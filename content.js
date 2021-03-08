@@ -362,6 +362,7 @@ function getCurrentSelectionExt() {
                     ii++;
                 }
                 selectedText = "";
+                let prevNodeIsInputOrSelect = false;
                 for (; ii < nodes.length; ii++) {
                     let end = false;
                     let nodeVal;
@@ -379,9 +380,15 @@ function getCurrentSelectionExt() {
                     }
                     nodeVal = nodeVal.replace(/\n/g, " ");
                     nodeVal = nodeVal.replace(/\s+/g, " ");
+                    if (prevNodeIsInputOrSelect && !nodeVal.startsWith(" ")) {
+                        selectedText += " ";
+                    }
                     selectedText += nodeVal;
                     if (end) {
                         break;
+                    }
+                    if (nodes[ii].nodeType == 1) {
+                        prevNodeIsInputOrSelect = true;
                     }
                 }
             }
