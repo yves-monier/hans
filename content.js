@@ -231,7 +231,7 @@ function dumpCurrentSelection() {
 }
 
 function isWordCharacter(ch) {
-    if (/[,.?!–\-]/.test(ch))
+    if (/["'„“,.?!–\-]/.test(ch))
         return false;
     if (/\s/.test(ch))
         return false;
