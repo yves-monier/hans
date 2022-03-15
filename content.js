@@ -51,7 +51,15 @@ function assistantMessageListener(request, sender) {
         currentOptions = Object.assign(currentOptions, request.param);
     } else if (request.method === "hlusta") {
         hlusta(request.param);
+    } else if (request.method === "showBinArnastofnun") {
+        console.log("content.js onMessage showBinArnastofnun " + request.param);
+        let iframe = document.createElement('iframe');
+        // let html = '<body>Foo</body>';
+        // iframe.src = 'data:text/html;charset=utf-8,' + encodeURI(html);
+        iframe.src = request.param;
+        document.body.appendChild(iframe);
     }
+    return true;
 }
 
 // https://stackoverflow.com/questions/10100540/chrome-extension-inject-sidebar-into-page
@@ -240,6 +248,12 @@ function isWordCharacter(ch) {
 }
 
 function selectNextWord(fromFocusNode, fromFocusOffset) {
+    var iframe = document.createElement('iframe');
+    var html = '<body>Foo</body>';
+    // iframe.src = 'data:text/html;charset=utf-8,' + encodeURI(html);
+    iframe.src = 'https://bin.arnastofnun.is/beyging/469289';
+    document.body.appendChild(iframe);
+
     let nextAnchorNode = null;
     let nextAnchorOffset = null;
     let nextFocusNode = null;
