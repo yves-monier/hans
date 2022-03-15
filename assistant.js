@@ -26,7 +26,7 @@ $(function () {
         withSelectedText(hlusta);
         return false;
     });
-    
+
     $('#clear').click(function (e) {
         $('#result').empty();
         e.preventDefault();
@@ -399,7 +399,14 @@ function getHelp(text) {
                         for (let m = morpho.morphoanalysis.length - 1; m >= 0; m--) {
                             let morphoanalysis = morpho.morphoanalysis[m];
                             let link = $("<a class='morpho-url' title='" + morphoanalysis.pos + " - show on http://bin.arnastofnun.is' target='ia-arnastofnun' href='" + morphoanalysis.url + "'></a>");
+                            /* WIP test bin.arnastofnun.is iframe display
+                            let link = $("<span class='morpho-url' title='" + morphoanalysis.pos + " - show on http://bin.arnastofnun.is'></span>");
                             morphoHeading.prepend(link);
+                            let linkElt = link.get(0);
+                            linkElt.addEventListener("click", function (e) {
+                                showBinArnastofnun(morphoanalysis.url);
+                            });
+                            */
                         }
                     }
                 }
@@ -461,7 +468,7 @@ function getHelp(text) {
     });
 }
 
-function hlusta (text) {
+function hlusta(text) {
     // let p = document.getElementById('readspeaker-hit').getElementsByTagName('p')[0];
     // p.textContent = 'text to read';
     // let range = document.createRange();
@@ -480,6 +487,15 @@ function hlusta (text) {
                 console.log("hlusta: done");
             });
         }
+    });
+}
+
+function showBinArnastofnun(url) {
+    console.log("sendMessage showBinArnastofnun " + url);
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        tabId = tabs[0].id;
+        chrome.tabs.sendMessage(tabId, { method: "showBinArnastofnun", param: url }, function (response) {
+        });
     });
 }
 
