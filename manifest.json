@@ -38,7 +38,8 @@
         "http://*.is/*",
         "https://*.is/*",
         "https://icelandiconline.com/*",
-        "https://www.facebook.com/groups/PracticeLearnIcelandic/*"
+        "https://www.facebook.com/groups/PracticeLearnIcelandic/*",
+        "https://www.clozemaster.com/l/isl-*"
       ],
       "css": [
         "content.css"
