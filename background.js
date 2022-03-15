@@ -733,6 +733,14 @@ chrome.runtime.onMessage.addListener(
     } else if (request.method == "setOptions") {
       setOptions(request.options);
       sendResponse({});
+    } else if (request.method == "showBinArnastofnun") {
+      console.log("background.js onMessage showBinArnastofnun " + request.url);
+      // var iframe = document.createElement('iframe');
+        // var html = '<body>Foo</body>';
+        // // iframe.src = 'data:text/html;charset=utf-8,' + encodeURI(html);
+        // iframe.src = 'https://bin.arnastofnun.is/beyging/469289';
+        // document.body.appendChild(iframe);
+        sendResponse({});
     } else {
       // console.log(sender.tab ?
       //   "from a content script:" + sender.tab.url :
