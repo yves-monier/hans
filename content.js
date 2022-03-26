@@ -43,6 +43,12 @@ chrome.runtime.sendMessage({ method: "getOptions" }, function (response) {
     currentOptions = Object.assign(currentOptions, response.options);
 });
 
+
+// https://stackoverflow.com/questions/10100540/chrome-extension-inject-sidebar-into-page
+let assistantIframe;
+let linguisticIframe;
+let closeLinguisticButton;
+
 function assistantMessageListener(request, sender) {
     if (request.method === "showSidebar") {
         let sidebarStatus = request.param;
@@ -51,20 +57,16 @@ function assistantMessageListener(request, sender) {
         currentOptions = Object.assign(currentOptions, request.param);
     } else if (request.method === "hlusta") {
         hlusta(request.param);
-    } else if (request.method === "showBinArnastofnun") {
-        console.log("content.js onMessage showBinArnastofnun " + request.param);
-        let iframe = document.createElement('iframe');
+    } else if (request.method === "showMorphoAnalysis" || request.method === "showDictionartLookup") {
+        console.log("content.js onMessage " + request.method + ": " + request.param);
         // let html = '<body>Foo</body>';
         // iframe.src = 'data:text/html;charset=utf-8,' + encodeURI(html);
-        iframe.src = request.param;
-        document.body.appendChild(iframe);
+        linguisticIframe.src = request.param;
+        linguisticIframe.style.display = "block";
+        closeLinguisticButton.style.display = "inline-flex";
     }
     return true;
 }
-
-// https://stackoverflow.com/questions/10100540/chrome-extension-inject-sidebar-into-page
-
-let assistantIframe;
 
 // Avoid recursive frame insertion...
 let extensionOrigin = 'chrome-extension://' + chrome.runtime.id;
@@ -89,6 +91,37 @@ if (!location.ancestorOrigins.contains(extensionOrigin)) {
             // console.log(response.sidebarStatus);
             showSidebar(response.sidebarStatus);
         });
+    });
+
+    linguisticIframe = document.createElement('iframe');
+    linguisticIframe.style.background = "transparent";
+    linguisticIframe.style.height = "calc(100% - 40px)";
+    linguisticIframe.style.width = "calc(100% - 340px)";
+    linguisticIframe.style.position = "fixed";
+    linguisticIframe.style.top = "30px";
+    linguisticIframe.style.left = "20px";
+    linguisticIframe.style.zIndex = "9000000000000000000";
+    linguisticIframe.style.borderWidth = "1px";
+    linguisticIframe.style.borderStyle = "solid";
+    linguisticIframe.style.boxSizing = "border-box";
+    linguisticIframe.style.display = "none";
+    document.body.appendChild(linguisticIframe);
+
+    closeLinguisticButton = document.createElement('button');
+    closeLinguisticButton.innerText = 'x';
+    closeLinguisticButton.style.height = "24px";
+    closeLinguisticButton.style.width = "24px";
+    closeLinguisticButton.style.borderRadius = "12px";
+    closeLinguisticButton.style.position = "fixed";
+    closeLinguisticButton.style.top = "22px";
+    closeLinguisticButton.style.right = "306px";
+    closeLinguisticButton.style.zIndex = "9000000000000000001";
+    closeLinguisticButton.style.display = "none";
+    closeLinguisticButton.style.alignItems = "flex-end";
+    document.body.appendChild(closeLinguisticButton);
+    closeLinguisticButton.addEventListener("click", function (e) {
+        linguisticIframe.style.display = "none";
+        closeLinguisticButton.style.display = "none";
     });
 }
 

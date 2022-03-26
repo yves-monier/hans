@@ -398,15 +398,14 @@ function getHelp(text) {
                     if (morpho.morphoanalysis && morpho.morphoanalysis.length > 0) {
                         for (let m = morpho.morphoanalysis.length - 1; m >= 0; m--) {
                             let morphoanalysis = morpho.morphoanalysis[m];
-                            let link = $("<a class='morpho-url' title='" + morphoanalysis.pos + " - show on http://bin.arnastofnun.is' target='ia-arnastofnun' href='" + morphoanalysis.url + "'></a>");
-                            /* WIP test bin.arnastofnun.is iframe display
+                            // let link = $("<a class='morpho-url' title='" + morphoanalysis.pos + " - show on http://bin.arnastofnun.is' target='ia-arnastofnun' href='" + morphoanalysis.url + "'></a>");
+                            // WIP test bin.arnastofnun.is iframe display
                             let link = $("<span class='morpho-url' title='" + morphoanalysis.pos + " - show on http://bin.arnastofnun.is'></span>");
                             morphoHeading.prepend(link);
                             let linkElt = link.get(0);
                             linkElt.addEventListener("click", function (e) {
-                                showBinArnastofnun(morphoanalysis.url);
+                                showMorphoAnalysis(morphoanalysis.url);
                             });
-                            */
                         }
                     }
                 }
@@ -490,11 +489,11 @@ function hlusta(text) {
     });
 }
 
-function showBinArnastofnun(url) {
-    console.log("sendMessage showBinArnastofnun " + url);
+function showMorphoAnalysis(url) {
+    console.log("sendMessage showMorphoAnalysis " + url);
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         tabId = tabs[0].id;
-        chrome.tabs.sendMessage(tabId, { method: "showBinArnastofnun", param: url }, function (response) {
+        chrome.tabs.sendMessage(tabId, { method: "showMorphoAnalysis", param: url }, function (response) {
         });
     });
 }

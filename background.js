@@ -733,8 +733,8 @@ chrome.runtime.onMessage.addListener(
     } else if (request.method == "setOptions") {
       setOptions(request.options);
       sendResponse({});
-    } else if (request.method == "showBinArnastofnun") {
-      console.log("background.js onMessage showBinArnastofnun " + request.url);
+    } else if (request.method == "showMorphoAnalysis") {
+      console.log("background.js onMessage showMorphoAnalysis " + request.url);
       // var iframe = document.createElement('iframe');
         // var html = '<body>Foo</body>';
         // // iframe.src = 'data:text/html;charset=utf-8,' + encodeURI(html);
