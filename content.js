@@ -57,7 +57,7 @@ function assistantMessageListener(request, sender) {
         currentOptions = Object.assign(currentOptions, request.param);
     } else if (request.method === "hlusta") {
         hlusta(request.param);
-    } else if (request.method === "showMorphoAnalysis" || request.method === "showDictionartLookup") {
+    } else if (request.method === "showMorphoAnalysis" || request.method === "showDictionaryLookup") {
         console.log("content.js onMessage " + request.method + ": " + request.param);
         // let html = '<body>Foo</body>';
         // iframe.src = 'data:text/html;charset=utf-8,' + encodeURI(html);

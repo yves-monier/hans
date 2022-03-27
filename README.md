@@ -1,6 +1,6 @@
 # Icelandic assistant
 
-I use [https://icelandiconline.com](https://icelandiconline.com) for learning Icelandic. Apart from its own learning resources, icelandiconline.com provides grammatical and is-en dictionary links that I've been using often enough to decide to develop a Chrome extension doing automatically for me what I had to do manually before: copy a word somewhere from my current lesson, display its [grammatical analysis](http://bin.arnastofnun.is/leit) web site, then search the displayed base form in the [IS-EN dictionary lookup](http://digicoll.library.wisc.edu/IcelOnline/Search.TEId.html) web site.
+I use [https://icelandiconline.com](https://icelandiconline.com) for learning Icelandic. Apart from its own learning resources, icelandiconline.com provides grammatical and is-en dictionary links that I've been using often enough to decide to develop a Chrome extension doing automatically for me what I had to do manually before: copy a word somewhere from my current lesson, display its [grammatical analysis](http://bin.arnastofnun.is/leit) web site, then search the displayed base form in the [IS-EN dictionary lookup](https://digicoll.library.wisc.edu/IcelOnline/Search.TEId.html) web site.
 
 **Note**: in my humble opinion, using Google-translate services for brute force translation of the whole lesson would be unfair and unproductive, in terms of learning.
 
@@ -26,7 +26,7 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## Acknowledgments
 
-- Thanks to [Stofnun Árna Magnússonar í íslenskum fræðum](http://bin.arnastofnun.is/leit/) and [University of Wisconsin-Madison's Icelandic Online Dictionary](http://digicoll.library.wisc.edu/IcelOnline/Search.TEId.html): the icelandic assistant is nothing but a wrapper on top of their online services.
+- Thanks to [Stofnun Árna Magnússonar í íslenskum fræðum](http://bin.arnastofnun.is/leit/) and [University of Wisconsin-Madison's Icelandic Online Dictionary](https://digicoll.library.wisc.edu/IcelOnline/Search.TEId.html): the icelandic assistant is nothing but a wrapper on top of their online services.
 - BTW also thanks to [https://icelandiconline.com](https://icelandiconline.com) for providing their online resources.
   
 ## TODO

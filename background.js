@@ -314,7 +314,7 @@ function dictToMorphoPOS(dp) {
   return [];
 }
 
-// query http://digicoll.library.wisc.edu/IcelOnline for dictionary entries
+// query https://digicoll.library.wisc.edu/IcelOnline for dictionary entries
 async function getDictionaryEntries(dictionaryLookup, givenUrl) {
   let newUrls = [];
 
@@ -332,9 +332,9 @@ async function getDictionaryEntries(dictionaryLookup, givenUrl) {
   if (givenUrl) {
     url = givenUrl;
   } else {
-    //url = "http://digicoll.library.wisc.edu/cgi-bin/IcelOnline/IcelOnline.TEId-idx?type=simple&size=First+100&rgn=lemma&q1=" + escape(baseform) + "&submit=Search";
+    //url = "https://digicoll.library.wisc.edu/cgi-bin/IcelOnline/IcelOnline.TEId-idx?type=simple&size=First+100&rgn=lemma&q1=" + escape(baseform) + "&submit=Search";
     // encodeURI is better for accents e.g. "fá"
-    url = "http://digicoll.library.wisc.edu/cgi-bin/IcelOnline/IcelOnline.TEId-idx?type=simple&size=First+100&rgn=lemma&q1=" + encodeURI(baseform) + "&submit=Search";
+    url = "https://digicoll.library.wisc.edu/cgi-bin/IcelOnline/IcelOnline.TEId-idx?type=simple&size=First+100&rgn=lemma&q1=" + encodeURI(baseform) + "&submit=Search";
   }
 
   try {
@@ -351,7 +351,7 @@ async function getDictionaryEntries(dictionaryLookup, givenUrl) {
         if (nestlevels.length > 0) {
           nestlevels.each(function () {
             let href = $(".lemma a[href^='/cgi-bin/IcelOnline']", this);
-            let refUrl = "http://digicoll.library.wisc.edu" + href.attr("href");
+            let refUrl = "https://digicoll.library.wisc.edu" + href.attr("href");
 
             // TODO factorization of morphoPOS vs. dictPOS matching to keep only
             // relevant dict entries
@@ -384,7 +384,7 @@ async function getDictionaryEntries(dictionaryLookup, givenUrl) {
         // let hrefs = $(".nestlevel .lemma a[href^='/cgi-bin/IcelOnline']", htmlDoc); // e.g. for vegna
         // if (hrefs.length > 0) {
         //   hrefs.each(function () {
-        //     let refUrl = "http://digicoll.library.wisc.edu" + $(this).attr("href");
+        //     let refUrl = "https://digicoll.library.wisc.edu" + $(this).attr("href");
         //     // getDictionaryEntriesRef(dictionaryLookup, refUrl);
         //     newUrls.push(refUrl);
         //   });
@@ -411,7 +411,7 @@ function processDictionaryEntryElements(dictionaryLookup, entryElements, fromUrl
       oneResultForLemma(dictionaryLookup, $(this), fromUrl);
     } else {
       hrefs.each(function () {
-        let refUrl = "http://digicoll.library.wisc.edu" + $(this).attr("href");
+        let refUrl = "https://digicoll.library.wisc.edu" + $(this).attr("href");
         // getDictionaryEntriesRef(dictionaryLookup, refUrl);
         newUrls.push(refUrl);
       });
@@ -506,7 +506,7 @@ function htmlEscape(string) {
 function enrichIcelandic(headwd, htmlObj) {
   let hwFull = headwd;
 
-  // search for '/' or '.' headword separator (see http://digicoll.library.wisc.edu/cgi-bin/IcelOnline/IcelOnline.TEId-idx?type=HTML&rgn=DIV1&id=IcelOnline.IEOrd&target=IcelOnline.IEOrd.Guide)
+  // search for '/' or '.' headword separator (see https://digicoll.library.wisc.edu/cgi-bin/IcelOnline/IcelOnline.TEId-idx?type=HTML&rgn=DIV1&id=IcelOnline.IEOrd&target=IcelOnline.IEOrd.Guide)
   let separatorPos = hwFull.indexOf('/');
   if (separatorPos == -1) {
     separatorPos = hwFull.indexOf('.');
@@ -538,7 +538,7 @@ function enrichIcelandic(headwd, htmlObj) {
 function enrichHeadword(entry) {
   let hwFull = entry.hw;
 
-  // search for '/' or '.' headword separator (see http://digicoll.library.wisc.edu/cgi-bin/IcelOnline/IcelOnline.TEId-idx?type=HTML&rgn=DIV1&id=IcelOnline.IEOrd&target=IcelOnline.IEOrd.Guide)
+  // search for '/' or '.' headword separator (see https://digicoll.library.wisc.edu/cgi-bin/IcelOnline/IcelOnline.TEId-idx?type=HTML&rgn=DIV1&id=IcelOnline.IEOrd&target=IcelOnline.IEOrd.Guide)
   let separatorPos = hwFull.indexOf('/');
   if (separatorPos == -1) {
     separatorPos = hwFull.indexOf('.');
@@ -573,7 +573,7 @@ async function morphoAnalysis(surfaceForm) {
 
   // issuing http $.get from https (icelandiconline.com...) triggers a mixed-content error
   // tried to add permissions in manifest.json, with no success:
-  // "http://dev.phpbin.ja.is/ajax_leit.php*", "http://digicoll.library.wisc.edu*"
+  // "http://dev.phpbin.ja.is/ajax_leit.php*", "https://digicoll.library.wisc.edu*"
   //
   // instead the actual processing may take place in background.js + using messages from content-to-background then
   // from background-to-js ???

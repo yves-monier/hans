@@ -80,7 +80,7 @@ $(function () {
 // function enrichEntry(entry) {
 //     let hwFull = entry.hw;
 
-//     // search for '/' or '.' headword separator (see http://digicoll.library.wisc.edu/cgi-bin/IcelOnline/IcelOnline.TEId-idx?type=HTML&rgn=DIV1&id=IcelOnline.IEOrd&target=IcelOnline.IEOrd.Guide)
+//     // search for '/' or '.' headword separator (see https://digicoll.library.wisc.edu/cgi-bin/IcelOnline/IcelOnline.TEId-idx?type=HTML&rgn=DIV1&id=IcelOnline.IEOrd&target=IcelOnline.IEOrd.Guide)
 //     let separatorPos = hwFull.indexOf('/');
 //     if (separatorPos == -1) {
 //         separatorPos = hwFull.indexOf('.');
@@ -327,7 +327,7 @@ function getHelp(text) {
 
     // issuing http $.get from https (icelandiconline.com...) triggers a mixed-content error
     // tried to add permissions in manifest.json, with no success:
-    // "http://dev.phpbin.ja.is/ajax_leit.php*", "http://digicoll.library.wisc.edu*"
+    // "http://dev.phpbin.ja.is/ajax_leit.php*", "https://digicoll.library.wisc.edu*"
     //
     // instead the actual processing may take place in background.js + using messages from content-to-background then
     // from background-to-js ???
@@ -399,7 +399,6 @@ function getHelp(text) {
                         for (let m = morpho.morphoanalysis.length - 1; m >= 0; m--) {
                             let morphoanalysis = morpho.morphoanalysis[m];
                             // let link = $("<a class='morpho-url' title='" + morphoanalysis.pos + " - show on http://bin.arnastofnun.is' target='ia-arnastofnun' href='" + morphoanalysis.url + "'></a>");
-                            // WIP test bin.arnastofnun.is iframe display
                             let link = $("<span class='morpho-url' title='" + morphoanalysis.pos + " - show on http://bin.arnastofnun.is'></span>");
                             morphoHeading.prepend(link);
                             let linkElt = link.get(0);
@@ -417,12 +416,17 @@ function getHelp(text) {
                         let entry = entries[j];
                         // enrichEntry(entry); // now done in background.js
                         let entryDiv = $("<div class='entry'></div>");
-                        let link = $("<a class='entry-url' title='Show on UWDC Icelandic Online Dictionary' target='ia-uwdc' href='" + entry.url + "'></a>");
+                        // let link = $("<a class='entry-url' title='Show on UWDC Icelandic Online Dictionary' target='ia-uwdc' href='" + entry.url + "'></a>");
+                        let link = $("<span class='entry-url' title='Show on UWDC Icelandic Online Dictionary' target='ia-uwdc'></span>");
                         link.appendTo(entryDiv);
                         let uwdcDiv = $("<div class='entry-uwdc'></div>");
                         uwdcDiv.html(entry.html);
                         uwdcDiv.appendTo(entryDiv);
                         entryDiv.appendTo(morphoDiv);
+                        let linkElt = link.get(0);
+                        linkElt.addEventListener("click", function (e) {
+                            showDictionaryLookup(entry.url);
+                        });
                     }
                 } else {
                     // let noResultDiv = $("<div class='entry'></div>");
@@ -494,6 +498,15 @@ function showMorphoAnalysis(url) {
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         tabId = tabs[0].id;
         chrome.tabs.sendMessage(tabId, { method: "showMorphoAnalysis", param: url }, function (response) {
+        });
+    });
+}
+
+function showDictionaryLookup(url) {
+    console.log("sendMessage showDictionaryLookup " + url);
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        tabId = tabs[0].id;
+        chrome.tabs.sendMessage(tabId, { method: "showDictionaryLookup", param: url }, function (response) {
         });
     });
 }

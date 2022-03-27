@@ -11,7 +11,7 @@ try:
 except IOError:
     print(filename + " not found or path is incorrect")
     http = urllib3.PoolManager()
-    r = http.request('GET', 'http://digicoll.library.wisc.edu/cgi-bin/IcelOnline/IcelOnline.TEId-idx?type=HTML&rgn=DIV1&id=IcelOnline.IEOrd&target=IcelOnline.IEOrd.AbbrSym')
+    r = http.request('GET', 'https://digicoll.library.wisc.edu/cgi-bin/IcelOnline/IcelOnline.TEId-idx?type=HTML&rgn=DIV1&id=IcelOnline.IEOrd&target=IcelOnline.IEOrd.AbbrSym')
     html = r.data.decode("iso-8859-1") 
     f = open(filename, mode="w", encoding="ISO-8859-1")
     f.write(html)
