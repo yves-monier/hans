@@ -33,6 +33,17 @@ $(function () {
         return false;
     });
 
+    $('#settings').click(function (e) {
+        $('#settings-form').show();
+        e.preventDefault();
+        return false;
+    });
+    $('#close-settings').click(function (e) {
+        $('#settings-form').hide();
+        e.preventDefault();
+        return false;
+    });
+
     $('#slider').click(function () {
         toggleSidebar();
     });
