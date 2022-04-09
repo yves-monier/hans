@@ -164,6 +164,14 @@ function updateSlider(sidebarStatus) {
     }
 }
 
+function updateDarkMode(darkMode) {
+    if ("on" === darkMode) {
+        $("#assistant").addClass("darkmode");
+    } else {
+        $("#assistant").removeClass("darkmode");
+    }
+}
+
 function help() {
     let userInput = $("#user-input").val().trim();
     if (userInput.length > 0) {
@@ -522,6 +530,68 @@ function showDictionaryLookup(url) {
     });
 }
 
+function loadOptions() {
+    chrome.runtime.sendMessage({ method: "getOptions" }, function (response) {
+        let options = response.options;
+
+        /*
+        let button = document.getElementById("toggle-sidebar");
+        // options.sidebarStatus: on / off
+        if ("on" === options.sidebarStatus) {
+            button.innerHTML = "Fela skenkur / Hide sidebar";
+        } else {
+            button.innerHTML = "Sýna skenkur / Show sidebar";
+        }
+        */
+
+        updateSlider(options.sidebarStatus);
+
+        updateDarkMode(options.darkMode);
+        let darkModeCheckbox = $("#option-dark-mode");
+        if (options.darkMode == "on") {
+            darkModeCheckbox.prop('checked', true);
+        } else {
+            darkModeCheckbox.prop('checked', false);
+        }
+
+        let autoHelpSelectionCheckbox = $("#option-auto-help-selection");
+        if (options.autoHelpSelection == "on") {
+            autoHelpSelectionCheckbox.prop('checked', true);
+        } else {
+            autoHelpSelectionCheckbox.prop('checked', false);
+        }
+
+        let googleTranslateCheckbox = $("#option-use-google-translate");
+        let googleTranslateSelect = $("#google-translate-target");
+        if (options.googleTranslate == "on") {
+            googleTranslateCheckbox.prop('checked', true);
+            googleTranslateSelect.prop("disabled", false);
+        } else {
+            googleTranslateCheckbox.prop('checked', false);
+            googleTranslateSelect.prop("disabled", true);
+        }
+
+        let target = options.googleTranslateTarget;
+        $("#option-google-translate-target option[value=" + target + "]", googleTranslateSelect).prop('selected', true);
+    });
+}
+
+function saveOption(option, value) {
+    let options = {};
+    options[option] = value;
+    saveOptions(options);
+}
+
+function saveOptions(options) {
+    chrome.runtime.sendMessage({ method: "setOptions", options: options }, function (response) {
+    });
+
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        tabId = tabs[0].id;
+        chrome.tabs.sendMessage(tabId, { method: "setOptions", param: options });
+    });
+}
+
 $(document).ready(function () {
     chrome.runtime.sendMessage({ method: "getSidebarStatus" }, function (response) {
         // response.sidebarStatus: on / off or undefined
@@ -575,5 +645,45 @@ $(document).ready(function () {
             input.value += ch;
             input.focus();
         }
+    });
+
+    loadOptions();
+
+    let autoHelpSelectionCheckbox = $("#option-auto-help-selection");
+    autoHelpSelectionCheckbox.change(function () {
+        if (autoHelpSelectionCheckbox.is(":checked")) {
+            saveOption("autoHelpSelection", "on");
+        } else {
+            saveOption("autoHelpSelection", "off");
+        }
+    });
+
+    let googleTranslateCheckbox = $("#option-use-google-translate");
+    let select = $("#option-google-translate-target");
+
+    googleTranslateCheckbox.change(function () {
+        if (googleTranslateCheckbox.is(":checked")) {
+            saveOption("googleTranslate", "on");
+            select.prop("disabled", false);
+        } else {
+            saveOption("googleTranslate", "off");
+            select.prop("disabled", true);
+        }
+    });
+
+    select.change(function () {
+        let option = $(this).find('option:selected');
+        let languageCode = option.val();
+        saveOption("googleTranslateTarget", languageCode);
+    });
+
+    let darkModeCheckbox = $("#option-dark-mode");
+    darkModeCheckbox.change(function () {
+        let darkMode = "off";
+        if (darkModeCheckbox.is(":checked")) {
+            darkMode = "on";
+        }
+        saveOption("darkMode", darkMode);
+        updateDarkMode(darkMode);
     });
 });

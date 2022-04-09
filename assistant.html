@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <script src="jquery-2.2.4.min.js"></script>
-    <link href="https://fonts.googleapis.com/css?family=Francois+One|Noto+Serif|Inconsolata" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Francois+One|Noto+Sans|Inconsolata" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -38,7 +38,7 @@
         #slider {
             flex: 0 0 24px;
             height: 32px;
-            background-color: #eee;
+            background-color: #f0f0f0;
             border-top-left-radius: 12px;
             border-bottom-left-radius: 12px;
             border: 1px solid #aaa;
@@ -210,9 +210,10 @@
             margin: 0.5rem;
             margin-left: 0;
             background-color: #eee;
+            color: #090909;
             padding-bottom: 0.25rem;
             border-bottom: 1px dotted steelblue;
-            font-family: 'Noto Serif', serif;
+            font-family: 'Noto Sans', sans-serif;
         }
 
         #result>.search-item>.morpho:last-child {
@@ -418,6 +419,20 @@
         #settings-form {
             display: none;
         }
+
+        #assistant.darkmode {
+            font-size: 120%;
+        }
+        #assistant.darkmode #assistant-in,
+        #assistant.darkmode #slider,
+        #assistant.darkmode #result>.search-item>.morpho:not(.searching-morpho) {
+            background-color: #090909;
+            color: #ccc;
+        }
+        #assistant.darkmode #settings-form label {
+            color: #ccc;
+        }
+
     </style>
 </head>
 
@@ -453,12 +468,12 @@
                     class="key">ö</button>
             </div>
             <div id="settings-form">
-                <p><button id="toggle-sidebar" title="Toggle sidebar"></button></p>
-                <p><input type="checkbox" id="auto-help-selection" name="autoHelpSelection" checked>
-                    <label for="auto-help-selection">Lookup selection automatically</label></p>
-                <p><input type="checkbox" id="use-google-translate" name="useGoogleTranslate" checked>
-                    <label for="use-google-translate">Show Google Translate tab</label>
-                    <select id="google-translate-target">
+                <!-- p><button id="toggle-sidebar" title="Toggle sidebar"></button></p -->
+                <p><input type="checkbox" id="option-auto-help-selection" name="autoHelpSelection">
+                    <label for="option-auto-help-selection">Lookup selection automatically</label></p>
+                <p><input type="checkbox" id="option-use-google-translate" name="useGoogleTranslate">
+                    <label for="option-use-google-translate">Show Google Translate tab</label>
+                    <select id="option-google-translate-target">
                         <option value="">Vers quelle langue ?</option>
                         <option value="af">Afrikaans</option>
                         <option value="sq">Albanais</option>
@@ -565,8 +580,8 @@
                         <option value="yo">Yorouba</option>
                         <option value="zu">Zoulou</option>
                     </select></p>
-                <p><input type="checkbox" id="dark-mode" name="darkMode">
-                <label for="dark-mode">Dark mode</label></p> 
+                <p><input type="checkbox" id="option-dark-mode" name="darkMode">
+                <label for="option-dark-mode">Dark mode</label></p> 
                 <button id="close-settings"title="Close">X</button>
             </div>            
             <div id="message">

@@ -673,6 +673,10 @@ function getOptions() {
   if (options.autoHelpSelection != "on") {
     options.autoHelpSelection = "off";
   }
+  options.darkMode = localStorage['darkMode'];
+  if (options.darkMode != "on") {
+    options.darkMode = "off";
+  }
   options.googleTranslate = localStorage['googleTranslate'];
   if (options.googleTranslate != "on") {
     options.googleTranslate = "off";
@@ -707,6 +711,14 @@ function setOptions(options) {
     }
   }
 
+  if (options.darkMode) {
+    if (options.darkMode == "on") {
+      localStorage['darkMode'] = "on";
+    } else {
+      localStorage['darkMode'] = "off";
+    }
+  }
+
   if (options.googleTranslateTarget) {
     localStorage['googleTranslateTarget'] = options.googleTranslateTarget;
   }
@@ -729,7 +741,7 @@ chrome.runtime.onMessage.addListener(
       sendResponse({});
     } else if (request.method == "getOptions") {
       let options = getOptions();
-      sendResponse({ options: options });
+      sendResponse({ options });
     } else if (request.method == "setOptions") {
       setOptions(request.options);
       sendResponse({});
