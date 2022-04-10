@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <script src="jquery-2.2.4.min.js"></script>
-    <link href="https://fonts.googleapis.com/css?family=Francois+One|Noto+Sans|Inconsolata" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Francois+One|Open+Sans:ital,wght@0,300;0,700;1,300|Inconsolata" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -213,7 +213,8 @@
             color: #090909;
             padding-bottom: 0.25rem;
             border-bottom: 1px dotted steelblue;
-            font-family: 'Noto Sans', sans-serif;
+            font-family: 'Open Sans', sans-serif;
+            font-weight: 300;
         }
 
         #result>.search-item>.morpho:last-child {
@@ -233,6 +234,7 @@
         }
 
         #result>.search-item>.morpho>h1.morphos-heading .morpho-url {
+            cursor: pointer;
             display: inline-block;
             width: 16px;
             height: 16px;
@@ -269,6 +271,7 @@
         }
 
         #result>.search-item>.morpho>.entry>.entry-url {
+            cursor: pointer;
             margin-right: 0.5rem;
             display: inline-block;
             width: 16px;
@@ -293,7 +296,7 @@
         }
 
         .entry-uwdc>.headwd>.lemma {
-            font-weight: bold;
+            font-weight: 700;
         }
 
         .entry-uwdc .sense {
@@ -424,13 +427,23 @@
             font-size: 120%;
         }
         #assistant.darkmode #assistant-in,
-        #assistant.darkmode #slider,
         #assistant.darkmode #result>.search-item>.morpho:not(.searching-morpho) {
             background-color: #090909;
             color: #ccc;
         }
         #assistant.darkmode #settings-form label {
             color: #ccc;
+        }
+        #assistant.darkmode span.morpho-heading {
+            background-color: #bbb;
+            border-radius: 4px;
+            padding: 2px 5px;
+        }
+        #assistant.darkmode .searching-item, 
+        #assistant.darkmode .searching-morpho {
+            color: #ccc;
+            font-size: 0.8rem;
+            font-family: 'Open Sans', 'sans-serif'
         }
 
     </style>
