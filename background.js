@@ -4,6 +4,22 @@
 
 'use strict';
 
+try {
+  importScripts('/cheerio-bundle.min.js');
+} catch (e) {
+  console.error('importScripts: ' + e);
+}
+
+// https://stackoverflow.com/questions/70704283/how-to-use-localstorage-or-an-alternative-in-manifest-v3
+const LS = {
+  getAllItems: () => chrome.storage.local.get(),
+  getItem: async key => (await chrome.storage.local.get(key))[key],
+  setItem: (key, val) => chrome.storage.local.set({[key]: val}),
+  removeItems: keys => chrome.storage.local.remove(keys),
+};
+
+// https://github.com/cheeriojs/cheerio
+
 // import desabbreviate from "./abbreviations";
 
 ////chrome.runtime.onInstalled.addListener(function () {
@@ -149,7 +165,7 @@ async function getMorphos(form, firstQuery) {
   }
 
   try {
-    let jqxhr = await $.get(url, function (data) {
+    let jqxhr = await fetch(url, function (data) {
       // success
       let parser = new DOMParser();
       let htmlDoc = parser.parseFromString(data, "text/html");
@@ -665,23 +681,23 @@ if (chrome.browserAction) {
 
 function getOptions() {
   let options = {};
-  options.sidebarStatus = localStorage['sidebarStatus'];
+  options.sidebarStatus = "on"; // localStorage['sidebarStatus'];
   if (options.sidebarStatus != "on") {
     options.sidebarStatus = "off";
   }
-  options.autoHelpSelection = localStorage['autoHelpSelection'];
+  options.autoHelpSelection = "on"; // localStorage['autoHelpSelection'];
   if (options.autoHelpSelection != "on") {
     options.autoHelpSelection = "off";
   }
-  options.darkMode = localStorage['darkMode'];
+  options.darkMode = "on"; // localStorage['darkMode'];
   if (options.darkMode != "on") {
     options.darkMode = "off";
   }
-  options.googleTranslate = localStorage['googleTranslate'];
+  options.googleTranslate = "off"; // localStorage['googleTranslate'];
   if (options.googleTranslate != "on") {
     options.googleTranslate = "off";
   }
-  options.googleTranslateTarget = localStorage['googleTranslateTarget'];
+  options.googleTranslateTarget = "fr"; // localStorage['googleTranslateTarget'];
   if (!options.googleTranslateTarget) {
     options.googleTranslateTarget = "en";
   }
@@ -691,36 +707,36 @@ function getOptions() {
 function setOptions(options) {
   if (options.sidebarStatus) {
     if (options.sidebarStatus == "on") {
-      localStorage['sidebarStatus'] = "on";
+      // localStorage['sidebarStatus'] = "on";
     } else {
-      localStorage['sidebarStatus'] = "off";
+      // localStorage['sidebarStatus'] = "off";
     }
   }
 
   if (options.autoHelpSelection == "on") {
-    localStorage['autoHelpSelection'] = "on";
+    // localStorage['autoHelpSelection'] = "on";
   } else {
-    localStorage['autoHelpSelection'] = "off";
+    // localStorage['autoHelpSelection'] = "off";
   }
 
   if (options.googleTranslate) {
     if (options.googleTranslate == "on") {
-      localStorage['googleTranslate'] = "on";
+      // localStorage['googleTranslate'] = "on";
     } else {
-      localStorage['googleTranslate'] = "off";
+      // localStorage['googleTranslate'] = "off";
     }
   }
 
   if (options.darkMode) {
     if (options.darkMode == "on") {
-      localStorage['darkMode'] = "on";
+      // localStorage['darkMode'] = "on";
     } else {
-      localStorage['darkMode'] = "off";
+      // localStorage['darkMode'] = "off";
     }
   }
 
   if (options.googleTranslateTarget) {
-    localStorage['googleTranslateTarget'] = options.googleTranslateTarget;
+    // localStorage['googleTranslateTarget'] = options.googleTranslateTarget;
   }
 }
 
@@ -733,11 +749,11 @@ chrome.runtime.onMessage.addListener(
       doDictionaryLookup(request.morphos, sendResponse);
       return true;
     } else if (request.method == "getSidebarStatus") {
-      let sidebarStatus = localStorage['sidebarStatus'];
+      let sidebarStatus = "on"; // localStorage['sidebarStatus'];
       sendResponse({ sidebarStatus: sidebarStatus });
     } else if (request.method == "setSidebarStatus") {
       let sidebarStatus = request.param;
-      localStorage['sidebarStatus'] = sidebarStatus;
+      // localStorage['sidebarStatus'] = sidebarStatus;
       sendResponse({});
     } else if (request.method == "getOptions") {
       let options = getOptions();

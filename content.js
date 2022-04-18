@@ -82,7 +82,7 @@ if (!location.ancestorOrigins.contains(extensionOrigin)) {
     assistantIframe.style.boxSizing = "border-box";
     // iframe.style.boxShadow = "inset 1px 0 0 steelblue";
     assistantIframe.frameBorder = "none";
-    assistantIframe.src = chrome.extension.getURL("assistant.html")
+    assistantIframe.src = chrome.runtime.getURL("assistant.html")
     document.body.appendChild(assistantIframe);
 
     $(assistantIframe).load(function () {

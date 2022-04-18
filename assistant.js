@@ -178,10 +178,29 @@ function help() {
         getHelp(userInput);
     } else {
         chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-            tabId = tabs[0].id;
+            let tabId = tabs[0].id;
+            /*
             chrome.tabs.executeScript(tabId, {
                 code: "window.getSelection().toString();"
             }, function (selection) {
+                if (selection && selection.length > 0) {
+                    let selectedText = selection[0];
+                    selectedText = selectedText.trim();
+                    if (selectedText.length > 0) {
+                        getHelp(selectedText);
+                    } else {
+                        showMessage("Please select or enter a word first...");
+                    }
+                } else {
+                    showMessage("Failed to retrieve selected text!");
+                }
+            });
+            */
+            chrome.scripting.executeScript({
+                target: {tabId: tabId},
+                files: ['get-window-selection.js']
+            },
+            function (selection) {
                 if (selection && selection.length > 0) {
                     let selectedText = selection[0];
                     selectedText = selectedText.trim();
@@ -211,9 +230,28 @@ function withSelectedText(f) {
     } else {
         chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
             tabId = tabs[0].id;
+            /*
             chrome.tabs.executeScript(tabId, {
                 code: "window.getSelection().toString();"
             }, function (selection) {
+                if (selection && selection.length > 0) {
+                    let selectedText = selection[0];
+                    selectedText = selectedText.trim();
+                    if (selectedText.length > 0) {
+                        f(selectedText);
+                    } else {
+                        showMessage("Please select or enter a word first...");
+                    }
+                } else {
+                    showMessage("Failed to retrieve selected text!");
+                }
+            });
+            */
+            chrome.scripting.executeScript({
+                target: {tabId: tabId},
+                files: ['get-window-selection.js']
+            },
+            function (selection) {
                 if (selection && selection.length > 0) {
                     let selectedText = selection[0];
                     selectedText = selectedText.trim();
