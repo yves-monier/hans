@@ -281,12 +281,6 @@ function isWordCharacter(ch) {
 }
 
 function selectNextWord(fromFocusNode, fromFocusOffset) {
-    var iframe = document.createElement('iframe');
-    var html = '<body>Foo</body>';
-    // iframe.src = 'data:text/html;charset=utf-8,' + encodeURI(html);
-    iframe.src = 'https://bin.arnastofnun.is/beyging/469289';
-    document.body.appendChild(iframe);
-
     let nextAnchorNode = null;
     let nextAnchorOffset = null;
     let nextFocusNode = null;
