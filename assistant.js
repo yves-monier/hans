@@ -13,9 +13,9 @@
 //             { code: 'document.body.style.backgroundColor = "' + color + '";' });
 //     });
 // };
-
+/*
 $(function () {
-    $("#controls").submit(function (e) {
+    $("#controls-form").submit(function (e) {
         e.preventDefault();
         withSelectedText(getHelp);
         return false;
@@ -61,7 +61,7 @@ $(function () {
         }
     });
 });
-
+*/
 //
 // HTML enrichment is now done in background.js: replacement of ~/~~ and some abbreviations
 //
@@ -354,7 +354,8 @@ function getHelp(text) {
     // => https://developer.chrome.com/extensions/messaging
 
     let searchItemDiv = $("<div class='search-item searching-item' data-search='" + escape(text) + "'></div>");
-    searchItemDiv.text("Morphological analysis: " + text + "...");
+    // searchItemDiv.text("Morphological analysis: " + text + "...");
+    searchItemDiv.text(text);
     // searchItemDiv.appendTo(result);
     result.prepend(searchItemDiv);
 
@@ -685,5 +686,51 @@ $(document).ready(function () {
         }
         saveOption("darkMode", darkMode);
         updateDarkMode(darkMode);
+    });
+
+    $("#controls-form").submit(function (e) {
+        e.preventDefault();
+        withSelectedText(getHelp);
+        return false;
+    });
+
+    $('#hlusta').click(function (e) {
+        e.preventDefault();
+        withSelectedText(hlusta);
+        return false;
+    });
+
+    $('#clear').click(function (e) {
+        $('#result').empty();
+        e.preventDefault();
+        return false;
+    });
+
+    $('#settings').click(function (e) {
+        $('#settings-form').show();
+        e.preventDefault();
+        return false;
+    });
+    $('#close-settings').click(function (e) {
+        $('#settings-form').hide();
+        e.preventDefault();
+        return false;
+    });
+
+    $('#slider').click(function () {
+        toggleSidebar();
+    });
+
+    $("#result").on("click", ".search-item .morpho .morpho-heading", function (e) {
+        if (e.target == e.currentTarget) {
+            let morphoObj = $(this).closest(".morpho");
+            if (morphoObj.hasClass("off")) {
+                $(".entry", morphoObj).show(500);
+                morphoObj.removeClass("off");
+            } else {
+                $(".entry", morphoObj).hide(500);
+                morphoObj.addClass("off");
+            }
+        }
     });
 });

@@ -338,14 +338,22 @@
             flex: 0 0 auto;
         }
 
-        .searching-item, .searching-morpho {
+        .searching-item, 
+        .searching-morpho {
             font-family: 'sans-serif';
             color: #555;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
+        }
+
+        .searching-item:first-child::before {
+            content: "Morphological analysis: "; 
+            font-weight: bold;
+            display: inline;
         }
 
         .searching-morpho:first-child::before {
-            content: "Dictionary lookup:";
+            content: "Dictionary lookup...";
+            font-weight: bold;
             display: block;
         }
 
@@ -439,6 +447,13 @@
             border-radius: 4px;
             padding: 2px 5px;
         }
+        #assistant.darkmode span.morpho-heading:not(:last-child) {
+            margin-right: 5px;
+        }
+        #assistant.darkmode #result>.search-item>.morpho>h1.morphos-heading>span.morpho-heading:not(:first-child):before {
+            content: "";
+        }
+
         #assistant.darkmode .searching-item, 
         #assistant.darkmode .searching-morpho {
             color: #ccc;
