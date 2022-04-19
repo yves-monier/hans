@@ -5,10 +5,13 @@
 'use strict';
 
 try {
-  importScripts('/cheerio-bundle.min.js');
+  importScripts('/cheerio-bundle.js');
 } catch (e) {
   console.error('importScripts: ' + e);
 }
+
+// let ch = cheerio.load('<ul id="fruits">pomme, fraise</ul>');
+// let html = ch.html();
 
 // https://stackoverflow.com/questions/70704283/how-to-use-localstorage-or-an-alternative-in-manifest-v3
 const LS = {
@@ -60,8 +63,8 @@ let abbreviations = [
   // { "abbr": "dat", "is": "??gufall", "en": "dative" },
   // { "abbr": "dat+acc", "is": "er merki vi? s?gn sem tekur me? s?r andlag ? ??gufalli og ?olfalli", "en": "indicates a verb with dative + accusative objects" },
   { "abbr": "e-a", "is": "einhverja", "en": "somebody (feminine)" },
-  // { "abbr": "e-", "is": "eitthva", "en": "something" },
-  { "abbr": "e-ð", "is": "eitthvað", "en": "something" },
+  // { "abbr": "e-ï¿½", "is": "eitthvaï¿½", "en": "something" },
+  { "abbr": "e-ï¿½", "is": "eitthvaï¿½", "en": "something" },
   { "abbr": "e-n", "is": "einhvern", "en": "somebody (masculine)" },
   { "abbr": "e-m", "is": "einhverjum", "en": "somebody" },
   { "abbr": "e-s", "is": "einhvers", "en": "somebody's" },
@@ -264,16 +267,16 @@ async function getMorphos(form, firstQuery) {
 }
 
 /*
-  karlkynsnafnorð: m (pl)
-  kvenkynsnafnorð: f (pl)
-  hvorugkynsnafnorð: n (pl)
-  sagnorð: v (acc), v, v refl, v impers 
-  persónufornafn: ... pron ... (3rd pers m sg pron / 3rd pers f sg pron, acc pron refl, ...)
-  lýsingarorð: adj
-  töluorð: num
-  atviksorð: adv
+  karlkynsnafnorï¿½: m (pl)
+  kvenkynsnafnorï¿½: f (pl)
+  hvorugkynsnafnorï¿½: n (pl)
+  sagnorï¿½: v (acc), v, v refl, v impers 
+  persï¿½nufornafn: ... pron ... (3rd pers m sg pron / 3rd pers f sg pron, acc pron refl, ...)
+  lï¿½singarorï¿½: adj
+  tï¿½luorï¿½: num
+  atviksorï¿½: adv
   samtenging: conj
-  upphrópun: interj
+  upphrï¿½pun: interj
   forsetning: prep 
 
   CF. https://bin.arnastofnun.is/DMII/infl-system/
@@ -288,40 +291,40 @@ function dictToMorphoPOS(dp) {
     return ["forsetning"];
 
   if (dp.startsWith("interj"))
-    return ["upphrópun"];
+    return ["upphrï¿½pun"];
 
   if (dp.startsWith("conj"))
     return ["samtenging"];
 
   if (dp.startsWith("adv"))
-    return ["atviksorð"];
+    return ["atviksorï¿½"];
 
   if (dp.startsWith("adj"))
-    return ["lýsingarorð"];
+    return ["lï¿½singarorï¿½"];
 
   if (dp.startsWith("num"))
-    return ["töluorð", "raðtala"];
+    return ["tï¿½luorï¿½", "raï¿½tala"];
 
   if (dp.includes("pron"))
-    return ["persónufornafn", "afturbeygt fornafn", "spurnarfornafn", "ábendingarfornafn", "óákveðið ábendingarfornafn", "óákveðið fornafn", "eignarfornafn", "afturbeygt eignarfornafn"];
+    return ["persï¿½nufornafn", "afturbeygt fornafn", "spurnarfornafn", "ï¿½bendingarfornafn", "ï¿½ï¿½kveï¿½iï¿½ ï¿½bendingarfornafn", "ï¿½ï¿½kveï¿½iï¿½ fornafn", "eignarfornafn", "afturbeygt eignarfornafn"];
 
   if (dp.startsWith("m"))
-    return ["karlkynsnafnorð", "karlmannsnafn"];
+    return ["karlkynsnafnorï¿½", "karlmannsnafn"];
 
   if (dp.startsWith("f"))
-    return ["kvenkynsnafnorð", "kvennafn"];
+    return ["kvenkynsnafnorï¿½", "kvennafn"];
 
   if (dp.startsWith("n"))
-    return ["hvorugkynsnafnorð"];
+    return ["hvorugkynsnafnorï¿½"];
 
   if (dp.startsWith("v"))
-    return ["sagnorð"];
+    return ["sagnorï¿½"];
 
   /*
   What about mp:
   greinir
-  upphrópun
-  nafnháttarmerki
+  upphrï¿½pun
+  nafnhï¿½ttarmerki
 
   What about dp:
   in compounds
@@ -349,68 +352,67 @@ async function getDictionaryEntries(dictionaryLookup, givenUrl) {
     url = givenUrl;
   } else {
     //url = "https://digicoll.library.wisc.edu/cgi-bin/IcelOnline/IcelOnline.TEId-idx?type=simple&size=First+100&rgn=lemma&q1=" + escape(baseform) + "&submit=Search";
-    // encodeURI is better for accents e.g. "fá"
+    // encodeURI is better for accents e.g. "fï¿½"
     url = "https://digicoll.library.wisc.edu/cgi-bin/IcelOnline/IcelOnline.TEId-idx?type=simple&size=First+100&rgn=lemma&q1=" + encodeURI(baseform) + "&submit=Search";
   }
 
-  try {
-    let jqxhr = await $.get(url, function (data) {
-      // success
-      let parser = new DOMParser();
-      let htmlDoc = parser.parseFromString(data, "text/html");
-      let entryElements = $(".entry", htmlDoc);
-      if (entryElements.length > 0) {
-        processDictionaryEntryElements(dictionaryLookup, entryElements, url, newUrls);
-      } else {
-        let nestlevels = $(".nestlevel", htmlDoc); // e.g. for vegna
-        let count = 0;
-        if (nestlevels.length > 0) {
-          nestlevels.each(function () {
-            let href = $(".lemma a[href^='/cgi-bin/IcelOnline']", this);
-            let refUrl = "https://digicoll.library.wisc.edu" + href.attr("href");
+  let response = await fetch(url);
+  if (response.ok) {
+    // success
+    let parser = new DOMParser();
+    let htmlDoc = parser.parseFromString(data, "text/html");
+    let entryElements = $(".entry", htmlDoc);
+    if (entryElements.length > 0) {
+      processDictionaryEntryElements(dictionaryLookup, entryElements, url, newUrls);
+    } else {
+      let nestlevels = $(".nestlevel", htmlDoc); // e.g. for vegna
+      let count = 0;
+      if (nestlevels.length > 0) {
+        nestlevels.each(function () {
+          let href = $(".lemma a[href^='/cgi-bin/IcelOnline']", this);
+          let refUrl = "https://digicoll.library.wisc.edu" + href.attr("href");
 
-            // TODO factorization of morphoPOS vs. dictPOS matching to keep only
-            // relevant dict entries
-            // See oneResultForLemma
-            let pos = $(".pos", this).text();
-            let dictPOS = pos.split("/").map(item => item.trim()).filter(item => item.length > 0);
-            dictPOS.forEach(function (dp) {
-              let mps = dictToMorphoPOS(dp);
-              let posOk = false;
-              if (mps.length == 0) {
-                console.log("[getDictionaryEntries] No POS mapping for: " + pos + " (" + dp + ")");
-              } else {
-                mps.forEach(function (mp) {
-                  if (morphoPOS.has(mp)) {
-                    posOk = true;
-                  }
-                });
-              }
-              if (posOk) {
-                // getDictionaryEntriesRef(dictionaryLookup, refUrl);
-                newUrls.push(refUrl);
-                count++;
-              }
-            });
+          // TODO factorization of morphoPOS vs. dictPOS matching to keep only
+          // relevant dict entries
+          // See oneResultForLemma
+          let pos = $(".pos", this).text();
+          let dictPOS = pos.split("/").map(item => item.trim()).filter(item => item.length > 0);
+          dictPOS.forEach(function (dp) {
+            let mps = dictToMorphoPOS(dp);
+            let posOk = false;
+            if (mps.length == 0) {
+              console.log("[getDictionaryEntries] No POS mapping for: " + pos + " (" + dp + ")");
+            } else {
+              mps.forEach(function (mp) {
+                if (morphoPOS.has(mp)) {
+                  posOk = true;
+                }
+              });
+            }
+            if (posOk) {
+              // getDictionaryEntriesRef(dictionaryLookup, refUrl);
+              newUrls.push(refUrl);
+              count++;
+            }
           });
-        }
-        if (count == 0) {
-          noResultForLemma(dictionaryLookup);
-        }
-        // let hrefs = $(".nestlevel .lemma a[href^='/cgi-bin/IcelOnline']", htmlDoc); // e.g. for vegna
-        // if (hrefs.length > 0) {
-        //   hrefs.each(function () {
-        //     let refUrl = "https://digicoll.library.wisc.edu" + $(this).attr("href");
-        //     // getDictionaryEntriesRef(dictionaryLookup, refUrl);
-        //     newUrls.push(refUrl);
-        //   });
-        // } else {
-        //   noResultForLemma(dictionaryLookup);
-        // }
+        });
       }
-    });
-  } catch (error) {
-    console.log("error: " + error);
+      if (count == 0) {
+        noResultForLemma(dictionaryLookup);
+      }
+      // let hrefs = $(".nestlevel .lemma a[href^='/cgi-bin/IcelOnline']", htmlDoc); // e.g. for vegna
+      // if (hrefs.length > 0) {
+      //   hrefs.each(function () {
+      //     let refUrl = "https://digicoll.library.wisc.edu" + $(this).attr("href");
+      //     // getDictionaryEntriesRef(dictionaryLookup, refUrl);
+      //     newUrls.push(refUrl);
+      //   });
+      // } else {
+      //   noResultForLemma(dictionaryLookup);
+      // }
+    }
+  } else {
+    console.log("error: " + response.statusText);
   }
 
   return newUrls;

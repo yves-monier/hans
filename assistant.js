@@ -197,22 +197,22 @@ function help() {
             });
             */
             chrome.scripting.executeScript({
-                target: {tabId: tabId},
+                target: { tabId: tabId },
                 files: ['get-window-selection.js']
             },
-            function (selection) {
-                if (selection && selection.length > 0) {
-                    let selectedText = selection[0];
-                    selectedText = selectedText.trim();
-                    if (selectedText.length > 0) {
-                        getHelp(selectedText);
+                function (selection) {
+                    if (selection && selection.length > 0) {
+                        let selectedText = selection[0];
+                        selectedText = selectedText.trim();
+                        if (selectedText.length > 0) {
+                            getHelp(selectedText);
+                        } else {
+                            showMessage("Please select or enter a word first...");
+                        }
                     } else {
-                        showMessage("Please select or enter a word first...");
+                        showMessage("Failed to retrieve selected text!");
                     }
-                } else {
-                    showMessage("Failed to retrieve selected text!");
-                }
-            });
+                });
         });
     }
     // chrome.tabs.executeScript(null, {
@@ -248,22 +248,22 @@ function withSelectedText(f) {
             });
             */
             chrome.scripting.executeScript({
-                target: {tabId: tabId},
+                target: { tabId: tabId },
                 files: ['get-window-selection.js']
             },
-            function (selection) {
-                if (selection && selection.length > 0) {
-                    let selectedText = selection[0];
-                    selectedText = selectedText.trim();
-                    if (selectedText.length > 0) {
-                        f(selectedText);
+                function (selection) {
+                    if (selection && selection.length > 0) {
+                        let selectedText = selection[0];
+                        selectedText = selectedText.trim();
+                        if (selectedText.length > 0) {
+                            f(selectedText);
+                        } else {
+                            showMessage("Please select or enter a word first...");
+                        }
                     } else {
-                        showMessage("Please select or enter a word first...");
+                        showMessage("Failed to retrieve selected text!");
                     }
-                } else {
-                    showMessage("Failed to retrieve selected text!");
-                }
-            });
+                });
         });
     }
     // chrome.tabs.executeScript(null, {
@@ -569,50 +569,109 @@ function showDictionaryLookup(url) {
     });
 }
 
-function loadOptions() {
-    chrome.runtime.sendMessage({ method: "getOptions" }, function (response) {
-        let options = response.options;
+function getOptions() {
+    let options = {};
+    options.sidebarStatus = localStorage['sidebarStatus'];
+    if (options.sidebarStatus != "on") {
+        options.sidebarStatus = "off";
+    }
+    options.autoHelpSelection = localStorage['autoHelpSelection'];
+    if (options.autoHelpSelection != "on") {
+        options.autoHelpSelection = "off";
+    }
+    options.darkMode = localStorage['darkMode'];
+    if (options.darkMode != "on") {
+        options.darkMode = "off";
+    }
+    options.googleTranslate = localStorage['googleTranslate'];
+    if (options.googleTranslate != "on") {
+        options.googleTranslate = "off";
+    }
+    options.googleTranslateTarget = localStorage['googleTranslateTarget'];
+    if (!options.googleTranslateTarget) {
+        options.googleTranslateTarget = "en";
+    }
+    return options;
+}
 
-        /*
-        let button = document.getElementById("toggle-sidebar");
-        // options.sidebarStatus: on / off
-        if ("on" === options.sidebarStatus) {
-            button.innerHTML = "Fela skenkur / Hide sidebar";
+function setOptions(options) {
+    if (options.sidebarStatus) {
+        if (options.sidebarStatus == "on") {
+            localStorage['sidebarStatus'] = "on";
         } else {
-            button.innerHTML = "Sýna skenkur / Show sidebar";
+            localStorage['sidebarStatus'] = "off";
         }
-        */
+    }
 
-        updateSlider(options.sidebarStatus);
+    if (options.autoHelpSelection == "on") {
+        localStorage['autoHelpSelection'] = "on";
+    } else {
+        localStorage['autoHelpSelection'] = "off";
+    }
 
-        updateDarkMode(options.darkMode);
-        let darkModeCheckbox = $("#option-dark-mode");
-        if (options.darkMode == "on") {
-            darkModeCheckbox.prop('checked', true);
-        } else {
-            darkModeCheckbox.prop('checked', false);
-        }
-
-        let autoHelpSelectionCheckbox = $("#option-auto-help-selection");
-        if (options.autoHelpSelection == "on") {
-            autoHelpSelectionCheckbox.prop('checked', true);
-        } else {
-            autoHelpSelectionCheckbox.prop('checked', false);
-        }
-
-        let googleTranslateCheckbox = $("#option-use-google-translate");
-        let googleTranslateSelect = $("#google-translate-target");
+    if (options.googleTranslate) {
         if (options.googleTranslate == "on") {
-            googleTranslateCheckbox.prop('checked', true);
-            googleTranslateSelect.prop("disabled", false);
+            localStorage['googleTranslate'] = "on";
         } else {
-            googleTranslateCheckbox.prop('checked', false);
-            googleTranslateSelect.prop("disabled", true);
+            localStorage['googleTranslate'] = "off";
         }
+    }
 
-        let target = options.googleTranslateTarget;
-        $("#option-google-translate-target option[value=" + target + "]", googleTranslateSelect).prop('selected', true);
-    });
+    if (options.darkMode) {
+        if (options.darkMode == "on") {
+            localStorage['darkMode'] = "on";
+        } else {
+            localStorage['darkMode'] = "off";
+        }
+    }
+
+    if (options.googleTranslateTarget) {
+        localStorage['googleTranslateTarget'] = options.googleTranslateTarget;
+    }
+}
+
+function loadOptions() {
+    let options = getOptions();
+
+    /*
+    let button = document.getElementById("toggle-sidebar");
+    // options.sidebarStatus: on / off
+    if ("on" === options.sidebarStatus) {
+        button.innerHTML = "Fela skenkur / Hide sidebar";
+    } else {
+        button.innerHTML = "Sýna skenkur / Show sidebar";
+    }
+    */
+
+    updateSlider(options.sidebarStatus);
+
+    updateDarkMode(options.darkMode);
+    let darkModeCheckbox = $("#option-dark-mode");
+    if (options.darkMode == "on") {
+        darkModeCheckbox.prop('checked', true);
+    } else {
+        darkModeCheckbox.prop('checked', false);
+    }
+
+    let autoHelpSelectionCheckbox = $("#option-auto-help-selection");
+    if (options.autoHelpSelection == "on") {
+        autoHelpSelectionCheckbox.prop('checked', true);
+    } else {
+        autoHelpSelectionCheckbox.prop('checked', false);
+    }
+
+    let googleTranslateCheckbox = $("#option-use-google-translate");
+    let googleTranslateSelect = $("#google-translate-target");
+    if (options.googleTranslate == "on") {
+        googleTranslateCheckbox.prop('checked', true);
+        googleTranslateSelect.prop("disabled", false);
+    } else {
+        googleTranslateCheckbox.prop('checked', false);
+        googleTranslateSelect.prop("disabled", true);
+    }
+
+    let target = options.googleTranslateTarget;
+    $("#option-google-translate-target option[value=" + target + "]", googleTranslateSelect).prop('selected', true);
 }
 
 function saveOption(option, value) {
@@ -622,8 +681,9 @@ function saveOption(option, value) {
 }
 
 function saveOptions(options) {
-    chrome.runtime.sendMessage({ method: "setOptions", options: options }, function (response) {
-    });
+    setOptions(options);
+    // chrome.runtime.sendMessage({ method: "setOptions", options: options }, function (response) {
+    // });
 
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         tabId = tabs[0].id;
