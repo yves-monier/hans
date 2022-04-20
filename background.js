@@ -10,6 +10,7 @@ try {
   console.error('importScripts: ' + e);
 }
 
+// https://github.com/cheeriojs/cheerio
 // let ch = cheerio.load('<ul id="fruits">pomme, fraise</ul>');
 // let html = ch.html();
 
@@ -17,11 +18,9 @@ try {
 const LS = {
   getAllItems: () => chrome.storage.local.get(),
   getItem: async key => (await chrome.storage.local.get(key))[key],
-  setItem: (key, val) => chrome.storage.local.set({[key]: val}),
+  setItem: (key, val) => chrome.storage.local.set({ [key]: val }),
   removeItems: keys => chrome.storage.local.remove(keys),
 };
-
-// https://github.com/cheeriojs/cheerio
 
 // import desabbreviate from "./abbreviations";
 
@@ -153,8 +152,6 @@ function findMorpho(morphoAnalysis, baseform) {
 // http://dev.phpbin.ja.is/ajax_leit.php?q=heiti
 // http://bin.arnastofnun.is/leit/?id=434170
 async function getMorphos(form, firstQuery) {
-  let morphoAnalysis = [];
-
   let encodedForm = encodeURIComponent(form);
 
   // let url = "http://dev.phpbin.ja.is/ajax_leit.php?q=" + encodedForm;
@@ -167,100 +164,79 @@ async function getMorphos(form, firstQuery) {
     url = url + "&ordmyndir=on";
   }
 
-  try {
-    let jqxhr = await fetch(url, function (data) {
-      // success
-      let parser = new DOMParser();
-      let htmlDoc = parser.parseFromString(data, "text/html");
-      let lis = $("ul li", htmlDoc);
-      lis.each(function (i) {
-        let b = $("b", this);
-        if (b.length == 0)
-          return;
+  let response = await fetch(url);
+  if (!response.ok) {
+    console.log("error: " + response.statusText);
+    return []; // no analyses
+  }
 
-        let baseform = b.text();
-        baseform = baseform.trim();
-        let pos = "???";
-        if (false) {
-          // old web site
-          pos = $(this).contents().filter(function () {
-            return this.nodeType == 3;
-          })[0].nodeValue;
-        } else {
-          // new web site (2019.09.29)
-          pos = $(".hinfo-ordflokkur", this).text();
-        }
-        pos = pos.trim();
+  // success
+  let morphoAnalysis = [];
+  let html = await response.text();
+  let htmlDoc = cheerio.load(html);
+  let lis = htmlDoc("ul li");
+  lis.each(function (i) {
+    let b = this("b");
+    if (b.length == 0)
+      return;
 
-        let arnastofnunUrl = url;
-        if (false) {
-          // old web site
-          let onclick = a[0].getAttribute("onclick");
-          let regex = /'(\d+)'/gm;
-          let m = regex.exec(onclick);
-          if (m !== null) {
-            let id = m[1];
-            arnastofnunUrl = "http://bin.arnastofnun.is/leit/?id=" + id
-            // console.log("Analysis " + i + ": " + baseform + " (" + pos + ") " + arnastofnunUrl);
-          }
-        } else {
-          // new web site (2019.09.29)
-          let a = $("a", b);
-          if (a.length > 0) {
-            let href = a[0].getAttribute("href");
-            if (href != null && href.length > 0) {
-              arnastofnunUrl = "https://bin.arnastofnun.is" + href;
-            }
-          }
-        }
+    let baseform = b.text();
+    baseform = baseform.trim();
+    let pos = this(".hinfo-ordflokkur").text();
+    pos = pos.trim();
 
-        let newMorpho = { baseform: baseform, pos: pos, url: arnastofnunUrl };
-        let morpho = findMorpho(morphoAnalysis, baseform);
-        if (morpho != null) {
-          // duplicates probably have different part-of-speech, but subsequent dictionary lookup
-          // will reflect that and return corresponding entries
-          morpho.morphoanalysis.push(newMorpho);
-        } else {
-          morpho = { baseform: baseform, morphoanalysis: [newMorpho] };
-          morphoAnalysis.push(morpho);
-        }
-      });
-
-      if (lis.length == 0) {
-        let h2s = $(".page-header h2", htmlDoc);
-        if (h2s.length > 0) {
-          let h2 = h2s[0];
-          let baseform = $(h2).contents().filter(function () {
-            return this.nodeType == 3;
-          })[0].nodeValue;
-          baseform = baseform.trim();
-          let small = $("small .hinfo-ordflokkur", h2);
-          let pos = small.text();
-          pos = pos.trim();
-          // console.log("Analysis: " + baseform + " (" + pos + ")");
-          // let arnastofnunUrl = "http://bin.arnastofnun.is/leit/?q=" + encodedForm;
-          let arnastofnunUrl = "http://bin.arnastofnun.is/leit/" + encodedForm;
-          if (!firstQuery) {
-            // arnastofnunUrl = arnastofnunUrl + "&id=&ordmyndir=on";
-            arnastofnunUrl = "https://bin.arnastofnun.is/leit/beygingarmynd/" + encodedForm;
-          }
-          let newMorpho = { baseform: baseform, pos: pos, url: arnastofnunUrl };
-          let morpho = findMorpho(morphoAnalysis, baseform);
-          if (morpho != null) {
-            // duplicates probably have different part-of-speech, but subsequent dictionary lookup
-            // will reflect that and return corresponding entries
-            morpho.morphoanalysis.push(newMorpho);
-          } else {
-            morpho = { baseform: baseform, morphoanalysis: [newMorpho] };
-            morphoAnalysis.push(morpho);
-          }
-        } else {
-          // found nothing...
-        }
+    let arnastofnunUrl = url;
+    let a = b("a");
+    if (a.length > 0) {
+      let href = a[0].getAttribute("href");
+      if (href != null && href.length > 0) {
+        arnastofnunUrl = "https://bin.arnastofnun.is" + href;
       }
-    });
-  } catch (error) {
-    console.log("error: " + error);
+    }
+
+    let newMorpho = { baseform: baseform, pos: pos, url: arnastofnunUrl };
+    let morpho = findMorpho(morphoAnalysis, baseform);
+    if (morpho != null) {
+      // duplicates probably have different part-of-speech, but subsequent dictionary lookup
+      // will reflect that and return corresponding entries
+      morpho.morphoanalysis.push(newMorpho);
+    } else {
+      morpho = { baseform: baseform, morphoanalysis: [newMorpho] };
+      morphoAnalysis.push(morpho);
+    }
+  });
+
+  if (lis.length == 0) {
+    let h2s = htmlDoc(".page-header h2");
+    if (h2s.length > 0) {
+      let h2 = h2s[0];
+      let baseform = h2.children.filter(function (node) {
+        return node.nodeType == 3;
+      })[0].nodeValue;
+      baseform = baseform.trim();
+      let small = cheerio.load(h2, null, false)("small .hinfo-ordflokkur");
+      let pos = small.text();
+      pos = pos.trim();
+      // console.log("Analysis: " + baseform + " (" + pos + ")");
+      // let arnastofnunUrl = "http://bin.arnastofnun.is/leit/?q=" + encodedForm;
+      let arnastofnunUrl = "http://bin.arnastofnun.is/leit/" + encodedForm;
+      if (!firstQuery) {
+        // arnastofnunUrl = arnastofnunUrl + "&id=&ordmyndir=on";
+        arnastofnunUrl = "https://bin.arnastofnun.is/leit/beygingarmynd/" + encodedForm;
+      }
+      let newMorpho = { baseform: baseform, pos: pos, url: arnastofnunUrl };
+      let morpho = findMorpho(morphoAnalysis, baseform);
+      if (morpho != null) {
+        // duplicates probably have different part-of-speech, but subsequent dictionary lookup
+        // will reflect that and return corresponding entries
+        morpho.morphoanalysis.push(newMorpho);
+      } else {
+        morpho = { baseform: baseform, morphoanalysis: [newMorpho] };
+        morphoAnalysis.push(morpho);
+      }
+    } else {
+      // found nothing...
+    }
   }
 
   return morphoAnalysis;
@@ -335,8 +311,6 @@ function dictToMorphoPOS(dp) {
 
 // query https://digicoll.library.wisc.edu/IcelOnline for dictionary entries
 async function getDictionaryEntries(dictionaryLookup, givenUrl) {
-  let newUrls = [];
-
   let morpho = dictionaryLookup.morphos[0];
   let baseform = morpho.baseform;
   let morphoPOS = new Set();
@@ -357,62 +331,65 @@ async function getDictionaryEntries(dictionaryLookup, givenUrl) {
   }
 
   let response = await fetch(url);
-  if (response.ok) {
-    // success
-    let parser = new DOMParser();
-    let htmlDoc = parser.parseFromString(data, "text/html");
-    let entryElements = $(".entry", htmlDoc);
-    if (entryElements.length > 0) {
-      processDictionaryEntryElements(dictionaryLookup, entryElements, url, newUrls);
-    } else {
-      let nestlevels = $(".nestlevel", htmlDoc); // e.g. for vegna
-      let count = 0;
-      if (nestlevels.length > 0) {
-        nestlevels.each(function () {
-          let href = $(".lemma a[href^='/cgi-bin/IcelOnline']", this);
-          let refUrl = "https://digicoll.library.wisc.edu" + href.attr("href");
-
-          // TODO factorization of morphoPOS vs. dictPOS matching to keep only
-          // relevant dict entries
-          // See oneResultForLemma
-          let pos = $(".pos", this).text();
-          let dictPOS = pos.split("/").map(item => item.trim()).filter(item => item.length > 0);
-          dictPOS.forEach(function (dp) {
-            let mps = dictToMorphoPOS(dp);
-            let posOk = false;
-            if (mps.length == 0) {
-              console.log("[getDictionaryEntries] No POS mapping for: " + pos + " (" + dp + ")");
-            } else {
-              mps.forEach(function (mp) {
-                if (morphoPOS.has(mp)) {
-                  posOk = true;
-                }
-              });
-            }
-            if (posOk) {
-              // getDictionaryEntriesRef(dictionaryLookup, refUrl);
-              newUrls.push(refUrl);
-              count++;
-            }
-          });
-        });
-      }
-      if (count == 0) {
-        noResultForLemma(dictionaryLookup);
-      }
-      // let hrefs = $(".nestlevel .lemma a[href^='/cgi-bin/IcelOnline']", htmlDoc); // e.g. for vegna
-      // if (hrefs.length > 0) {
-      //   hrefs.each(function () {
-      //     let refUrl = "https://digicoll.library.wisc.edu" + $(this).attr("href");
-      //     // getDictionaryEntriesRef(dictionaryLookup, refUrl);
-      //     newUrls.push(refUrl);
-      //   });
-      // } else {
-      //   noResultForLemma(dictionaryLookup);
-      // }
-    }
-  } else {
+  if (!response.ok) {
     console.log("error: " + response.statusText);
+    return []; // no urls returned
+  }
+
+  // success
+  let newUrls = [];
+  let html = await response.text();
+  let htmlDoc = cheerio.load(html);
+  let entryElements = htmlDoc(".entry");
+  if (entryElements.length > 0) {
+    processDictionaryEntryElements(dictionaryLookup, entryElements, url, newUrls);
+  } else {
+    let nestlevels = htmlDoc(".nestlevel"); // e.g. vegna
+    let count = 0;
+    if (nestlevels.length > 0) {
+      nestlevels.each(function (i, nl) {
+        let nlCh = cheerio.load(nl, null, false);
+        let href = nlCh(".lemma a[href^='/cgi-bin/IcelOnline']");
+        let refUrl = "https://digicoll.library.wisc.edu" + href.attr("href");
+
+        // TODO factorization of morphoPOS vs. dictPOS matching to keep only
+        // relevant dict entries
+        // See oneResultForLemma
+        let pos = nlCh(".pos").text();
+        let dictPOS = pos.split("/").map(item => item.trim()).filter(item => item.length > 0);
+        dictPOS.forEach(function (dp) {
+          let mps = dictToMorphoPOS(dp);
+          let posOk = false;
+          if (mps.length == 0) {
+            console.log("[getDictionaryEntries] No POS mapping for: " + pos + " (" + dp + ")");
+          } else {
+            mps.forEach(function (mp) {
+              if (morphoPOS.has(mp)) {
+                posOk = true;
+              }
+            });
+          }
+          if (posOk) {
+            // getDictionaryEntriesRef(dictionaryLookup, refUrl);
+            newUrls.push(refUrl);
+            count++;
+          }
+        });
+      });
+    }
+    if (count == 0) {
+      noResultForLemma(dictionaryLookup);
+    }
+    // let hrefs = $(".nestlevel .lemma a[href^='/cgi-bin/IcelOnline']", htmlDoc); // e.g. for vegna
+    // if (hrefs.length > 0) {
+    //   hrefs.each(function () {
+    //     let refUrl = "https://digicoll.library.wisc.edu" + $(this).attr("href");
+    //     // getDictionaryEntriesRef(dictionaryLookup, refUrl);
+    //     newUrls.push(refUrl);
+    //   });
+    // } else {
+    //   noResultForLemma(dictionaryLookup);
+    // }
   }
 
   return newUrls;
@@ -424,12 +401,12 @@ function processDictionaryEntryElements(dictionaryLookup, entryElements, fromUrl
 
   entryElements.each(function () {
     // console.log("Dictionary entry:\n" + $(this).html());
-    let hrefs = $(".ref a[href^='/cgi-bin/IcelOnline']", this); // e.g. for veitingasta?ur
+    let hrefs = this(".ref a[href^='/cgi-bin/IcelOnline']"); // e.g. for veitingasta?ur
     if (hrefs.length == 0) {
-      oneResultForLemma(dictionaryLookup, $(this), fromUrl);
+      oneResultForLemma(dictionaryLookup, this, fromUrl);
     } else {
       hrefs.each(function () {
-        let refUrl = "https://digicoll.library.wisc.edu" + $(this).attr("href");
+        let refUrl = "https://digicoll.library.wisc.edu" + this.attr("href");
         // getDictionaryEntriesRef(dictionaryLookup, refUrl);
         newUrls.push(refUrl);
       });
@@ -451,7 +428,7 @@ function oneResultForLemma(dictionaryLookup, htmlObj, url) {
     }
   }
 
-  let headwdObj = $(".headwd > .lemma", htmlObj);
+  let headwdObj = htmlObj(".headwd > .lemma");
   let headwd = "???";
   if (headwdObj.length > 0) {
     headwd = headwdObj.contents().filter(function () {
@@ -462,10 +439,10 @@ function oneResultForLemma(dictionaryLookup, htmlObj, url) {
   // TODO factorization of morphoPOS vs. dictPOS matching to keep only
   // relevant dict entries
   // See getDictionaryEntries
-  let gramObjs = $(".headwd > .graminfl > .gram", htmlObj);
+  let gramObjs = htmlObj(".headwd > .graminfl > .gram");
   let dictPOS = [];
   for (let ii = 0; ii < gramObjs.length; ii++) {
-    let pos = $(gramObjs[ii]).text();
+    let pos = gramObjs[ii].text();
     dictPOS.push(pos.trim());
   }
   let posOk = false;
@@ -543,8 +520,8 @@ function enrichIcelandic(headwd, htmlObj) {
   }
   let enrichmentBeforeSeparator = "<span class='hw-placeholder'>$1</span><span class='hw-actual'>" + htmlEscape(hwBeforeSeparator) + "</span>";
 
-  $(".orth, .usg", htmlObj).each(function (index) {
-    let obj = $(this);
+  htmlObj(".orth, .usg").each(function (index) {
+    let obj = this;
     let html = obj.html();
     let enrichedHtml = html.replace(regexFull, enrichmentFull); // tala, segja, sj?n, ...
     enrichedHtml = enrichedHtml.replace(regexBeforeSeparator, enrichmentBeforeSeparator); // tala, segja, sj?n
@@ -766,11 +743,11 @@ chrome.runtime.onMessage.addListener(
     } else if (request.method == "showMorphoAnalysis") {
       console.log("background.js onMessage showMorphoAnalysis " + request.url);
       // var iframe = document.createElement('iframe');
-        // var html = '<body>Foo</body>';
-        // // iframe.src = 'data:text/html;charset=utf-8,' + encodeURI(html);
-        // iframe.src = 'https://bin.arnastofnun.is/beyging/469289';
-        // document.body.appendChild(iframe);
-        sendResponse({});
+      // var html = '<body>Foo</body>';
+      // // iframe.src = 'data:text/html;charset=utf-8,' + encodeURI(html);
+      // iframe.src = 'https://bin.arnastofnun.is/beyging/469289';
+      // document.body.appendChild(iframe);
+      sendResponse({});
     } else {
       // console.log(sender.tab ?
       //   "from a content script:" + sender.tab.url :
