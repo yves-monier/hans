@@ -63,7 +63,7 @@ let abbreviations = [
   // { "abbr": "dat+acc", "is": "er merki vi? s?gn sem tekur me? s?r andlag ? ??gufalli og ?olfalli", "en": "indicates a verb with dative + accusative objects" },
   { "abbr": "e-a", "is": "einhverja", "en": "somebody (feminine)" },
   // { "abbr": "e-�", "is": "eitthva�", "en": "something" },
-  { "abbr": "e-�", "is": "eitthva�", "en": "something" },
+  { "abbr": "e-\u00f0", "is": "eitthva\u00f0", "en": "something" },
   { "abbr": "e-n", "is": "einhvern", "en": "somebody (masculine)" },
   { "abbr": "e-m", "is": "einhverjum", "en": "somebody" },
   { "abbr": "e-s", "is": "einhvers", "en": "somebody's" },
@@ -175,20 +175,21 @@ async function getMorphos(form, firstQuery) {
   let html = await response.text();
   let htmlDoc = cheerio.load(html);
   let lis = htmlDoc("ul li");
-  lis.each(function (i) {
-    let b = this("b");
+  lis.each(function (i, li) {
+    let liCh = cheerio.load(li, null, false);
+    let b = liCh("b");
     if (b.length == 0)
       return;
 
     let baseform = b.text();
     baseform = baseform.trim();
-    let pos = this(".hinfo-ordflokkur").text();
+    let pos = liCh(".hinfo-ordflokkur").text();
     pos = pos.trim();
 
     let arnastofnunUrl = url;
-    let a = b("a");
+    let a = cheerio.load(b[0], null, false)("a");
     if (a.length > 0) {
-      let href = a[0].getAttribute("href");
+      let href = a.attr("href");
       if (href != null && href.length > 0) {
         arnastofnunUrl = "https://bin.arnastofnun.is" + href;
       }
@@ -243,16 +244,16 @@ async function getMorphos(form, firstQuery) {
 }
 
 /*
-  karlkynsnafnor�: m (pl)
-  kvenkynsnafnor�: f (pl)
-  hvorugkynsnafnor�: n (pl)
-  sagnor�: v (acc), v, v refl, v impers 
-  pers�nufornafn: ... pron ... (3rd pers m sg pron / 3rd pers f sg pron, acc pron refl, ...)
-  l�singaror�: adj
-  t�luor�: num
-  atviksor�: adv
+  karlkynsnafnor\u00f0: m (pl)
+  kvenkynsnafnor\u00f0: f (pl)
+  hvorugkynsnafnor\u00f0: n (pl)
+  sagnor\u00f0: v (acc), v, v refl, v impers 
+  pers\u00f3nufornafn: ... pron ... (3rd pers m sg pron / 3rd pers f sg pron, acc pron refl, ...)
+  l\u00fdsingaror\u00f0: adj
+  t\u00f6luor\u00f0: num
+  atviksor\u00f0: adv
   samtenging: conj
-  upphr�pun: interj
+  upphr\u00f3pun: interj
   forsetning: prep 
 
   CF. https://bin.arnastofnun.is/DMII/infl-system/
@@ -267,39 +268,38 @@ function dictToMorphoPOS(dp) {
     return ["forsetning"];
 
   if (dp.startsWith("interj"))
-    return ["upphr�pun"];
+    return ["upphr\u00f3pun"];
 
   if (dp.startsWith("conj"))
     return ["samtenging"];
 
   if (dp.startsWith("adv"))
-    return ["atviksor�"];
+    return ["atviksor\u00f0"];
 
   if (dp.startsWith("adj"))
-    return ["l�singaror�"];
+    return ["l\u00fdsingaror\u00f0"];
 
   if (dp.startsWith("num"))
-    return ["t�luor�", "ra�tala"];
+    return ["t\u00f6luor\u00f0", "ra\u00f0tala"];
 
   if (dp.includes("pron"))
-    return ["pers�nufornafn", "afturbeygt fornafn", "spurnarfornafn", "�bendingarfornafn", "��kve�i� �bendingarfornafn", "��kve�i� fornafn", "eignarfornafn", "afturbeygt eignarfornafn"];
+    return ["pers\u00f3nufornafn", "afturbeygt fornafn", "spurnarfornafn", "\u00e1bendingarfornafn", "\u00f3\u00e1kve\u00f0i\u00f0 \u00e1bendingarfornafn", "\u00f3\u00e1kve\u00f0i\u00f0 fornafn", "eignarfornafn", "afturbeygt eignarfornafn"];
 
   if (dp.startsWith("m"))
-    return ["karlkynsnafnor�", "karlmannsnafn"];
+    return ["karlkynsnafnor\u00f0", "karlmannsnafn"];
 
   if (dp.startsWith("f"))
-    return ["kvenkynsnafnor�", "kvennafn"];
+    return ["kvenkynsnafnor\u00f0", "kvennafn"];
 
   if (dp.startsWith("n"))
-    return ["hvorugkynsnafnor�"];
+    return ["hvorugkynsnafnor\u00f0"];
 
   if (dp.startsWith("v"))
-    return ["sagnor�"];
+    return ["sagnor\u00f0"];
 
   /*
   What about mp:
   greinir
-  upphr�pun
   nafnh�ttarmerki
 
   What about dp:
@@ -399,11 +399,11 @@ function processDictionaryEntryElements(dictionaryLookup, entryElements, fromUrl
   let morpho = dictionaryLookup.morphos[0];
   let baseform = morpho.baseform;
 
-  entryElements.each(function () {
-    // console.log("Dictionary entry:\n" + $(this).html());
-    let hrefs = this(".ref a[href^='/cgi-bin/IcelOnline']"); // e.g. for veitingasta?ur
+  entryElements.each(function (i, entryElement) {
+    let entryElementCh = cheerio.load(entryElement, null, false);
+    let hrefs = entryElementCh(".ref a[href^='/cgi-bin/IcelOnline']"); // e.g. for veitingasta?ur
     if (hrefs.length == 0) {
-      oneResultForLemma(dictionaryLookup, this, fromUrl);
+      oneResultForLemma(dictionaryLookup, entryElementCh, fromUrl);
     } else {
       hrefs.each(function () {
         let refUrl = "https://digicoll.library.wisc.edu" + this.attr("href");
@@ -417,7 +417,7 @@ function processDictionaryEntryElements(dictionaryLookup, entryElements, fromUrl
   }
 }
 
-function oneResultForLemma(dictionaryLookup, htmlObj, url) {
+function oneResultForLemma(dictionaryLookup, entryElementCh, url) {
   let morpho = dictionaryLookup.morphos[0];
   let baseform = morpho.baseform;
 
@@ -428,21 +428,21 @@ function oneResultForLemma(dictionaryLookup, htmlObj, url) {
     }
   }
 
-  let headwdObj = htmlObj(".headwd > .lemma");
+  let headwdObj = entryElementCh(".headwd > .lemma");
   let headwd = "???";
   if (headwdObj.length > 0) {
-    headwd = headwdObj.contents().filter(function () {
-      return this.nodeType == 3;
+    headwd = headwdObj[0].children.filter(function (node) {
+      return node.nodeType == 3;
     })[0].nodeValue;
   }
 
   // TODO factorization of morphoPOS vs. dictPOS matching to keep only
   // relevant dict entries
   // See getDictionaryEntries
-  let gramObjs = htmlObj(".headwd > .graminfl > .gram");
+  let gramObjs = entryElementCh(".headwd > .graminfl > .gram");
   let dictPOS = [];
   for (let ii = 0; ii < gramObjs.length; ii++) {
-    let pos = gramObjs[ii].text();
+    let pos = cheerio.load(gramObjs[ii], null, false).text();
     dictPOS.push(pos.trim());
   }
   let posOk = false;
@@ -463,9 +463,9 @@ function oneResultForLemma(dictionaryLookup, htmlObj, url) {
     // let regex = new RegExp('\\/', 'g');
     // headwd = headwd.replace(regex, ''); // e.g. "tal/a" => "tala"
 
-    enrichIcelandic(headwd, htmlObj);
+    enrichIcelandic(headwd, entryElementCh);
 
-    let entry = { html: htmlObj.html(), hw: headwd, url: url, source: "uwdc" };
+    let entry = { html: entryElementCh.html(), hw: headwd, url: url, source: "uwdc" };
 
     // enrichHeadword(entry);
 
