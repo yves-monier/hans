@@ -463,6 +463,7 @@ function oneResultForLemma(dictionaryLookup, entryElementCh, url) {
     // let regex = new RegExp('\\/', 'g');
     // headwd = headwd.replace(regex, ''); // e.g. "tal/a" => "tala"
 
+    // possibly modify entryElementCh
     enrichIcelandic(headwd, entryElementCh);
 
     let entry = { html: entryElementCh.html(), hw: headwd, url: url, source: "uwdc" };
@@ -498,7 +499,7 @@ function htmlEscape(string) {
   });
 }
 
-function enrichIcelandic(headwd, htmlObj) {
+function enrichIcelandic(headwd, entryElementCh) {
   let hwFull = headwd;
 
   // search for '/' or '.' headword separator (see https://digicoll.library.wisc.edu/cgi-bin/IcelOnline/IcelOnline.TEId-idx?type=HTML&rgn=DIV1&id=IcelOnline.IEOrd&target=IcelOnline.IEOrd.Guide)
@@ -520,13 +521,15 @@ function enrichIcelandic(headwd, htmlObj) {
   }
   let enrichmentBeforeSeparator = "<span class='hw-placeholder'>$1</span><span class='hw-actual'>" + htmlEscape(hwBeforeSeparator) + "</span>";
 
-  htmlObj(".orth, .usg").each(function (index) {
-    let obj = this;
-    let html = obj.html();
+  entryElementCh(".orth, .usg").each(function (i, obj) {
+    let objCh = cheerio.load(obj, null, false); 
+    let html = objCh.html();
     let enrichedHtml = html.replace(regexFull, enrichmentFull); // tala, segja, sj?n, ...
     enrichedHtml = enrichedHtml.replace(regexBeforeSeparator, enrichmentBeforeSeparator); // tala, segja, sj?n
     enrichedHtml = desabbreviate(enrichedHtml);
-    obj.html(enrichedHtml);
+    // let newCh = cheerio.load(enrichedHtml, null, false);
+    // objCh.replaceWith(newCh);
+    console.log("enriched html: " + html + " => " + enrichedHtml);
   });
 }
 
