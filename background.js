@@ -173,23 +173,21 @@ async function getMorphos(form, firstQuery) {
   // success
   let morphoAnalysis = [];
   let html = await response.text();
-  let htmlDoc = cheerio.load(html);
-  let lis = htmlDoc("ul li");
+  let $morphoAnalysisHtml = cheerio.load(html);
+  let lis = $morphoAnalysisHtml("ul li");
   lis.each(function (i, li) {
-    let liCh = cheerio.load(li, null, false);
-    let b = liCh("b");
+    let b = $morphoAnalysisHtml("b", li);
     if (b.length == 0)
       return;
 
     let baseform = b.text();
     baseform = baseform.trim();
-    let pos = liCh(".hinfo-ordflokkur").text();
-    pos = pos.trim();
+    let pos = $morphoAnalysisHtml(".hinfo-ordflokkur", li).text().trim();
 
     let arnastofnunUrl = url;
-    let a = cheerio.load(b[0], null, false)("a");
+    let a = $morphoAnalysisHtml("a", b);
     if (a.length > 0) {
-      let href = a.attr("href");
+      let href = $morphoAnalysisHtml(a).attr("href");
       if (href != null && href.length > 0) {
         arnastofnunUrl = "https://bin.arnastofnun.is" + href;
       }
@@ -208,31 +206,28 @@ async function getMorphos(form, firstQuery) {
   });
 
   if (lis.length == 0) {
-    let h2s = htmlDoc(".page-header h2");
+    let h2s = $morphoAnalysisHtml(".page-header h2");
     if (h2s.length > 0) {
       let h2 = h2s[0];
       let baseform = h2.children.filter(function (node) {
         return node.nodeType == 3;
       })[0].nodeValue;
       baseform = baseform.trim();
-      let small = cheerio.load(h2, null, false)("small .hinfo-ordflokkur");
-      let pos = small.text();
-      pos = pos.trim();
-      // console.log("Analysis: " + baseform + " (" + pos + ")");
-      // let arnastofnunUrl = "http://bin.arnastofnun.is/leit/?q=" + encodedForm;
+      let small = $morphoAnalysisHtml("small .hinfo-ordflokkur", h2);
+      let pos = small.text().trim();
       let arnastofnunUrl = "http://bin.arnastofnun.is/leit/" + encodedForm;
       if (!firstQuery) {
         // arnastofnunUrl = arnastofnunUrl + "&id=&ordmyndir=on";
         arnastofnunUrl = "https://bin.arnastofnun.is/leit/beygingarmynd/" + encodedForm;
       }
-      let newMorpho = { baseform: baseform, pos: pos, url: arnastofnunUrl };
+      let newMorpho = { baseform, pos, url: arnastofnunUrl };
       let morpho = findMorpho(morphoAnalysis, baseform);
       if (morpho != null) {
         // duplicates probably have different part-of-speech, but subsequent dictionary lookup
         // will reflect that and return corresponding entries
         morpho.morphoanalysis.push(newMorpho);
       } else {
-        morpho = { baseform: baseform, morphoanalysis: [newMorpho] };
+        morpho = { baseform, morphoanalysis: [newMorpho] };
         morphoAnalysis.push(morpho);
       }
     } else {
@@ -339,23 +334,22 @@ async function getDictionaryEntries(dictionaryLookup, givenUrl) {
   // success
   let newUrls = [];
   let html = await response.text();
-  let htmlDoc = cheerio.load(html);
-  let entryElements = htmlDoc(".entry");
+  let $dictLookupHtml = cheerio.load(html);
+  let entryElements = $dictLookupHtml(".entry");
   if (entryElements.length > 0) {
-    processDictionaryEntryElements(dictionaryLookup, entryElements, url, newUrls);
+    processDictionaryEntryElements($dictLookupHtml, dictionaryLookup, entryElements, url, newUrls);
   } else {
-    let nestlevels = htmlDoc(".nestlevel"); // e.g. vegna
+    let nestlevels = $dictLookupHtml(".nestlevel"); // e.g. vegna
     let count = 0;
     if (nestlevels.length > 0) {
       nestlevels.each(function (i, nl) {
-        let nlCh = cheerio.load(nl, null, false);
-        let href = nlCh(".lemma a[href^='/cgi-bin/IcelOnline']");
+        let href = $dictLookupHtml(".lemma a[href^='/cgi-bin/IcelOnline']", nl);
         let refUrl = "https://digicoll.library.wisc.edu" + href.attr("href");
 
         // TODO factorization of morphoPOS vs. dictPOS matching to keep only
         // relevant dict entries
         // See oneResultForLemma
-        let pos = nlCh(".pos").text();
+        let pos = $dictLookupHtml(".pos", nl).text();
         let dictPOS = pos.split("/").map(item => item.trim()).filter(item => item.length > 0);
         dictPOS.forEach(function (dp) {
           let mps = dictToMorphoPOS(dp);
@@ -395,18 +389,17 @@ async function getDictionaryEntries(dictionaryLookup, givenUrl) {
   return newUrls;
 }
 
-function processDictionaryEntryElements(dictionaryLookup, entryElements, fromUrl, newUrls) {
+function processDictionaryEntryElements($dictLookupHtml, dictionaryLookup, entryElements, fromUrl, newUrls) {
   let morpho = dictionaryLookup.morphos[0];
   let baseform = morpho.baseform;
 
   entryElements.each(function (i, entryElement) {
-    let entryElementCh = cheerio.load(entryElement, null, false);
-    let hrefs = entryElementCh(".ref a[href^='/cgi-bin/IcelOnline']"); // e.g. for veitingasta?ur
+    let hrefs = $dictLookupHtml(".ref a[href^='/cgi-bin/IcelOnline']", entryElement); // e.g. for veitingasta?ur
     if (hrefs.length == 0) {
-      oneResultForLemma(dictionaryLookup, entryElementCh, fromUrl);
+      oneResultForLemma($dictLookupHtml, dictionaryLookup, entryElement, fromUrl);
     } else {
-      hrefs.each(function () {
-        let refUrl = "https://digicoll.library.wisc.edu" + this.attr("href");
+      hrefs.each(function (i, href) {
+        let refUrl = "https://digicoll.library.wisc.edu" + $dictLookupHtml(href).attr("href");
         // getDictionaryEntriesRef(dictionaryLookup, refUrl);
         newUrls.push(refUrl);
       });
@@ -417,7 +410,7 @@ function processDictionaryEntryElements(dictionaryLookup, entryElements, fromUrl
   }
 }
 
-function oneResultForLemma(dictionaryLookup, entryElementCh, url) {
+function oneResultForLemma($dictLookupHtml, dictionaryLookup, entryElement, url) {
   let morpho = dictionaryLookup.morphos[0];
   let baseform = morpho.baseform;
 
@@ -428,7 +421,7 @@ function oneResultForLemma(dictionaryLookup, entryElementCh, url) {
     }
   }
 
-  let headwdObj = entryElementCh(".headwd > .lemma");
+  let headwdObj = $dictLookupHtml(".headwd > .lemma", entryElement);
   let headwd = "???";
   if (headwdObj.length > 0) {
     headwd = headwdObj[0].children.filter(function (node) {
@@ -439,12 +432,12 @@ function oneResultForLemma(dictionaryLookup, entryElementCh, url) {
   // TODO factorization of morphoPOS vs. dictPOS matching to keep only
   // relevant dict entries
   // See getDictionaryEntries
-  let gramObjs = entryElementCh(".headwd > .graminfl > .gram");
   let dictPOS = [];
-  for (let ii = 0; ii < gramObjs.length; ii++) {
-    let pos = cheerio.load(gramObjs[ii], null, false).text();
+  let gramObjs = $dictLookupHtml(".headwd > .graminfl > .gram", entryElement);
+  gramObjs.each(function (i, gramObj) {
+    let pos = $dictLookupHtml(gramObj).text();
     dictPOS.push(pos.trim());
-  }
+  });
   let posOk = false;
   dictPOS.forEach(function (dp) {
     let mps = dictToMorphoPOS(dp);
@@ -463,10 +456,9 @@ function oneResultForLemma(dictionaryLookup, entryElementCh, url) {
     // let regex = new RegExp('\\/', 'g');
     // headwd = headwd.replace(regex, ''); // e.g. "tal/a" => "tala"
 
-    // possibly modify entryElementCh
-    enrichIcelandic(headwd, entryElementCh);
+    enrichIcelandic($dictLookupHtml, headwd, entryElement);
 
-    let entry = { html: entryElementCh.html(), hw: headwd, url: url, source: "uwdc" };
+    let entry = { html: $dictLookupHtml(entryElement).html(), hw: headwd, url, source: "uwdc" };
 
     // enrichHeadword(entry);
 
@@ -499,7 +491,7 @@ function htmlEscape(string) {
   });
 }
 
-function enrichIcelandic(headwd, entryElementCh) {
+function enrichIcelandic($dictLookupHtml, headwd, entryElement) {
   let hwFull = headwd;
 
   // search for '/' or '.' headword separator (see https://digicoll.library.wisc.edu/cgi-bin/IcelOnline/IcelOnline.TEId-idx?type=HTML&rgn=DIV1&id=IcelOnline.IEOrd&target=IcelOnline.IEOrd.Guide)
@@ -521,15 +513,15 @@ function enrichIcelandic(headwd, entryElementCh) {
   }
   let enrichmentBeforeSeparator = "<span class='hw-placeholder'>$1</span><span class='hw-actual'>" + htmlEscape(hwBeforeSeparator) + "</span>";
 
-  entryElementCh(".orth, .usg").each(function (i, obj) {
-    let objCh = cheerio.load(obj, null, false); 
-    let html = objCh.html();
+  $dictLookupHtml(".orth, .usg", entryElement).each(function (i, obj) {
+    let $obj = $dictLookupHtml(obj); 
+    let html = $obj.html();
     let enrichedHtml = html.replace(regexFull, enrichmentFull); // tala, segja, sj?n, ...
     enrichedHtml = enrichedHtml.replace(regexBeforeSeparator, enrichmentBeforeSeparator); // tala, segja, sj?n
     enrichedHtml = desabbreviate(enrichedHtml);
-    // let newCh = cheerio.load(enrichedHtml, null, false);
-    // objCh.replaceWith(newCh);
-    console.log("enriched html: " + html + " => " + enrichedHtml);
+    if (html !== enrichedHtml) {
+      $obj.html(enrichedHtml);
+    }
   });
 }
 
