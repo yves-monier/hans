@@ -5,7 +5,7 @@
 'use strict';
 
 try {
-  importScripts('/cheerio-bundle.js');
+  importScripts('/cheerio-bundle.min.js');
 } catch (e) {
   console.error('importScripts: ' + e);
 }
