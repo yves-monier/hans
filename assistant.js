@@ -569,109 +569,42 @@ function showDictionaryLookup(url) {
     });
 }
 
-function getOptions() {
-    let options = {};
-    options.sidebarStatus = localStorage['sidebarStatus'];
-    if (options.sidebarStatus != "on") {
-        options.sidebarStatus = "off";
-    }
-    options.autoHelpSelection = localStorage['autoHelpSelection'];
-    if (options.autoHelpSelection != "on") {
-        options.autoHelpSelection = "off";
-    }
-    options.darkMode = localStorage['darkMode'];
-    if (options.darkMode != "on") {
-        options.darkMode = "off";
-    }
-    options.googleTranslate = localStorage['googleTranslate'];
-    if (options.googleTranslate != "on") {
-        options.googleTranslate = "off";
-    }
-    options.googleTranslateTarget = localStorage['googleTranslateTarget'];
-    if (!options.googleTranslateTarget) {
-        options.googleTranslateTarget = "en";
-    }
-    return options;
-}
-
-function setOptions(options) {
-    if (options.sidebarStatus) {
-        if (options.sidebarStatus == "on") {
-            localStorage['sidebarStatus'] = "on";
-        } else {
-            localStorage['sidebarStatus'] = "off";
-        }
-    }
-
-    if (options.autoHelpSelection == "on") {
-        localStorage['autoHelpSelection'] = "on";
-    } else {
-        localStorage['autoHelpSelection'] = "off";
-    }
-
-    if (options.googleTranslate) {
-        if (options.googleTranslate == "on") {
-            localStorage['googleTranslate'] = "on";
-        } else {
-            localStorage['googleTranslate'] = "off";
-        }
-    }
-
-    if (options.darkMode) {
-        if (options.darkMode == "on") {
-            localStorage['darkMode'] = "on";
-        } else {
-            localStorage['darkMode'] = "off";
-        }
-    }
-
-    if (options.googleTranslateTarget) {
-        localStorage['googleTranslateTarget'] = options.googleTranslateTarget;
-    }
-}
+const DEFAULT_OPTIONS = { sidebarStatus: "off", autoHelpSelection: "on", darkMode: "on", googleTranslate: "off", googleTranslateTarget: "en" };
 
 function loadOptions() {
-    let options = getOptions();
+    chrome.runtime.sendMessage({ method: "getOptions" }, function (response) {
+        let options = Object.assign(DEFAULT_OPTIONS, response ? response.options : {});
 
-    /*
-    let button = document.getElementById("toggle-sidebar");
-    // options.sidebarStatus: on / off
-    if ("on" === options.sidebarStatus) {
-        button.innerHTML = "Fela skenkur / Hide sidebar";
-    } else {
-        button.innerHTML = "Sýna skenkur / Show sidebar";
-    }
-    */
+        updateSlider(options.sidebarStatus);
 
-    updateSlider(options.sidebarStatus);
+        updateDarkMode(options.darkMode);
+        let darkModeCheckbox = $("#option-dark-mode");
+        if (options.darkMode == "on") {
+            darkModeCheckbox.prop('checked', true);
+        } else {
+            darkModeCheckbox.prop('checked', false);
+        }
 
-    updateDarkMode(options.darkMode);
-    let darkModeCheckbox = $("#option-dark-mode");
-    if (options.darkMode == "on") {
-        darkModeCheckbox.prop('checked', true);
-    } else {
-        darkModeCheckbox.prop('checked', false);
-    }
+        let autoHelpSelectionCheckbox = $("#option-auto-help-selection");
+        if (options.autoHelpSelection == "on") {
+            autoHelpSelectionCheckbox.prop('checked', true);
+        } else {
+            autoHelpSelectionCheckbox.prop('checked', false);
+        }
 
-    let autoHelpSelectionCheckbox = $("#option-auto-help-selection");
-    if (options.autoHelpSelection == "on") {
-        autoHelpSelectionCheckbox.prop('checked', true);
-    } else {
-        autoHelpSelectionCheckbox.prop('checked', false);
-    }
+        let googleTranslateCheckbox = $("#option-use-google-translate");
+        let googleTranslateSelect = $("#google-translate-target");
+        if (options.googleTranslate == "on") {
+            googleTranslateCheckbox.prop('checked', true);
+            googleTranslateSelect.prop("disabled", false);
+        } else {
+            googleTranslateCheckbox.prop('checked', false);
+            googleTranslateSelect.prop("disabled", true);
+        }
 
-    let googleTranslateCheckbox = $("#option-use-google-translate");
-    let googleTranslateSelect = $("#google-translate-target");
-    if (options.googleTranslate == "on") {
-        googleTranslateCheckbox.prop('checked', true);
-        googleTranslateSelect.prop("disabled", false);
-    } else {
-        googleTranslateCheckbox.prop('checked', false);
-        googleTranslateSelect.prop("disabled", true);
-    }
-
-    let target = options.googleTranslateTarget;
-    $("#option-google-translate-target option[value=" + target + "]", googleTranslateSelect).prop('selected', true);
+        let target = options.googleTranslateTarget;
+        $("#option-google-translate-target option[value=" + target + "]", googleTranslateSelect).prop('selected', true);
+    });
 }
 
 function saveOption(option, value) {
@@ -681,9 +614,8 @@ function saveOption(option, value) {
 }
 
 function saveOptions(options) {
-    setOptions(options);
-    // chrome.runtime.sendMessage({ method: "setOptions", options: options }, function (response) {
-    // });
+    chrome.runtime.sendMessage({ method: "setOptions", options: options }, function (response) {
+    });
 
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         tabId = tabs[0].id;

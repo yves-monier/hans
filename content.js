@@ -38,9 +38,9 @@ if (!chrome.runtime.onMessage.hasListener(assistantMessageListener)) {
 }
 
 
-let currentOptions = { sidebarStatus: "off", autoHelpSelection: "on", googleTranslate: "off", googleTranslateTarget: "en" };
+let currentOptions = { sidebarStatus: "off", autoHelpSelection: "on", darkMode: "on", googleTranslate: "off", googleTranslateTarget: "en" };
 chrome.runtime.sendMessage({ method: "getOptions" }, function (response) {
-    currentOptions = Object.assign(currentOptions, response.options);
+    currentOptions = Object.assign(currentOptions, response ? response.options : {});
 });
 
 

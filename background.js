@@ -1,7 +1,3 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 'use strict';
 
 try {
@@ -514,7 +510,7 @@ function enrichIcelandic($dictLookupHtml, headwd, entryElement) {
   let enrichmentBeforeSeparator = "<span class='hw-placeholder'>$1</span><span class='hw-actual'>" + htmlEscape(hwBeforeSeparator) + "</span>";
 
   $dictLookupHtml(".orth, .usg", entryElement).each(function (i, obj) {
-    let $obj = $dictLookupHtml(obj); 
+    let $obj = $dictLookupHtml(obj);
     let html = $obj.html();
     let enrichedHtml = html.replace(regexFull, enrichmentFull); // tala, segja, sj?n, ...
     enrichedHtml = enrichedHtml.replace(regexBeforeSeparator, enrichmentBeforeSeparator); // tala, segja, sj?n
@@ -653,65 +649,79 @@ if (chrome.browserAction) {
   });
 }
 
-function getOptions() {
+async function getOptions() {
   let options = {};
-  options.sidebarStatus = "on"; // localStorage['sidebarStatus'];
-  if (options.sidebarStatus != "on") {
-    options.sidebarStatus = "off";
+  // these are "on" by default
+  options.sidebarStatus = await LS.getItem("sidebarStatus");
+  if (options.sidebarStatus != "off") {
+    options.sidebarStatus = "on";
   }
-  options.autoHelpSelection = "on"; // localStorage['autoHelpSelection'];
-  if (options.autoHelpSelection != "on") {
-    options.autoHelpSelection = "off";
+  options.autoHelpSelection = await LS.getItem("autoHelpSelection");
+  if (options.autoHelpSelection != "off") {
+    options.autoHelpSelection = "on";
   }
-  options.darkMode = "on"; // localStorage['darkMode'];
-  if (options.darkMode != "on") {
-    options.darkMode = "off";
+  options.darkMode = await LS.getItem("darkMode");
+  if (options.darkMode != "off") {
+    options.darkMode = "on";
   }
-  options.googleTranslate = "off"; // localStorage['googleTranslate'];
+  // "off" by default
+  options.googleTranslate = await LS.getItem("googleTranslate");
   if (options.googleTranslate != "on") {
     options.googleTranslate = "off";
   }
-  options.googleTranslateTarget = "fr"; // localStorage['googleTranslateTarget'];
+  // "en" by default
+  options.googleTranslateTarget = await LS.getItem("googleTranslateTarget");
   if (!options.googleTranslateTarget) {
     options.googleTranslateTarget = "en";
   }
   return options;
 }
 
-function setOptions(options) {
+async function setOptions(options) {
+  // these are "on" by default
   if (options.sidebarStatus) {
-    if (options.sidebarStatus == "on") {
-      // localStorage['sidebarStatus'] = "on";
+    if (options.sidebarStatus === "off") {
+      await LS.setItem("sidebarStatus", "off");
     } else {
-      // localStorage['sidebarStatus'] = "off";
+      await LS.setItem("sidebarStatus", "on");
     }
   }
-
-  if (options.autoHelpSelection == "on") {
-    // localStorage['autoHelpSelection'] = "on";
-  } else {
-    // localStorage['autoHelpSelection'] = "off";
-  }
-
-  if (options.googleTranslate) {
-    if (options.googleTranslate == "on") {
-      // localStorage['googleTranslate'] = "on";
+  if (options.autoHelpSelection) {
+    if (options.autoHelpSelection === "off") {
+      await LS.setItem("autoHelpSelection", "off");
     } else {
-      // localStorage['googleTranslate'] = "off";
+      await LS.setItem("autoHelpSelection", "on");
     }
   }
-
   if (options.darkMode) {
-    if (options.darkMode == "on") {
-      // localStorage['darkMode'] = "on";
+    if (options.darkMode === "off") {
+      await LS.setItem("darkMode", "off");
     } else {
-      // localStorage['darkMode'] = "off";
+      await LS.setItem("darkMode", "on");
     }
   }
-
-  if (options.googleTranslateTarget) {
-    // localStorage['googleTranslateTarget'] = options.googleTranslateTarget;
+  // "off" by default
+  if (options.googleTranslate) {
+    if (options.googleTranslate === "on") {
+      await LS.setItem("googleTranslate", "on");
+    } else {
+      await LS.setItem("googleTranslate", "off");
+    }
   }
+  // "en" by default
+  if (options.googleTranslateTarget) {
+    await LS.setItem("googleTranslateTarget", options.googleTranslateTarget);
+  }
+}
+
+// https://stackoverflow.com/questions/14094447/chrome-extension-dealing-with-asynchronous-sendmessage
+async function sendGetOptions(sendResponse) {
+  let options = await getOptions();
+  sendResponse({ options });
+}
+async function sendSetOptions(options, sendResponse) {
+  await setOptions(options);
+  sendResponse({});
 }
 
 chrome.runtime.onMessage.addListener(
@@ -725,16 +735,18 @@ chrome.runtime.onMessage.addListener(
     } else if (request.method == "getSidebarStatus") {
       let sidebarStatus = "on"; // localStorage['sidebarStatus'];
       sendResponse({ sidebarStatus: sidebarStatus });
+      return true;
     } else if (request.method == "setSidebarStatus") {
       let sidebarStatus = request.param;
       // localStorage['sidebarStatus'] = sidebarStatus;
       sendResponse({});
+      return true;
     } else if (request.method == "getOptions") {
-      let options = getOptions();
-      sendResponse({ options });
+      sendGetOptions(sendResponse);
+      return true;
     } else if (request.method == "setOptions") {
-      setOptions(request.options);
-      sendResponse({});
+      sendSetOptions(sendResponse);
+      return true;
     } else if (request.method == "showMorphoAnalysis") {
       console.log("background.js onMessage showMorphoAnalysis " + request.url);
       // var iframe = document.createElement('iframe');
@@ -743,6 +755,7 @@ chrome.runtime.onMessage.addListener(
       // iframe.src = 'https://bin.arnastofnun.is/beyging/469289';
       // document.body.appendChild(iframe);
       sendResponse({});
+      return true;
     } else {
       // console.log(sender.tab ?
       //   "from a content script:" + sender.tab.url :
