@@ -407,7 +407,7 @@
         }
 
         #keyboard {
-            background-color: rgb(165, 205, 255);
+            background-color: #282874;
             padding: 5px 10px;
             display: flex;
             justify-content: space-evenly;
@@ -421,6 +421,7 @@
             border: 1px solid #999;
             text-align: center;
             border-radius: 4px;
+            cursor: pointer;
         }
 
         .key:hover {
@@ -433,6 +434,14 @@
 
         #assistant.darkmode {
             font-size: 120%;
+        }
+        #assistant.darkmode #keyboard {
+            background-color: #555;
+        }
+        #assistant.darkmode .key {
+            background-color: #000;
+            border: 1px solid #222;
+            color: #999;
         }
         #assistant.darkmode #assistant-in,
         #assistant.darkmode #result>.search-item>.morpho:not(.searching-morpho) {
@@ -453,14 +462,16 @@
         #assistant.darkmode #result>.search-item>.morpho>h1.morphos-heading>span.morpho-heading:not(:first-child):before {
             content: "";
         }
-
         #assistant.darkmode .searching-item, 
         #assistant.darkmode .searching-morpho {
             color: #ccc;
             font-size: 0.8rem;
             font-family: 'Open Sans', 'sans-serif'
         }
-
+        #assistant.darkmode .searching-item:after,
+        #assistant.darkmode .searching-morpho:after {
+            background-color: lightblue;
+        }
     </style>
 </head>
 
