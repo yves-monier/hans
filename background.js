@@ -714,7 +714,7 @@ async function setOptions(options) {
   }
 }
 
-// https://stackoverflow.com/questions/14094447/chrome-extension-dealing-with-asynchronous-sendmessage
+//// https://stackoverflow.com/questions/14094447/chrome-extension-dealing-with-asynchronous-sendmessage
 async function sendGetOptions(sendResponse) {
   let options = await getOptions();
   sendResponse({ options });
@@ -723,6 +723,22 @@ async function sendSetOptions(options, sendResponse) {
   await setOptions(options);
   sendResponse({});
 }
+async function sendGetSidebarStatus(sendResponse) {
+  let sidebarStatus = await LS.getItem("sidebarStatus");
+  if (sidebarStatus !== "off") {
+    sidebarStatus = "on";
+  }
+  sendResponse({ sidebarStatus: sidebarStatus });
+}
+async function sendSetSidebarStatus(sidebarStatus, sendResponse) {
+  if (sidebarStatus === "off") {
+    await LS.setItem("sidebarStatus", "off");
+  } else {
+    await LS.setItem("sidebarStatus", "on");
+  }
+  sendResponse({});
+}
+////
 
 chrome.runtime.onMessage.addListener(
   function (request, sender, sendResponse) {
@@ -733,13 +749,11 @@ chrome.runtime.onMessage.addListener(
       doDictionaryLookup(request.morphos, sendResponse);
       return true;
     } else if (request.method == "getSidebarStatus") {
-      let sidebarStatus = "on"; // localStorage['sidebarStatus'];
-      sendResponse({ sidebarStatus: sidebarStatus });
+      sendGetSidebarStatus(sendResponse);
       return true;
     } else if (request.method == "setSidebarStatus") {
       let sidebarStatus = request.param;
-      // localStorage['sidebarStatus'] = sidebarStatus;
-      sendResponse({});
+      sendSetSidebarStatus(sidebarStatus, sendResponse);
       return true;
     } else if (request.method == "getOptions") {
       sendGetOptions(sendResponse);
@@ -747,20 +761,13 @@ chrome.runtime.onMessage.addListener(
     } else if (request.method == "setOptions") {
       sendSetOptions(sendResponse);
       return true;
-    } else if (request.method == "showMorphoAnalysis") {
-      console.log("background.js onMessage showMorphoAnalysis " + request.url);
-      // var iframe = document.createElement('iframe');
-      // var html = '<body>Foo</body>';
-      // // iframe.src = 'data:text/html;charset=utf-8,' + encodeURI(html);
-      // iframe.src = 'https://bin.arnastofnun.is/beyging/469289';
-      // document.body.appendChild(iframe);
-      sendResponse({});
-      return true;
     } else {
       // console.log(sender.tab ?
       //   "from a content script:" + sender.tab.url :
       //   "from the extension");
       // sendResponse({ data: "provide help about: " + request.surfaceForm });
+      sendResponse({});
+      return true;
     }
   });
 
