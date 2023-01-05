@@ -1,8 +1,6 @@
 # Icelandic assistant
 
-I use [https://icelandiconline.com](https://icelandiconline.com) for learning Icelandic. Apart from its own learning resources, icelandiconline.com provides grammatical and is-en dictionary links that I've been using often enough to decide to develop a Chrome extension doing automatically for me what I had to do manually before: copy a word somewhere from my current lesson, display its [grammatical analysis](http://bin.arnastofnun.is/leit) web site, then search the displayed base form in the [IS-EN dictionary lookup](https://digicoll.library.wisc.edu/IcelOnline/Search.TEId.html) web site.
-
-**Note**: in my humble opinion, using Google-translate services for brute force translation of the whole lesson would be unfair and unproductive, in terms of learning.
+I use [https://icelandiconline.com](https://icelandiconline.com) for learning Icelandic. Apart from its own learning resources, icelandiconline.com provides grammatical and is-en dictionary links that I've been using often enough to decide to develop a Chrome extension doing automatically for me what I had to do manually before: copy a word somewhere from my current lesson, display its [grammatical analysis](http://bin.arnastofnun.is/leit), then search the relevant base form in the [IS-EN dictionary lookup](https://digicoll.library.wisc.edu/IcelOnline/Search.TEId.html) web site.
 
 ## Getting Started
 
