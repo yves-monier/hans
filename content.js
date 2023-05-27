@@ -119,7 +119,7 @@ if (!location.ancestorOrigins.contains(extensionOrigin)) {
     closeLinguisticButton.style.display = "none";
     closeLinguisticButton.style.fontSize = "18px";
     closeLinguisticButton.style.backgroundColor = "#ccc";
-    closeLinguisticButton.style.display = "inline";
+    closeLinguisticButton.style.display = "none";
     closeLinguisticButton.style.lineHeight = "20px";
     document.body.appendChild(closeLinguisticButton);
     closeLinguisticButton.addEventListener("click", function (e) {
