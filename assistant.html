@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <script src="jquery-2.2.4.min.js"></script>
-    <link href="https://fonts.googleapis.com/css?family=Francois+One|Open+Sans:ital,wght@0,300;0,700;1,300|Inconsolata" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Francois+One|Open+Sans:ital,wght@0,300;0,700;1,300|Inconsolata"
+        rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -138,11 +139,15 @@
             border: 1px solid darkred;
             background-color: darkblue;
             border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         #controls-form #clear {
             margin-left: auto;
         }
+
         #controls-form #settings {
             margin-right: 10px;
         }
@@ -215,7 +220,7 @@
             padding-bottom: 0.25rem;
             border-bottom: 1px dotted steelblue;
             font-family: 'Open Sans', sans-serif;
-            font-weight: 300;
+            font-weight: 400;
         }
 
         #result>.search-item>.morpho:last-child {
@@ -283,6 +288,10 @@
             background-repeat: no-repeat;
         }
 
+        .entry-uwdc {
+            line-height: 100%;
+        }
+
         .entry-uwdc>p.headwd {
             margin-bottom: 0.5rem;
         }
@@ -298,6 +307,7 @@
 
         .entry-uwdc>.headwd>.lemma {
             font-weight: 700;
+            font-size: 120%;
         }
 
         .entry-uwdc .sense {
@@ -339,7 +349,7 @@
             flex: 0 0 auto;
         }
 
-        .searching-item, 
+        .searching-item,
         .searching-morpho {
             font-family: 'sans-serif';
             color: #555;
@@ -347,7 +357,7 @@
         }
 
         .searching-item:first-child::before {
-            content: "Morphological analysis: "; 
+            content: "Morphological analysis: ";
             font-weight: bold;
             display: inline;
         }
@@ -436,39 +446,48 @@
         #assistant.darkmode {
             font-size: 120%;
         }
+
         #assistant.darkmode #keyboard {
             background-color: #555;
         }
+
         #assistant.darkmode .key {
             background-color: #000;
             border: 1px solid #222;
             color: #999;
         }
+
         #assistant.darkmode #assistant-in,
         #assistant.darkmode #result>.search-item>.morpho:not(.searching-morpho) {
             background-color: #090909;
             color: #ccc;
         }
+
         #assistant.darkmode #settings-form label {
             color: #ccc;
         }
+
         #assistant.darkmode span.morpho-heading {
             background-color: #bbb;
             border-radius: 4px;
             padding: 2px 5px;
         }
+
         #assistant.darkmode span.morpho-heading:not(:last-child) {
             margin-right: 5px;
         }
+
         #assistant.darkmode #result>.search-item>.morpho>h1.morphos-heading>span.morpho-heading:not(:first-child):before {
             content: "";
         }
-        #assistant.darkmode .searching-item, 
+
+        #assistant.darkmode .searching-item,
         #assistant.darkmode .searching-morpho {
             color: #ccc;
             font-size: 0.8rem;
             font-family: 'Open Sans', 'sans-serif'
         }
+
         #assistant.darkmode .searching-item:after,
         #assistant.darkmode .searching-morpho:after {
             background-color: lightblue;
@@ -485,7 +504,7 @@
         <div id="assistant-in">
             <form id="controls-form">
                 <input id="user-input" type="text" name="user-input" size="10" autocomplete="off" />
-                <input id="help" type="submit" title="Lookup selected word" value="Hjálp" />
+                <input id="help" type="submit" title="Lookup selected word" value="Hefja leit" />
                 <a id="google-translate-link" target="icelandic-google-translate">google translate</a>
                 <!-- input id="hlusta" type="button" title="Listen selected word" value="Hlusta" / -->
                 <button id="clear" class="svg-icon" title="Hreinsa / Clear">
@@ -510,7 +529,8 @@
             <div id="settings-form">
                 <!-- p><button id="toggle-sidebar" title="Toggle sidebar"></button></p -->
                 <p><input type="checkbox" id="option-auto-help-selection" name="autoHelpSelection">
-                    <label for="option-auto-help-selection">Lookup selection automatically</label></p>
+                    <label for="option-auto-help-selection">Lookup selection automatically</label>
+                </p>
                 <p><input type="checkbox" id="option-use-google-translate" name="useGoogleTranslate">
                     <label for="option-use-google-translate">Show Google Translate tab</label>
                     <select id="option-google-translate-target">
@@ -619,11 +639,13 @@
                         <option value="yi">Yiddish</option>
                         <option value="yo">Yorouba</option>
                         <option value="zu">Zoulou</option>
-                    </select></p>
+                    </select>
+                </p>
                 <p><input type="checkbox" id="option-dark-mode" name="darkMode">
-                <label for="option-dark-mode">Dark mode</label></p> 
-                <button id="close-settings"title="Close">X</button>
-            </div>            
+                    <label for="option-dark-mode">Dark mode</label>
+                </p>
+                <button id="close-settings" title="Close">X</button>
+            </div>
             <div id="message">
             </div>
             <div id="busy">
@@ -631,7 +653,7 @@
             <div id="result">
             </div>
             <!-- iframe id="bin-arnastofnun">
-            </iframe --> 
+            </iframe -->
         </div>
         <script src="assistant.js"></script>
     </div>

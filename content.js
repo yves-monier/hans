@@ -63,7 +63,7 @@ function assistantMessageListener(request, sender) {
         // iframe.src = 'data:text/html;charset=utf-8,' + encodeURI(html);
         linguisticIframe.src = request.param;
         linguisticIframe.style.display = "block";
-        closeLinguisticButton.style.display = "inline-flex";
+        closeLinguisticButton.style.display = "inline";
     }
     return true;
 }
@@ -109,15 +109,18 @@ if (!location.ancestorOrigins.contains(extensionOrigin)) {
 
     closeLinguisticButton = document.createElement('button');
     closeLinguisticButton.innerText = 'x';
-    closeLinguisticButton.style.height = "24px";
-    closeLinguisticButton.style.width = "24px";
-    closeLinguisticButton.style.borderRadius = "12px";
+    closeLinguisticButton.style.height = "20px";
+    closeLinguisticButton.style.width = "20px";
+    closeLinguisticButton.style.borderRadius = "10px";
     closeLinguisticButton.style.position = "fixed";
-    closeLinguisticButton.style.top = "22px";
-    closeLinguisticButton.style.right = "306px";
+    closeLinguisticButton.style.top = "36px";
+    closeLinguisticButton.style.right = "340px";
     closeLinguisticButton.style.zIndex = "9000000000000000001";
     closeLinguisticButton.style.display = "none";
-    closeLinguisticButton.style.alignItems = "flex-end";
+    closeLinguisticButton.style.fontSize = "18px";
+    closeLinguisticButton.style.backgroundColor = "#ccc";
+    closeLinguisticButton.style.display = "inline";
+    closeLinguisticButton.style.lineHeight = "20px";
     document.body.appendChild(closeLinguisticButton);
     closeLinguisticButton.addEventListener("click", function (e) {
         linguisticIframe.style.display = "none";

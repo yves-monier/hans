@@ -18,6 +18,16 @@ const LS = {
   removeItems: keys => chrome.storage.local.remove(keys),
 };
 
+let optionsWithoutLS = {
+  sidebarStatus: "off", autoHelpSelection: "on",
+  darkMode: "off", googleTranslate: "off",
+  googleTranslateTarget: "en"
+};
+
+// to use local storage, set useLS to true
+// + add "storage" to manifest.json's permissions
+const useLS = false;
+
 // import desabbreviate from "./abbreviations";
 
 ////chrome.runtime.onInstalled.addListener(function () {
@@ -651,66 +661,109 @@ if (chrome.browserAction) {
 
 async function getOptions() {
   let options = {};
-  // these are "on" by default
-  options.sidebarStatus = await LS.getItem("sidebarStatus");
-  if (options.sidebarStatus != "off") {
+  if (useLS) {
+    // "on" by default
+    options.autoHelpSelection = await LS.getItem("autoHelpSelection");
+    if (options.autoHelpSelection != "off") {
+      options.autoHelpSelection = "on";
+    }
+    // "off" by default
+    options.sidebarStatus = await LS.getItem("sidebarStatus");
+    if (options.sidebarStatus != "on") {
+      options.sidebarStatus = "off";
+    }
+    options.darkMode = await LS.getItem("darkMode");
+    if (options.darkMode != "on") {
+      options.darkMode = "off";
+    }
+    options.googleTranslate = await LS.getItem("googleTranslate");
+    if (options.googleTranslate != "on") {
+      options.googleTranslate = "off";
+    }
+    // "en" by default
+    options.googleTranslateTarget = await LS.getItem("googleTranslateTarget");
+    if (!options.googleTranslateTarget) {
+      options.googleTranslateTarget = "en";
+    }
+  } else {
     options.sidebarStatus = "on";
-  }
-  options.autoHelpSelection = await LS.getItem("autoHelpSelection");
-  if (options.autoHelpSelection != "off") {
     options.autoHelpSelection = "on";
-  }
-  options.darkMode = await LS.getItem("darkMode");
-  if (options.darkMode != "off") {
-    options.darkMode = "on";
-  }
-  // "off" by default
-  options.googleTranslate = await LS.getItem("googleTranslate");
-  if (options.googleTranslate != "on") {
+    options.darkMode = "off";
     options.googleTranslate = "off";
-  }
-  // "en" by default
-  options.googleTranslateTarget = await LS.getItem("googleTranslateTarget");
-  if (!options.googleTranslateTarget) {
     options.googleTranslateTarget = "en";
   }
   return options;
 }
 
 async function setOptions(options) {
-  // these are "on" by default
-  if (options.sidebarStatus) {
-    if (options.sidebarStatus === "off") {
-      await LS.setItem("sidebarStatus", "off");
-    } else {
-      await LS.setItem("sidebarStatus", "on");
+  if (useLS) {
+    // "on" by default
+    if (options.autoHelpSelection) {
+      if (options.autoHelpSelection === "off") {
+        await LS.setItem("autoHelpSelection", "off");
+      } else {
+        await LS.setItem("autoHelpSelection", "on");
+      }
     }
-  }
-  if (options.autoHelpSelection) {
-    if (options.autoHelpSelection === "off") {
-      await LS.setItem("autoHelpSelection", "off");
-    } else {
-      await LS.setItem("autoHelpSelection", "on");
+    // "off" by default
+    if (options.sidebarStatus) {
+      if (options.sidebarStatus === "on") {
+        await LS.setItem("sidebarStatus", "on");
+      } else {
+        await LS.setItem("sidebarStatus", "off");
+      }
     }
-  }
-  if (options.darkMode) {
-    if (options.darkMode === "off") {
-      await LS.setItem("darkMode", "off");
-    } else {
-      await LS.setItem("darkMode", "on");
+    if (options.darkMode) {
+      if (options.darkMode === "on") {
+        await LS.setItem("darkMode", "on");
+      } else {
+        await LS.setItem("darkMode", "off");
+      }
     }
-  }
-  // "off" by default
-  if (options.googleTranslate) {
-    if (options.googleTranslate === "on") {
-      await LS.setItem("googleTranslate", "on");
-    } else {
-      await LS.setItem("googleTranslate", "off");
+    if (options.googleTranslate) {
+      if (options.googleTranslate === "on") {
+        await LS.setItem("googleTranslate", "on");
+      } else {
+        await LS.setItem("googleTranslate", "off");
+      }
     }
-  }
-  // "en" by default
-  if (options.googleTranslateTarget) {
-    await LS.setItem("googleTranslateTarget", options.googleTranslateTarget);
+    // "en" by default
+    if (options.googleTranslateTarget) {
+      await LS.setItem("googleTranslateTarget", options.googleTranslateTarget);
+    }
+  } else {
+    if (options.sidebarStatus) {
+      if (options.sidebarStatus === "off") {
+        optionsWithoutLS.sidebarStatus = "off";
+      } else {
+        optionsWithoutLS.sidebarStatus = "on";
+      }
+    }
+    if (options.autoHelpSelection) {
+      if (options.autoHelpSelection === "off") {
+        optionsWithoutLS.autoHelpSelection = "off";
+      } else {
+        optionsWithoutLS.autoHelpSelection = "on";
+      }
+    }
+    if (options.darkMode) {
+      if (options.darkMode === "off") {
+        optionsWithoutLS.darkMode = "off";
+      } else {
+        optionsWithoutLS.darkMode = "on";
+      }
+    }
+    if (options.googleTranslate) {
+      if (options.googleTranslate === "on") {
+        optionsWithoutLS.googleTranslate = "on";
+      } else {
+        optionsWithoutLS.googleTranslate = "off";
+      }
+    }
+    // "en" by default
+    if (options.googleTranslateTarget) {
+      optionsWithoutLS.googleTranslateTarget = options.googleTranslateTarget;
+    }
   }
 }
 
@@ -719,22 +772,38 @@ async function sendGetOptions(sendResponse) {
   let options = await getOptions();
   sendResponse({ options });
 }
+
 async function sendSetOptions(options, sendResponse) {
   await setOptions(options);
   sendResponse({});
 }
+
 async function sendGetSidebarStatus(sendResponse) {
-  let sidebarStatus = await LS.getItem("sidebarStatus");
+  let sidebarStatus;
+  if (useLS) {
+    sidebarStatus = await LS.getItem("sidebarStatus");
+  } else {
+    sidebarStatus = optionsWithoutLS.sidebarStatus;
+  }
   if (sidebarStatus !== "off") {
     sidebarStatus = "on";
   }
   sendResponse({ sidebarStatus: sidebarStatus });
 }
+
 async function sendSetSidebarStatus(sidebarStatus, sendResponse) {
   if (sidebarStatus === "off") {
-    await LS.setItem("sidebarStatus", "off");
+    if (useLS) {
+      await LS.setItem("sidebarStatus", "off");
+    } else {
+      optionsWithoutLS.sidebarStatus = "off";
+    }
   } else {
-    await LS.setItem("sidebarStatus", "on");
+    if (useLS) {
+      await LS.setItem("sidebarStatus", "on");
+    } else {
+      optionsWithoutLS.sidebarStatus = "on";
+    }
   }
   sendResponse({});
 }

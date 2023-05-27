@@ -48,6 +48,7 @@ $(function () {
         }
     });
 
+    /*
     let googleTranslateCheckbox = $("#use-google-translate");
     let select = $("#google-translate-target");
 
@@ -66,6 +67,7 @@ $(function () {
         let languageCode = option.val();
         saveOption("googleTranslateTarget", languageCode);
     });
+    */
 });
 
 function loadOptions() {
@@ -97,6 +99,7 @@ function loadOptions() {
             autoHelpSelectionCheckbox.prop('checked', false);
         }
 
+        /*
         let googleTranslateCheckbox = $("#use-google-translate");
         let googleTranslateSelect = $("#google-translate-target");
         if (options.googleTranslate == "on") {
@@ -109,7 +112,7 @@ function loadOptions() {
 
         let target = options.googleTranslateTarget;
         $("option[value=" + target + "]", googleTranslateSelect).prop('selected', true);
-
+        */
     });
 }
 
@@ -122,7 +125,7 @@ function saveOption(option, value) {
 function saveOptions(options) {
     chrome.runtime.sendMessage({ method: "setOptions", options: options }, function (response) {
     });
-    
+
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         tabId = tabs[0].id;
         chrome.tabs.sendMessage(tabId, { method: "setOptions", param: options });
