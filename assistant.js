@@ -179,23 +179,21 @@ function help() {
     } else {
         chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
             let tabId = tabs[0].id;
-            /*
-            chrome.tabs.executeScript(tabId, {
-                code: "window.getSelection().toString();"
-            }, function (selection) {
-                if (selection && selection.length > 0) {
-                    let selectedText = selection[0];
-                    selectedText = selectedText.trim();
-                    if (selectedText.length > 0) {
-                        getHelp(selectedText);
-                    } else {
-                        showMessage("Please select or enter a word first...");
-                    }
-                } else {
-                    showMessage("Failed to retrieve selected text!");
-                }
-            });
-            */
+            // chrome.tabs.executeScript(tabId, {
+            //     code: "window.getSelection().toString();"
+            // }, function (selection) {
+            //     if (selection && selection.length > 0) {
+            //         let selectedText = selection[0];
+            //         selectedText = selectedText.trim();
+            //         if (selectedText.length > 0) {
+            //             getHelp(selectedText);
+            //         } else {
+            //             showMessage("Please select or enter a word first...");
+            //         }
+            //     } else {
+            //         showMessage("Failed to retrieve selected text!");
+            //     }
+            // });
             chrome.scripting.executeScript({
                 target: { tabId: tabId },
                 files: ['get-window-selection.js']
@@ -230,23 +228,21 @@ function withSelectedText(f) {
     } else {
         chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
             tabId = tabs[0].id;
-            /*
-            chrome.tabs.executeScript(tabId, {
-                code: "window.getSelection().toString();"
-            }, function (selection) {
-                if (selection && selection.length > 0) {
-                    let selectedText = selection[0];
-                    selectedText = selectedText.trim();
-                    if (selectedText.length > 0) {
-                        f(selectedText);
-                    } else {
-                        showMessage("Please select or enter a word first...");
-                    }
-                } else {
-                    showMessage("Failed to retrieve selected text!");
-                }
-            });
-            */
+            // chrome.tabs.executeScript(tabId, {
+            //     code: "window.getSelection().toString();"
+            // }, function (selection) {
+            //     if (selection && selection.length > 0) {
+            //         let selectedText = selection[0];
+            //         selectedText = selectedText.trim();
+            //         if (selectedText.length > 0) {
+            //             f(selectedText);
+            //         } else {
+            //             showMessage("Please select or enter a word first...");
+            //         }
+            //     } else {
+            //         showMessage("Failed to retrieve selected text!");
+            //     }
+            // });
             chrome.scripting.executeScript({
                 target: { tabId: tabId },
                 files: ['get-window-selection.js']
@@ -507,26 +503,26 @@ function getHelp(text) {
         });
     });
 
-    chrome.runtime.sendMessage({ method: "getOptions" }, function (response) {
-        if (response.options.googleTranslate == "on") {
-            chrome.tabs.query({ currentWindow: true }, function (tabs) {
-                if (tabs) {
-                    for (let i = 0; i < tabs.length; i++) {
-                        let url = tabs[i].url;
-                        // if a google translate tab exists, update it
-                        if (url.startsWith(GOOGLE_TRANSLATE_BASE_URL)) {
-                            let googleTranslateUrl = GOOGLE_TRANSLATE_BASE_URL + response.options.googleTranslateTarget + "&text=" + encodeURIComponent(text); // loka%C3%B0
-                            chrome.tabs.update(tabs[i].id, { url: googleTranslateUrl });
-                            return;
-                        }
-                    }
+    // chrome.runtime.sendMessage({ method: "getOptions" }, function (response) {
+    //     if (response.options.googleTranslate == "on") {
+    //         chrome.tabs.query({ currentWindow: true }, function (tabs) {
+    //             if (tabs) {
+    //                 for (let i = 0; i < tabs.length; i++) {
+    //                     let url = tabs[i].url;
+    //                     // if a google translate tab exists, update it
+    //                     if (url.startsWith(GOOGLE_TRANSLATE_BASE_URL)) {
+    //                         let googleTranslateUrl = GOOGLE_TRANSLATE_BASE_URL + response.options.googleTranslateTarget + "&text=" + encodeURIComponent(text); // loka%C3%B0
+    //                         chrome.tabs.update(tabs[i].id, { url: googleTranslateUrl });
+    //                         return;
+    //                     }
+    //                 }
 
-                    // if no existing google translate tab, open one
-                    googleTranslate(text);
-                }
-            });
-        }
-    });
+    //                 // if no existing google translate tab, open one
+    //                 googleTranslate(text);
+    //             }
+    //         });
+    //     }
+    // });
 }
 
 function hlusta(text) {
@@ -541,14 +537,15 @@ function hlusta(text) {
     // if (a.length > 0) {
     //  a[0].click();
     // }
-    chrome.tabs.query({ url: 'https://www.hi.is/haskolinn/saga', currentWindow: true }, function (tabs) {
-        if (tabs.length > 0) {
-            let t = tabs[0];
-            chrome.tabs.sendMessage(t.id, { method: "hlusta", param: text }, function (response) {
-                console.log("hlusta: done");
-            });
-        }
-    });
+
+    // chrome.tabs.query({ url: 'https://www.hi.is/haskolinn/saga', currentWindow: true }, function (tabs) {
+    //     if (tabs.length > 0) {
+    //         let t = tabs[0];
+    //         chrome.tabs.sendMessage(t.id, { method: "hlusta", param: text }, function (response) {
+    //             console.log("hlusta: done");
+    //         });
+    //     }
+    // });
 }
 
 function showMorphoAnalysis(url) {

@@ -635,21 +635,22 @@ async function doDictionaryLookup(morphos, sendResponse) {
 //   sendResponse(dictionaryLookupResult);
 // }
 
-chrome.declarativeContent.onPageChanged.removeRules(undefined, function () {
-  chrome.declarativeContent.onPageChanged.addRules([{
-    conditions: [new chrome.declarativeContent.PageStateMatcher({
-      pageUrl: { hostSuffix: '.is' },
-    })
-    ],
-    actions: [new chrome.declarativeContent.ShowPageAction()]
-  }, {
-    conditions: [new chrome.declarativeContent.PageStateMatcher({
-      pageUrl: { hostEquals: 'icelandiconline.com' },
-    })
-    ],
-    actions: [new chrome.declarativeContent.ShowPageAction()]
-  }]);
-});
+// required permission in manifest.json: declarativeContent
+// chrome.declarativeContent.onPageChanged.removeRules(undefined, function () {
+//   chrome.declarativeContent.onPageChanged.addRules([{
+//     conditions: [new chrome.declarativeContent.PageStateMatcher({
+//       pageUrl: { hostSuffix: '.is' },
+//     })
+//     ],
+//     actions: [new chrome.declarativeContent.ShowPageAction()]
+//   }, {
+//     conditions: [new chrome.declarativeContent.PageStateMatcher({
+//       pageUrl: { hostEquals: 'icelandiconline.com' },
+//     })
+//     ],
+//     actions: [new chrome.declarativeContent.ShowPageAction()]
+//   }]);
+// });
 
 if (chrome.browserAction) {
   chrome.browserAction.onClicked.addListener(function () {
