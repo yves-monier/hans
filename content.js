@@ -107,24 +107,33 @@ if (!location.ancestorOrigins.contains(extensionOrigin)) {
     linguisticIframe.style.display = "none";
     document.body.appendChild(linguisticIframe);
 
-    closeLinguisticButton = document.createElement('button');
-    closeLinguisticButton.innerText = 'x';
-    closeLinguisticButton.style.height = "20px";
-    closeLinguisticButton.style.width = "20px";
-    closeLinguisticButton.style.borderRadius = "10px";
+    closeLinguisticButton = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    closeLinguisticButton.setAttribute('width', '32px');
+    closeLinguisticButton.setAttribute('height', '32px');
+    closeLinguisticButton.setAttribute('viewBox', '0 0 32 32');
+    closeLinguisticButton.style.backgroundColor = "#f3f3f3";
+    closeLinguisticButton.setAttribute('fill', '#444');
     closeLinguisticButton.style.position = "fixed";
     closeLinguisticButton.style.top = "36px";
     closeLinguisticButton.style.right = "340px";
     closeLinguisticButton.style.zIndex = "9000000000000000001";
+    closeLinguisticButton.style.cursor = "default";
     closeLinguisticButton.style.display = "none";
-    closeLinguisticButton.style.fontSize = "18px";
-    closeLinguisticButton.style.backgroundColor = "#ccc";
-    closeLinguisticButton.style.display = "none";
-    closeLinguisticButton.style.lineHeight = "20px";
+    const iconPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    iconPath.setAttribute('d', 'M 5 5 L 5 6 L 5 26 L 5 27 L 6 27 L 26 27 L 27 27 L 27 26 L 27 6 L 27 5 L 26 5 L 6 5 L 5 5 z M 7 7 L 25 7 L 25 25 L 7 25 L 7 7 z M 11.6875 10.3125 L 10.28125 11.71875 L 14.5625 16 L 10.21875 20.34375 L 11.625 21.75 L 15.96875 17.40625 L 20.28125 21.71875 L 21.6875 20.3125 L 17.375 16 L 21.625 11.75 L 20.21875 10.34375 L 15.96875 14.59375 L 11.6875 10.3125 z');
+    closeLinguisticButton.appendChild(iconPath);
     document.body.appendChild(closeLinguisticButton);
     closeLinguisticButton.addEventListener("click", function (e) {
         linguisticIframe.style.display = "none";
         closeLinguisticButton.style.display = "none";
+    });
+    closeLinguisticButton.addEventListener("mouseenter", function (e) {
+        closeLinguisticButton.setAttribute('fill', 'black');
+        closeLinguisticButton.style.cursor = "pointer";
+    });
+    closeLinguisticButton.addEventListener("mouseleave", function (e) {
+        closeLinguisticButton.setAttribute('fill', '#555');
+        closeLinguisticButton.style.cursor = "default";
     });
 }
 
