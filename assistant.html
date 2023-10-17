@@ -4,7 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <script src="jquery-2.2.4.min.js"></script>
-    <link href="https://fonts.googleapis.com/css?family=Francois+One|Open+Sans:ital,wght@0,300;0,700;1,300|Inconsolata"
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400&display=swap"
         rel="stylesheet">
     <style>
         * {
@@ -29,11 +31,12 @@
         }
 
         #assistant {
-            width: 300px;
+            width: 350px;
             height: 100%;
             display: flex;
             flex-direction: row;
             align-items: center;
+            font-size: 16px;
         }
 
         #slider {
@@ -219,7 +222,7 @@
             color: #090909;
             padding-bottom: 0.25rem;
             border-bottom: 1px dotted steelblue;
-            font-family: 'Open Sans', sans-serif;
+            font-family: Roboto, sans-serif;
             font-weight: 400;
         }
 
@@ -229,10 +232,10 @@
         }
 
         #result>.search-item>.morpho>h1.morphos-heading {
-            font-size: 1rem;
             font-weight: normal;
-            font-family: 'Francois One', sans-serif;
+            font-family: Roboto, sans-serif;
             color: darkblue;
+            font-size: 1.2rem;
         }
 
         #result>.search-item>.morpho.no-entry>h1.morphos-heading {
@@ -247,6 +250,7 @@
             background-image: url("images/arnastofnun.png");
             background-position: left top;
             background-repeat: no-repeat;
+            margin-right: 4px;
         }
 
         /*#result>.search-item>.morpho>h1.morphos-heading .morpho-url:before {
@@ -261,6 +265,15 @@
 
         #result>.search-item>.morpho>h1.morphos-heading>span.morpho-heading:not(:first-child):before {
             content: ", ";
+        }
+
+        #result>.search-item>.morpho>h1.morphos-heading>span.morpho-heading {
+            display: flex;
+            align-items: center;
+        }
+
+        #result>.search-item>.morpho>h1.morphos-heading>span.morpho-heading>.lemma {
+            font-weight: 700;
         }
 
         #result>.search-item>.morpho>.entry {
@@ -278,7 +291,7 @@
 
         #result>.search-item>.morpho>.entry>.entry-url {
             cursor: pointer;
-            margin-right: 0.5rem;
+            margin-right: 4px;
             display: inline-block;
             width: 16px;
             height: 16px;
@@ -293,7 +306,8 @@
         }
 
         .entry-uwdc>p.headwd {
-            margin-bottom: 0.5rem;
+            display: flex;
+            margin-bottom: 10px;
         }
 
         .entry-uwdc>.headwd>.graminfl>.gram {
@@ -307,11 +321,16 @@
 
         .entry-uwdc>.headwd>.lemma {
             font-weight: 700;
-            font-size: 120%;
+            margin-right: 0.25rem;
         }
 
-        .entry-uwdc .sense {
-            margin-bottom: 0.5rem;
+        .entry-uwdc>.headwd>.graminfl {
+            font-size: 70%;
+        }
+
+        .entry-uwdc>.sense {
+            margin-bottom: 8px;
+            font-size: 85%;
         }
 
         .entry-uwdc .sense .re {
@@ -358,13 +377,13 @@
 
         .searching-item:first-child::before {
             content: "Morphological analysis: ";
-            font-weight: bold;
+            font-weight: 700;
             display: inline;
         }
 
         .searching-morpho:first-child::before {
             content: "Dictionary lookup...";
-            font-weight: bold;
+            font-weight: 700;
             display: block;
         }
 
@@ -485,7 +504,7 @@
         #assistant.darkmode .searching-morpho {
             color: #ccc;
             font-size: 0.8rem;
-            font-family: 'Open Sans', 'sans-serif'
+            font-family: Roboto, 'sans-serif'
         }
 
         #assistant.darkmode .searching-item:after,

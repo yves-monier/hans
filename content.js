@@ -157,7 +157,7 @@ function showSidebar(onOrOff) {
     if (assistantIframe) {
         let newWidth;
         if ("on" == onOrOff) {
-            newWidth = "300px";
+            newWidth = "350px";
         } else {
             newWidth = "24px";
         }

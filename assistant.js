@@ -447,7 +447,9 @@ function getHelp(text) {
                     }
 
                     let morphoHeading = $("<span class='morpho-heading'></span>");
-                    morphoHeading.text(baseform);
+                    let morphoLemma = $("<span class='lemma'></span>");
+                    morphoLemma.text(baseform);
+                    morphoHeading.prepend(morphoLemma);
                     heading.append(morphoHeading);
                     if (morpho.morphoanalysis && morpho.morphoanalysis.length > 0) {
                         for (let m = morpho.morphoanalysis.length - 1; m >= 0; m--) {
