@@ -750,7 +750,7 @@ $(document).ready(function () {
         toggleSidebar();
     });
 
-    $("#result").on("click", ".search-item .morpho .morpho-heading", function (e) {
+    $("#result").on("click", ".search-item .morpho .morpho-heading .lemma", function (e) {
         if (e.target == e.currentTarget) {
             let morphoObj = $(this).closest(".morpho");
             if (morphoObj.hasClass("off")) {
