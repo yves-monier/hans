@@ -390,6 +390,7 @@ function getHelp(text) {
     let searchItemDiv = $("<div class='search-item searching-item' data-search='" + escape(text) + "'></div>");
     // searchItemDiv.text("Morphological analysis: " + text + "...");
     searchItemDiv.text(text);
+    searchItemDiv.append("<div class='progress-bar'><div class='progress-bar-value'></div></div>");
     // searchItemDiv.appendTo(result);
     result.prepend(searchItemDiv);
 
@@ -416,6 +417,7 @@ function getHelp(text) {
             let morphoDiv = $("<div class='morpho searching-morpho'></div>");
             let txt = morphos[i].baseform + "...";
             morphoDiv.text(txt);
+            morphoDiv.append("<div class='progress-bar'><div class='progress-bar-value'></div></div>");
             morphoDiv.appendTo(searchItemDiv);
             morphoDivs.push(morphoDiv);
         }
