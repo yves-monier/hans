@@ -1,7 +1,7 @@
 {
 	"name": "Hans, Icelandic assistant",
 	"short_name": "Hans",
-	"version": "1.3.0",
+	"version": "1.3.1",
 	"author": "Yves Monier",
 	"description": "Aims to make learning Icelandic easier. Hans is the dependable Icelandic assistant in Jules Verne's \"Voyage au centre de la Terre\"",
 	"permissions": [
